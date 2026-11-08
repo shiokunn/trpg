@@ -4,52 +4,31 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.shiokunn.trpg.data.repository.AppPreferences
+import io.github.shiokunn.trpg.data.repository.ThemeMode
+import io.github.shiokunn.trpg.ui.navigation.TrpgNavHost
 import io.github.shiokunn.trpg.ui.theme.TrpgTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val container = (application as TrpgApplication).container
         setContent {
-            TrpgTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    BootScreen(modifier = Modifier.padding(innerPadding))
-                }
+            val preferences by container.settings.preferences
+                .collectAsStateWithLifecycle(initialValue = AppPreferences())
+            val systemDark = isSystemInDarkTheme()
+            val darkTheme = when (preferences.themeMode) {
+                ThemeMode.DARK -> true
+                ThemeMode.LIGHT -> false
+                ThemeMode.SYSTEM -> systemDark
+            }
+            TrpgTheme(darkTheme = darkTheme) {
+                TrpgNavHost(container = container)
             }
         }
     }
-}
-
-@Composable
-private fun BootScreen(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier.fillMaxSize().padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(text = "TRPGオフライン", style = MaterialTheme.typography.headlineLarge)
-        Text(
-            text = "端末内のLLMがゲームマスターを務める、完全オフラインTRPG",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun BootScreenPreview() {
-    TrpgTheme { BootScreen() }
 }
