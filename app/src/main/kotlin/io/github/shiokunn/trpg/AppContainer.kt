@@ -1,6 +1,9 @@
 package io.github.shiokunn.trpg
 
 import android.content.Context
+import io.github.shiokunn.trpg.ai.engine.InferenceEngine
+import io.github.shiokunn.trpg.ai.engine.LlamaCppEngine
+import io.github.shiokunn.trpg.ai.model.ModelFileManager
 import io.github.shiokunn.trpg.data.db.AppDatabase
 import io.github.shiokunn.trpg.data.repository.CharacterRepository
 import io.github.shiokunn.trpg.data.repository.MemoryRepository
@@ -21,5 +24,9 @@ class AppContainer(context: Context) {
     val memories = MemoryRepository(database)
     val models = ModelRepository(database)
     val settings = SettingsRepository(context)
+    val modelFiles = ModelFileManager(context)
+    val engine: InferenceEngine by lazy {
+        LlamaCppEngine(context.applicationInfo.nativeLibraryDir.orEmpty())
+    }
     val appContext: Context = context.applicationContext
 }
