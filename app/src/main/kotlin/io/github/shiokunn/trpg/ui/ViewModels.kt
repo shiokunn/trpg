@@ -9,6 +9,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import io.github.shiokunn.trpg.AppContainer
 import io.github.shiokunn.trpg.ai.engine.BackendInfo
 import io.github.shiokunn.trpg.ai.engine.EngineStatus
+import io.github.shiokunn.trpg.BuildConfig
 import io.github.shiokunn.trpg.ai.model.ModelFileManager
 import io.github.shiokunn.trpg.core.ai.CharacterDraft
 import io.github.shiokunn.trpg.core.ai.GmChoice
@@ -18,6 +19,9 @@ import io.github.shiokunn.trpg.creation.AdventureAssembler
 import io.github.shiokunn.trpg.creation.CreationInput
 import io.github.shiokunn.trpg.creation.CreationMode
 import io.github.shiokunn.trpg.creation.CreationResult
+import io.github.shiokunn.trpg.core.backup.BackupBundle
+import io.github.shiokunn.trpg.core.backup.BackupCodec
+import io.github.shiokunn.trpg.core.backup.BackupDecodeResult
 import io.github.shiokunn.trpg.core.domain.DiceResult
 import io.github.shiokunn.trpg.core.domain.ModelSettings
 import io.github.shiokunn.trpg.data.db.RecentSessionRow
@@ -28,6 +32,7 @@ import io.github.shiokunn.trpg.game.GameEventTypes
 import io.github.shiokunn.trpg.game.GmTurnListener
 import io.github.shiokunn.trpg.game.GmTurnPhase
 import io.github.shiokunn.trpg.game.GmTurnResult
+import io.github.shiokunn.trpg.data.repository.BackupImportException
 import io.github.shiokunn.trpg.game.PlayerTurnAction
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -336,12 +341,130 @@ class NewAdventureViewModel(private val container: AppContainer) : ViewModel() {
     }
 }
 
+data class BackupUiState(
+    val running: Boolean = false,
+    val message: String? = null,
+    val error: String? = null,
+    val errors: List<String> = emptyList(),
+    val pendingImport: BackupBundle? = null,
+)
+
 class SettingsViewModel(private val container: AppContainer) : ViewModel() {
     val preferences: StateFlow<AppPreferences> = container.settings.preferences
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AppPreferences())
 
+    private val _backup = MutableStateFlow(BackupUiState())
+    val backup: StateFlow<BackupUiState> = _backup.asStateFlow()
+
     fun setTheme(mode: ThemeMode) {
         viewModelScope.launch { container.settings.setThemeMode(mode) }
+    }
+
+    fun clearBackupMessage() {
+        _backup.update { it.copy(message = null, error = null, errors = emptyList()) }
+    }
+
+    fun cancelPendingImport() {
+        _backup.update { it.copy(pendingImport = null) }
+    }
+
+    fun exportBackup(uri: Uri) {
+        if (_backup.value.running) return
+        _backup.value = BackupUiState(running = true)
+        viewModelScope.launch {
+            try {
+                val bundle = container.backups.exportBundle(BuildConfig.VERSION_NAME)
+                val text = BackupCodec.encode(bundle)
+                val bytes = container.backupFiles.write(uri, text).getOrThrow()
+                _backup.update {
+                    it.copy(
+                        running = false,
+                        message = "エクスポートしました（セーブ${bundle.sessions.size}件、${bytes / 1024}KB）。",
+                    )
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Throwable) {
+                _backup.update {
+                    it.copy(
+                        running = false,
+                        error = error.message ?: "エクスポートに失敗しました。",
+                    )
+                }
+            }
+        }
+    }
+
+    fun prepareImport(uri: Uri) {
+        if (_backup.value.running) return
+        _backup.value = BackupUiState(running = true)
+        viewModelScope.launch {
+            try {
+                val raw = container.backupFiles.read(uri).getOrThrow()
+                when (val decoded = BackupCodec.decode(raw)) {
+                    is BackupDecodeResult.Success -> _backup.update {
+                        it.copy(running = false, pendingImport = decoded.bundle)
+                    }
+                    is BackupDecodeResult.Failure -> _backup.update {
+                        it.copy(
+                            running = false,
+                            error = "バックアップを読み込めませんでした。既存のデータは変更されていません。",
+                            errors = decoded.errors,
+                        )
+                    }
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Throwable) {
+                _backup.update {
+                    it.copy(
+                        running = false,
+                        error = error.message ?: "ファイルを読み込めませんでした。",
+                    )
+                }
+            }
+        }
+    }
+
+    fun confirmImport() {
+        val bundle = _backup.value.pendingImport ?: return
+        if (_backup.value.running) return
+        _backup.update { it.copy(running = true, pendingImport = null) }
+        viewModelScope.launch {
+            try {
+                val summary = container.backups.importBundle(bundle)
+                _backup.update {
+                    it.copy(
+                        running = false,
+                        message = "インポートしました（セーブ${summary.sessionsImported}件" +
+                            (
+                                if (summary.sessionsReplaced > 0) {
+                                    "、うち${summary.sessionsReplaced}件を置き換え）。"
+                                } else {
+                                    "）。"
+                                }
+                            ),
+                    )
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: BackupImportException) {
+                _backup.update {
+                    it.copy(
+                        running = false,
+                        error = "インポートできませんでした。既存のデータは変更されていません。",
+                        errors = error.errors,
+                    )
+                }
+            } catch (error: Throwable) {
+                _backup.update {
+                    it.copy(
+                        running = false,
+                        error = error.message ?: "インポートに失敗しました。既存のデータは変更されていません。",
+                    )
+                }
+            }
+        }
     }
 }
 

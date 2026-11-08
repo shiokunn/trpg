@@ -4,7 +4,9 @@ import android.content.Context
 import io.github.shiokunn.trpg.ai.engine.InferenceEngine
 import io.github.shiokunn.trpg.ai.engine.LlamaCppEngine
 import io.github.shiokunn.trpg.ai.model.ModelFileManager
+import io.github.shiokunn.trpg.backup.BackupFileManager
 import io.github.shiokunn.trpg.data.db.AppDatabase
+import io.github.shiokunn.trpg.data.repository.BackupRepository
 import io.github.shiokunn.trpg.data.repository.CharacterRepository
 import io.github.shiokunn.trpg.data.repository.MemoryRepository
 import io.github.shiokunn.trpg.data.repository.ModelRepository
@@ -36,5 +38,7 @@ class AppContainer(context: Context) {
     val adventureCreator: AdventureCreator by lazy {
         AdventureCreator(models, engine)
     }
+    val backups = BackupRepository(database)
+    val backupFiles = BackupFileManager(context)
     val appContext: Context = context.applicationContext
 }

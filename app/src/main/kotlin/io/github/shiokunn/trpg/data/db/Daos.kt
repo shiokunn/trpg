@@ -18,6 +18,9 @@ interface WorldDao {
     @Query("SELECT * FROM worlds ORDER BY createdAt DESC")
     fun observeAll(): Flow<List<WorldEntity>>
 
+    @Query("SELECT * FROM worlds ORDER BY createdAt ASC")
+    suspend fun getAll(): List<WorldEntity>
+
     @Query("SELECT * FROM worlds WHERE id = :id")
     fun observe(id: String): Flow<WorldEntity?>
 
@@ -47,6 +50,9 @@ interface SessionDao {
 
     @Query("SELECT * FROM game_sessions ORDER BY lastPlayedAt DESC")
     fun observeAll(): Flow<List<SessionEntity>>
+
+    @Query("SELECT * FROM game_sessions ORDER BY lastPlayedAt ASC")
+    suspend fun getAll(): List<SessionEntity>
 
     @Query("SELECT * FROM game_sessions ORDER BY lastPlayedAt DESC LIMIT :limit")
     fun observeRecent(limit: Int): Flow<List<SessionEntity>>
@@ -144,6 +150,9 @@ interface NpcMemoryDao {
     @Query("SELECT * FROM npc_memories WHERE sessionId = :sessionId ORDER BY importance DESC, createdAt DESC")
     suspend fun getBySession(sessionId: String): List<NpcMemoryEntity>
 
+    @Query("SELECT COUNT(*) FROM npc_memories WHERE id = :id AND sessionId != :sessionId")
+    suspend fun countForeign(id: String, sessionId: String): Int
+
     @Query("SELECT * FROM npc_memories WHERE npcId = :npcId ORDER BY createdAt DESC")
     fun observeByNpc(npcId: String): Flow<List<NpcMemoryEntity>>
 
@@ -200,6 +209,12 @@ interface GameEventDao {
 
     @Query("SELECT * FROM game_events WHERE sessionId = :sessionId ORDER BY turn ASC, createdAt ASC")
     fun observeBySession(sessionId: String): Flow<List<GameEventEntity>>
+
+    @Query("SELECT * FROM game_events WHERE sessionId = :sessionId ORDER BY turn ASC, createdAt ASC")
+    suspend fun getAll(sessionId: String): List<GameEventEntity>
+
+    @Query("SELECT COUNT(*) FROM game_events WHERE id = :id AND sessionId != :sessionId")
+    suspend fun countForeign(id: String, sessionId: String): Int
 }
 
 @Dao
@@ -215,6 +230,9 @@ interface StoryMemoryDao {
 
     @Query("SELECT * FROM story_memories WHERE sessionId = :sessionId ORDER BY turn DESC, importance DESC")
     suspend fun getBySession(sessionId: String): List<StoryMemoryEntity>
+
+    @Query("SELECT COUNT(*) FROM story_memories WHERE id = :id AND sessionId != :sessionId")
+    suspend fun countForeign(id: String, sessionId: String): Int
 
     @Query("SELECT * FROM story_memories WHERE sessionId = :sessionId ORDER BY turn DESC")
     fun observeBySession(sessionId: String): Flow<List<StoryMemoryEntity>>
@@ -239,6 +257,12 @@ interface ChatHistoryDao {
 
     @Query("SELECT * FROM chat_history WHERE sessionId = :sessionId ORDER BY turn ASC, createdAt ASC")
     fun observeBySession(sessionId: String): Flow<List<ChatHistoryEntity>>
+
+    @Query("SELECT * FROM chat_history WHERE sessionId = :sessionId ORDER BY turn ASC, createdAt ASC")
+    suspend fun getAll(sessionId: String): List<ChatHistoryEntity>
+
+    @Query("SELECT COUNT(*) FROM chat_history WHERE id = :id AND sessionId != :sessionId")
+    suspend fun countForeign(id: String, sessionId: String): Int
 }
 
 @Dao
@@ -251,6 +275,9 @@ interface DiceRollDao {
 
     @Query("SELECT * FROM dice_roll_logs WHERE sessionId = :sessionId ORDER BY turn DESC, createdAt DESC")
     fun observeBySession(sessionId: String): Flow<List<DiceRollEntity>>
+
+    @Query("SELECT * FROM dice_roll_logs WHERE sessionId = :sessionId ORDER BY turn ASC, createdAt ASC")
+    suspend fun getAll(sessionId: String): List<DiceRollEntity>
 }
 
 @Dao
