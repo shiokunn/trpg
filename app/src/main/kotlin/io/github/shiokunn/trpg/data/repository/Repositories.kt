@@ -117,6 +117,21 @@ class CharacterRepository(private val db: AppDatabase) {
         }
     }
 
+    suspend fun toggleEquipment(sessionId: String, itemId: String) {
+        val character = get(sessionId) ?: return
+        val item = character.itemById(itemId) ?: return
+        val nowEquipped = !item.equipped
+        val inventory = character.inventory.map { existing ->
+            if (existing.id == itemId) existing.copy(equipped = nowEquipped) else existing
+        }
+        val equipment = if (nowEquipped) {
+            (character.equipment + itemId).distinct()
+        } else {
+            character.equipment - itemId
+        }
+        save(sessionId, character.copy(inventory = inventory, equipment = equipment))
+    }
+
     suspend fun updateHp(characterId: String, hp: Int) {
         val entity = db.characterDao().getById(characterId) ?: return
         db.characterDao().upsert(entity.copy(hp = hp.coerceIn(0, entity.maxHp)))

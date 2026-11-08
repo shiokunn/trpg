@@ -33,6 +33,7 @@ import io.github.shiokunn.trpg.game.GmTurnListener
 import io.github.shiokunn.trpg.game.GmTurnPhase
 import io.github.shiokunn.trpg.game.GmTurnResult
 import io.github.shiokunn.trpg.data.repository.BackupImportException
+import io.github.shiokunn.trpg.game.CombatActionResult
 import io.github.shiokunn.trpg.game.PlayerTurnAction
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -116,6 +117,19 @@ class GameViewModel(
         container.engine.cancel()
     }
 
+    fun attack(useDexterity: Boolean) {
+        if (turnJob?.isActive == true) return
+        _turn.value = GameTurnUiState(running = true, phase = GmTurnPhase.Committing)
+        turnJob = viewModelScope.launch {
+            when (val result = container.combat.attack(sessionId, useDexterity)) {
+                is CombatActionResult.Success -> _turn.value = GameTurnUiState()
+                is CombatActionResult.Failed -> _turn.update {
+                    it.copy(running = false, phase = null, error = result.message)
+                }
+            }
+        }
+    }
+
     fun clearError() {
         _turn.update { it.copy(error = null, errorDetails = emptyList()) }
     }
@@ -170,6 +184,10 @@ class CharacterViewModel(
 ) : ViewModel() {
     val bundle: StateFlow<SessionBundle?> = container.sessions.observeBundle(sessionId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    fun toggleEquipment(itemId: String) {
+        viewModelScope.launch { container.characters.toggleEquipment(sessionId, itemId) }
+    }
 }
 
 class WorldViewModel(

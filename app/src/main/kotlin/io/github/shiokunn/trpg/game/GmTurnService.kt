@@ -456,4 +456,5 @@ class GmTurnService(
 object GameEventTypes {
     const val TURN = "TURN"
     const val CHOICES = "CHOICES"
+    const val COMBAT = "COMBAT"
 }

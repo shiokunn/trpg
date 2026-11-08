@@ -19,6 +19,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -179,18 +180,17 @@ fun CharacterScreen(viewModel: CharacterViewModel, onBack: () -> Unit) {
                                                 )
                                             }
                                         }
-                                        if (item.equipped) {
-                                            Text(
-                                                "装備中",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = MaterialTheme.colorScheme.primary,
-                                            )
-                                        }
                                         if (item.power > 0 || item.defense > 0) {
                                             Text(
-                                                " 攻${item.power} 防${item.defense}",
+                                                "攻${item.power} 防${item.defense}",
                                                 style = MaterialTheme.typography.labelSmall,
                                                 color = MaterialTheme.colorScheme.outline,
+                                            )
+                                        }
+                                        TextButton(onClick = { viewModel.toggleEquipment(item.id) }) {
+                                            Text(
+                                                if (item.equipped) "外す" else "装備",
+                                                style = MaterialTheme.typography.labelSmall,
                                             )
                                         }
                                     }

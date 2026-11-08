@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Public
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -49,6 +50,7 @@ import io.github.shiokunn.trpg.ai.engine.EngineStatus
 import io.github.shiokunn.trpg.core.ai.GmChoice
 import io.github.shiokunn.trpg.core.domain.ChatMessage
 import io.github.shiokunn.trpg.core.domain.ChatRole
+import io.github.shiokunn.trpg.core.domain.CombatState
 import io.github.shiokunn.trpg.core.domain.DiceResult
 import io.github.shiokunn.trpg.core.domain.Difficulty
 import io.github.shiokunn.trpg.game.GmTurnPhase
@@ -99,6 +101,7 @@ fun GameScreen(
                     onBegin = viewModel::beginAdventure,
                     onChoose = viewModel::choose,
                     onAct = { text -> viewModel.act(text) },
+                    onAttack = viewModel::attack,
                     onCancel = viewModel::cancelGeneration,
                     onDismissError = viewModel::clearError,
                 )
@@ -118,6 +121,7 @@ private fun GameContent(
     onBegin: () -> Unit,
     onChoose: (GmChoice) -> Unit,
     onAct: (String) -> Unit,
+    onAttack: (Boolean) -> Unit,
     onCancel: () -> Unit,
     onDismissError: () -> Unit,
 ) {
@@ -168,6 +172,16 @@ private fun GameContent(
                         )
                     }
                 }
+            }
+        }
+
+        current.session.activeCombat?.let { combat ->
+            item {
+                CombatCard(
+                    combat = combat,
+                    enabled = !busy,
+                    onAttack = onAttack,
+                )
             }
         }
 
@@ -310,6 +324,73 @@ private fun StatusCard(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+        }
+    }
+}
+
+@Composable
+private fun CombatCard(
+    combat: CombatState,
+    enabled: Boolean,
+    onAttack: (Boolean) -> Unit,
+) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        "戦闘中: ${combat.enemyName}",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                    )
+                    Text(
+                        "ラウンド ${combat.round} ／ 攻撃 ${combat.enemyAttackPower} ／ 防御 ${combat.enemyDefense}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                    )
+                }
+                Text(
+                    "HP ${combat.enemyHp}/${combat.enemyMaxHp}",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            LinearProgressIndicator(
+                progress = {
+                    if (combat.enemyMaxHp <= 0) 0f
+                    else combat.enemyHp.toFloat() / combat.enemyMaxHp
+                },
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.error,
+                trackColor = MaterialTheme.colorScheme.errorContainer,
+            )
+            Spacer(Modifier.height(10.dp))
+            Text(
+                "戦闘はアプリのD6ルールで解決されます（AIは出目を決めません）。",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onErrorContainer,
+            )
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(
+                    onClick = { onAttack(false) },
+                    enabled = enabled,
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Text("筋力で攻撃")
+                }
+                OutlinedButton(
+                    onClick = { onAttack(true) },
+                    enabled = enabled,
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Text("敏捷で攻撃")
+                }
+            }
         }
     }
 }
