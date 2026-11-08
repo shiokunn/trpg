@@ -46,7 +46,7 @@ internal fun decodeStringList(raw: String): List<String> = JsonCodec.decode(raw,
 internal fun encodeStringList(value: List<String>): String = JsonCodec.encode(value)
 
 internal fun <T : Enum<T>> enumValue(raw: String, fallback: T): T =
-    enumValues<T>().firstOrNull { it.name == raw } ?: fallback
+    fallback.declaringJavaClass.enumConstants.firstOrNull { it.name == raw } ?: fallback
 
 fun WorldEntity.toDomain(): World = World(
     id = id,

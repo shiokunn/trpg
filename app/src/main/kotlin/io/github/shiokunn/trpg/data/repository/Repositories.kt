@@ -13,6 +13,7 @@ import io.github.shiokunn.trpg.core.domain.Quest
 import io.github.shiokunn.trpg.core.domain.StoryMemory
 import io.github.shiokunn.trpg.core.domain.World
 import io.github.shiokunn.trpg.data.db.AppDatabase
+import io.github.shiokunn.trpg.data.db.QuestEntity
 import io.github.shiokunn.trpg.data.db.WorldFlagEntity
 import io.github.shiokunn.trpg.data.db.toDomain
 import io.github.shiokunn.trpg.data.db.toEntity
@@ -173,7 +174,7 @@ class SessionRepository(private val db: AppDatabase) {
             if (partial == null) {
                 flowOf(null)
             } else {
-                combine(questsFlow, flagsFlow) { quests, flags ->
+                combine(questsFlow, flagsFlow) { quests: List<QuestEntity>, flags: List<WorldFlagEntity> ->
                     SessionBundle(
                         session = partial.session,
                         world = partial.world,
