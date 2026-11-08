@@ -43,10 +43,10 @@
   - AGP 8.13.2 / Kotlin 2.3.0 / compileSdk 36 / NDK 29.0.13113456 / CMake 3.31.6
   - `InferenceEngine` 抽象 + `InferenceEngineImpl` + JNI（`ai_chat.cpp`）
   - `GGML_BACKEND_DL=ON`, `GGML_CPU_ALL_VARIANTS=ON`, `GGML_NATIVE=OFF`, arm64 で KleidiAI/OpenMP
-  - 現行 API 確認済み: `llama_model_load_from_file`, `llama_init_from_model`, `llama_batch_init`,
-    `llama_decode`, `llama_sampler_chain_init`, `llama_model_chat_template`, `llama_chat_apply_template`,
-    `llama_model_n_ctx_train`, `llama_memory_clear` 等。v0.9.0 では `llama_process`/`llama_batch_ext` も追加されているが、
-    互換性重視で従来の batch/decode API を使用する。
+  - 現行 API 確認済み: `llama_model_load_from_file`, `llama_init_from_model`, `llama_batch_ext_init`,
+    `llama_process(LLAMA_PROCESS_TYPE_DECODE)`, `llama_sampler_chain_init`, `llama_model_chat_template`,
+    `llama_chat_apply_template`, `llama_model_n_ctx_train`, `llama_memory_clear` 等。
+    v0.9.0 では `llama_load_mode` が mmap/mlock を表すため、JNI は `LLAMA_LOAD_MODE_AUTO` を使用する。
 
 ### 既存 PLAN/PROGRESS
 - 無し。別ゴールのファイルも無いため、新規作成する。

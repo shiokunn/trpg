@@ -297,8 +297,8 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeLoadModel(
 
     llama_model_params model_params = llama_model_default_params();
     model_params.n_gpu_layers = n_gpu_layers;
-    model_params.use_mmap = true;
-    model_params.use_mlock = false;
+    // v0.9.0: mmap/mlock are selected by llama_load_mode. AUTO is appropriate on Android.
+    model_params.load_mode = LLAMA_LOAD_MODE_AUTO;
 
     llama_model * model = llama_model_load_from_file(model_path.c_str(), model_params);
     if (model == nullptr) {

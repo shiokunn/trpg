@@ -8,13 +8,21 @@ data class CombatStats(
     val defense: Int = 0,
     val attackSkillLevel: Int = 0,
     val defenseSkillLevel: Int = 0,
+    /** Starting/remaining HP. Stored inside the NPC JSON column. */
+    val hp: Int = DEFAULT_HP,
 ) {
     fun normalized(): CombatStats = copy(
         attackPower = attackPower.coerceIn(0, 20),
         defense = defense.coerceIn(0, 20),
         attackSkillLevel = attackSkillLevel.coerceIn(0, Skill.MAX_LEVEL),
         defenseSkillLevel = defenseSkillLevel.coerceIn(0, Skill.MAX_LEVEL),
+        hp = hp.coerceIn(0, MAX_HP),
     )
+
+    companion object {
+        const val DEFAULT_HP = 10
+        const val MAX_HP = 999
+    }
 }
 
 @Serializable
