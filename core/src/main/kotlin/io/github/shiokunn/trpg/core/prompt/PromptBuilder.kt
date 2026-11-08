@@ -211,13 +211,17 @@ class PromptBuilder(
             "${it.label}${character.attributes.valueOf(it)}"
         })
         if (character.skills.isNotEmpty()) {
-            append("\nスキル: ").append(character.skills.joinToString("、") { "${it.name}${it.level}" })
+            append("\nスキル: ").append(
+                character.skills.joinToString("、") { skill ->
+                    "${skill.name} Lv${skill.level}(id=${skill.id})"
+                },
+            )
         }
         if (character.inventory.isNotEmpty()) {
             append("\n所持品: ").append(
                 character.inventory.joinToString("、") { item ->
                     val equipped = if (item.id in character.equipment) "（装備）" else ""
-                    "${item.name}×${item.quantity}$equipped"
+                    "${item.name}×${item.quantity}(id=${item.id})$equipped"
                 },
             )
         }
@@ -248,11 +252,12 @@ class PromptBuilder(
             .joinToString("\n") { quest ->
                 buildString {
                     append("- [").append(quest.status.label).append("] ").append(quest.title)
+                    append("(id=").append(quest.id).append(")")
                     if (quest.description.isNotBlank()) append(": ").append(quest.description)
                     if (quest.objectives.isNotEmpty()) {
                         append("（").append(
-                            quest.objectives.joinToString(" / ") { objective ->
-                                (if (objective.completed) "達成: " else "未達: ") + objective.description
+                            quest.objectives.withIndex().joinToString(" / ") { (index, objective) ->
+                                "$index: " + (if (objective.completed) "達成: " else "未達: ") + objective.description
                             },
                         ).append("）")
                     }
@@ -265,7 +270,7 @@ class PromptBuilder(
         if (visible.isEmpty()) return ""
         return visible.joinToString("\n\n") { npc ->
             buildString {
-                append("- ").append(npc.name)
+                append("- ").append(npc.name).append("(id=").append(npc.id).append(")")
                 if (npc.occupation.isNotBlank()) append("（").append(npc.occupation).append("）")
                 if (!npc.isAlive) append(" ※倒れている")
                 append("\n  関係: ").append(relationshipLabel(npc.relationship))
@@ -304,7 +309,7 @@ class PromptBuilder(
         if (discovered.isEmpty()) return ""
         return discovered.joinToString("\n") { location ->
             buildString {
-                append("- ").append(location.name)
+                append("- ").append(location.name).append("(id=").append(location.id).append(")")
                 if (location.id == currentId) append("（現在地）")
                 if (location.description.isNotBlank()) append(": ").append(location.description)
                 if (location.secrets.isNotEmpty()) {

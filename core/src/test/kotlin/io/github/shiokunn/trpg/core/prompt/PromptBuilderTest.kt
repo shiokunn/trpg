@@ -135,6 +135,21 @@ class PromptBuilderTest {
     }
 
     @Test
+    fun stateSectionExposesEntityIdsForStateChanges() = runBlocking {
+        val bundle = PromptBuilder().build(context(), largeBudget)
+        // The GM must be able to reference exact IDs when emitting stateChanges.
+        listOf("s1", "s2", "i1", "i2", "n1", "q1", "l1").forEach { id ->
+            assertTrue("missing (id=$id)", bundle.system.contains("(id=$id)"))
+        }
+        // Quest objectives are addressed by index.
+        assertTrue(bundle.system.contains("0: 達成: 酒場で聞き込み"))
+        assertTrue(bundle.system.contains("1: 未達: 灯台へ向かう"))
+        // Undiscovered entities must not leak their IDs.
+        assertTrue(!bundle.system.contains("(id=n2)"))
+        assertTrue(!bundle.system.contains("(id=l2)"))
+    }
+
+    @Test
     fun secretInformationIsClearlyMarkedGmOnly() = runBlocking {
         val bundle = PromptBuilder().build(context(), largeBudget)
         assertTrue(bundle.system.contains("GM専用"))
