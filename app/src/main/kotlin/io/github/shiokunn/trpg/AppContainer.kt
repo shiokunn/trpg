@@ -11,6 +11,7 @@ import io.github.shiokunn.trpg.data.repository.ModelRepository
 import io.github.shiokunn.trpg.data.repository.SessionRepository
 import io.github.shiokunn.trpg.data.repository.SettingsRepository
 import io.github.shiokunn.trpg.data.repository.WorldRepository
+import io.github.shiokunn.trpg.creation.AdventureCreator
 import io.github.shiokunn.trpg.game.GmTurnService
 
 /**
@@ -31,6 +32,9 @@ class AppContainer(context: Context) {
     }
     val gmTurns: GmTurnService by lazy {
         GmTurnService(sessions, memories, models, engine)
+    }
+    val adventureCreator: AdventureCreator by lazy {
+        AdventureCreator(models, engine)
     }
     val appContext: Context = context.applicationContext
 }

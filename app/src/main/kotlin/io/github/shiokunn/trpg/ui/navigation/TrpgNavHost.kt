@@ -13,6 +13,7 @@ import io.github.shiokunn.trpg.ui.GameViewModel
 import io.github.shiokunn.trpg.ui.HomeViewModel
 import io.github.shiokunn.trpg.ui.JournalViewModel
 import io.github.shiokunn.trpg.ui.ModelsViewModel
+import io.github.shiokunn.trpg.ui.NewAdventureViewModel
 import io.github.shiokunn.trpg.ui.SavesViewModel
 import io.github.shiokunn.trpg.ui.SettingsViewModel
 import io.github.shiokunn.trpg.ui.WorldViewModel
@@ -63,7 +64,18 @@ fun TrpgNavHost(container: AppContainer) {
         }
 
         composable(Routes.NEW_ADVENTURE) {
-            NewAdventureScreen(onBack = { navController.popBackStack() })
+            val vm: NewAdventureViewModel = viewModel(
+                factory = io.github.shiokunn.trpg.ui.createFactory { NewAdventureViewModel(container) },
+            )
+            NewAdventureScreen(
+                viewModel = vm,
+                onBack = { navController.popBackStack() },
+                onCreated = { sessionId ->
+                    navController.navigate(Routes.game(sessionId)) {
+                        popUpTo(Routes.HOME)
+                    }
+                },
+            )
         }
 
         composable(Routes.SAVES) {

@@ -30,7 +30,9 @@
   - [x] `GmTurnService`（判定→プロンプト→ストリーミング→厳格解析→1回修復→状態検証→単一トランザクション確定）
   - [x] ターン失敗・キャンセル時に保存データを変更しない経路
   - [x] 選択肢の永続化（`CHOICES` イベント）と GameScreen の選択肢・自由行動・ストリーミング・中止UI
-  - [ ] `NewAdventureScreen`（AI自動生成 / ユーザー設定+AI補完）
+  - [x] `NewAdventureScreen`（AI自動生成 / ユーザー設定+AI補完、世界・導入・主人公の確認、保存）
+  - [x] `AdventureAssembler` と単体テスト（WorldDraft → World/Location/Npc/Quest、初期HP、ID一意性、戦闘値正規化）
+  - [ ] 世界・導入の事後編集UI（現状は再生成と入力条件の変更で対応）
   - [ ] 実機でのターン生成・修復リトライ・キャンセル検証
 
 ## 完了したステップ
@@ -45,18 +47,18 @@
 - [x] Phase 2: Kotlin 推論層・モデルファイル管理・モデル管理UI・ネイティブビルド
 - [x] Phase 3: 状態変更エンジン・GM/草案パーサとテスト
 - [x] Phase 4: PromptBuilder とテスト、GMターンパイプライン
+- [x] Phase 4: 冒険開始画面（世界・キャラクター生成、確認、保存）
 
 ## 進行中
 
-- Phase 4: 冒険開始画面（世界・キャラクター生成）と GameScreen の仕上げ
+- Phase 5: 4層記憶の選別・要約更新
 
 ## 次にやること
 
-1. `NewAdventureScreen`: 世界観のAI自動生成 / ユーザー設定+AI補完、キャラクター生成・確認・保存
-2. CI で今回のターンパイプラインを含む APK ビルドを確認
-3. Phase 5: 4層記憶の選別・要約更新、NPC記憶の表示
-4. Phase 6: 戦闘UI（CombatResolver 接続）、クエスト・所持品・地図、JSONエクスポート/インポート
-5. Phase 7: 品質向上（アクセシビリティ、空状態、エラー表示、テスト追加）
+1. CI で冒険開始フローと `AdventureAssemblerTest` を含むビルドを確認
+2. Phase 5: 4層記憶の選別・要約更新、NPC記憶の表示、再開時コンテキストのテスト
+3. Phase 6: 戦闘UI（CombatResolver 接続）、クエスト・所持品・地図編集、JSONエクスポート/インポート
+4. Phase 7: 品質向上（アクセシビリティ、空状態、エラー表示、テスト追加）
 
 ## 既知の問題・制約
 
@@ -69,4 +71,6 @@
 
 - `./gradlew -p core test`: コアテスト全件 green（ルール21 + 状態変更18 + GMパーサ13 + 草案パーサ10 + プロンプト6）
 - GitHub Actions run 42481150919: `:core:test` / `:app:testDebugUnitTest` / `:app:assembleDebug`（arm64-v8a）すべて成功
-- 未検証: 実機推論、GGUF読み込み、Vulkan、Room 実マイグレーション（DB未出荷のため v1 のみ）、今回追加のターンパイプラインの実行時挙動
+- GitHub Actions run 42481907089: GMターンパイプライン込みで `:app:assembleDebug`（arm64-v8a）成功
+- `AdventureAssemblerTest`（app unit test）: 5件（マッピング、初期HP、ID一意性、戦闘値正規化、タイトル補完）
+- 未検証: 実機推論、GGUF読み込み、Vulkan、Room 実マイグレーション（DB未出荷のため v1 のみ）、ターン生成・修復リトライ・キャンセルの実行時挙動

@@ -10,8 +10,14 @@ import io.github.shiokunn.trpg.AppContainer
 import io.github.shiokunn.trpg.ai.engine.BackendInfo
 import io.github.shiokunn.trpg.ai.engine.EngineStatus
 import io.github.shiokunn.trpg.ai.model.ModelFileManager
+import io.github.shiokunn.trpg.core.ai.CharacterDraft
 import io.github.shiokunn.trpg.core.ai.GmChoice
 import io.github.shiokunn.trpg.core.ai.TurnChoices
+import io.github.shiokunn.trpg.core.ai.WorldDraft
+import io.github.shiokunn.trpg.creation.AdventureAssembler
+import io.github.shiokunn.trpg.creation.CreationInput
+import io.github.shiokunn.trpg.creation.CreationMode
+import io.github.shiokunn.trpg.creation.CreationResult
 import io.github.shiokunn.trpg.core.domain.DiceResult
 import io.github.shiokunn.trpg.core.domain.ModelSettings
 import io.github.shiokunn.trpg.data.db.RecentSessionRow
@@ -184,6 +190,148 @@ class JournalViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
     val dice = container.memories.observeDice(sessionId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+}
+
+enum class CreationStage { FORM, GENERATING, PREVIEW }
+
+data class NewAdventureUiState(
+    val mode: CreationMode = CreationMode.AUTO,
+    val keywords: String = "",
+    val setting: String = "",
+    val protagonistWish: String = "",
+    val tone: String = "",
+    val difficulty: String = "",
+    val stage: CreationStage = CreationStage.FORM,
+    val statusText: String = "",
+    val world: WorldDraft? = null,
+    val character: CharacterDraft? = null,
+    val error: String? = null,
+    val details: List<String> = emptyList(),
+    val saving: Boolean = false,
+    val createdSessionId: String? = null,
+)
+
+class NewAdventureViewModel(private val container: AppContainer) : ViewModel() {
+
+    private val _state = MutableStateFlow(NewAdventureUiState())
+    val state: StateFlow<NewAdventureUiState> = _state.asStateFlow()
+
+    val engineStatus: StateFlow<EngineStatus> = container.engine.status
+
+    private var job: Job? = null
+
+    fun setMode(mode: CreationMode) = _state.update { it.copy(mode = mode) }
+
+    fun setKeywords(value: String) = _state.update { it.copy(keywords = value) }
+
+    fun setSetting(value: String) = _state.update { it.copy(setting = value) }
+
+    fun setProtagonistWish(value: String) = _state.update { it.copy(protagonistWish = value) }
+
+    fun setTone(value: String) = _state.update { it.copy(tone = value) }
+
+    fun setDifficulty(value: String) = _state.update { it.copy(difficulty = value) }
+
+    fun clearError() = _state.update { it.copy(error = null, details = emptyList()) }
+
+    fun cancelGeneration() {
+        container.engine.cancel()
+    }
+
+    fun generate() {
+        if (job?.isActive == true) return
+        val current = _state.value
+        if (current.mode == CreationMode.GUIDED &&
+            current.setting.isBlank() && current.keywords.isBlank()
+        ) {
+            _state.update {
+                it.copy(error = "世界設定かキーワードを入力してください。", details = emptyList())
+            }
+            return
+        }
+
+        _state.update {
+            it.copy(
+                stage = CreationStage.GENERATING,
+                statusText = "世界とシナリオを生成しています…",
+                world = null,
+                character = null,
+                error = null,
+                details = emptyList(),
+            )
+        }
+        val input = CreationInput(
+            mode = current.mode,
+            keywords = current.keywords.trim(),
+            setting = current.setting.trim(),
+            protagonistWish = current.protagonistWish.trim(),
+            tone = current.tone.trim(),
+            difficulty = current.difficulty.trim(),
+        )
+        job = viewModelScope.launch {
+            val worldResult = container.adventureCreator.generateWorld(input)
+            val world = when (worldResult) {
+                is CreationResult.Success -> worldResult.value
+                is CreationResult.Cancelled -> {
+                    failGeneration("生成をキャンセルしました。", emptyList())
+                    return@launch
+                }
+                is CreationResult.Failed -> {
+                    failGeneration(worldResult.message, worldResult.errors)
+                    return@launch
+                }
+            }
+            _state.update { it.copy(world = world, statusText = "主人公を生成しています…") }
+            when (val characterResult = container.adventureCreator.generateCharacter(world, input)) {
+                is CreationResult.Success -> _state.update {
+                    it.copy(
+                        stage = CreationStage.PREVIEW,
+                        character = characterResult.value,
+                        statusText = "",
+                    )
+                }
+                is CreationResult.Cancelled -> failGeneration("生成をキャンセルしました。", emptyList())
+                is CreationResult.Failed -> failGeneration(characterResult.message, characterResult.errors)
+            }
+        }
+    }
+
+    fun backToForm() {
+        _state.update { it.copy(stage = CreationStage.FORM, error = null, details = emptyList()) }
+    }
+
+    fun createAdventure() {
+        val current = _state.value
+        val world = current.world ?: return
+        val character = current.character ?: return
+        if (current.saving) return
+        _state.update { it.copy(saving = true, error = null, details = emptyList()) }
+        viewModelScope.launch {
+            runCatching {
+                container.sessions.create(AdventureAssembler.assemble(world, character))
+            }.onSuccess { sessionId ->
+                _state.update { it.copy(saving = false, createdSessionId = sessionId) }
+            }.onFailure { error ->
+                _state.update {
+                    it.copy(
+                        saving = false,
+                        error = error.message ?: "冒険の保存に失敗しました。",
+                    )
+                }
+            }
+        }
+    }
+
+    private fun failGeneration(message: String, details: List<String>) {
+        _state.update {
+            it.copy(
+                stage = CreationStage.FORM,
+                statusText = "",
+                error = message,
+                details = details,
+            )
+        }
+    }
 }
 
 class SettingsViewModel(private val container: AppContainer) : ViewModel() {
