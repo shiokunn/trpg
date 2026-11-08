@@ -146,6 +146,9 @@ interface NpcMemoryDao {
 
     @Query("SELECT * FROM npc_memories WHERE npcId = :npcId ORDER BY createdAt DESC")
     fun observeByNpc(npcId: String): Flow<List<NpcMemoryEntity>>
+
+    @Query("SELECT * FROM npc_memories WHERE sessionId = :sessionId ORDER BY importance DESC, createdAt DESC")
+    fun observeBySession(sessionId: String): Flow<List<NpcMemoryEntity>>
 }
 
 @Dao

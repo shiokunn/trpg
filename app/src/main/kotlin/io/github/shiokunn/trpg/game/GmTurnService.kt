@@ -18,6 +18,7 @@ import io.github.shiokunn.trpg.core.domain.GameEvent
 import io.github.shiokunn.trpg.core.domain.ModelSettings
 import io.github.shiokunn.trpg.core.domain.NpcMemory
 import io.github.shiokunn.trpg.core.domain.StoryMemory
+import io.github.shiokunn.trpg.core.memory.MemorySelector
 import io.github.shiokunn.trpg.core.prompt.PromptBudget
 import io.github.shiokunn.trpg.core.prompt.PromptBuilder
 import io.github.shiokunn.trpg.core.prompt.PromptBundle
@@ -125,7 +126,12 @@ class GmTurnService(
         }
 
         val recentChat = memories.recentChat(sessionId, MAX_HISTORY_MESSAGES)
-        val longTerm = memories.topMemories(sessionId, MAX_LONG_TERM_MEMORIES)
+        val longTerm = MemorySelector.select(
+            memories = memories.allMemories(sessionId),
+            query = action.text,
+            currentTurn = bundle.session.turnCount,
+            limit = MAX_LONG_TERM_MEMORIES,
+        )
         val npcMemories = memories.npcMemories(sessionId)
 
         val context = PromptContext(

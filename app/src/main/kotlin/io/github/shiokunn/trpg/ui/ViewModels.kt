@@ -175,6 +175,8 @@ class WorldViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
     val memories = container.memories.observeMemories(sessionId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    val npcMemories = container.memories.observeNpcMemoriesBySession(sessionId)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 }
 
 class JournalViewModel(

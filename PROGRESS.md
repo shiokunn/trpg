@@ -49,16 +49,23 @@
 - [x] Phase 4: PromptBuilder とテスト、GMターンパイプライン
 - [x] Phase 4: 冒険開始画面（世界・キャラクター生成、確認、保存）
 
+- Phase 5 進行中:
+  - [x] 短期記憶（直近チャット）・長期記憶（重要度/関連度）・世界状態・NPC記憶の4層をプロンプトへ供給
+  - [x] `MemorySelector`（重要度・新しさ・未解決・伏線・行動キーワードの関連度で選別、上限つき）とテスト6件
+  - [x] GM専用 secret をプレイヤー画面（履歴・世界情報）から除外
+  - [x] NPC記憶を世界情報画面に表示
+  - [ ] 記憶の競合記録方針の明文化・テスト（現状は上書きせず全件保持）
+
 ## 進行中
 
-- Phase 5: 4層記憶の選別・要約更新
+- Phase 5 仕上げと Phase 6 着手
 
 ## 次にやること
 
-1. CI で冒険開始フローと `AdventureAssemblerTest` を含むビルドを確認
-2. Phase 5: 4層記憶の選別・要約更新、NPC記憶の表示、再開時コンテキストのテスト
-3. Phase 6: 戦闘UI（CombatResolver 接続）、クエスト・所持品・地図編集、JSONエクスポート/インポート
-4. Phase 7: 品質向上（アクセシビリティ、空状態、エラー表示、テスト追加）
+1. Phase 6: 戦闘UI（CombatResolver 接続）、クエスト・所持品・地図編集
+2. Phase 6: JSONエクスポート/インポート（SAF、検証、単一トランザクション、失敗時に既存データを壊さない）
+3. Phase 7: 品質向上（アクセシビリティ、空状態、エラー表示、テスト追加）
+4. 実機検証項目を最終報告にまとめる
 
 ## 既知の問題・制約
 
@@ -69,7 +76,7 @@
 
 ## 検証済み
 
-- `./gradlew -p core test`: コアテスト全件 green（ルール21 + 状態変更18 + GMパーサ13 + 草案パーサ10 + プロンプト6）
+- `./gradlew -p core test`: コアテスト全件 green（全75件: ルール21 + 状態変更18 + GMパーサ13 + 草案パーサ10 + プロンプト6 + 記憶選別6 + 他1）
 - GitHub Actions run 42481150919: `:core:test` / `:app:testDebugUnitTest` / `:app:assembleDebug`（arm64-v8a）すべて成功
 - GitHub Actions run 42481907089: GMターンパイプライン込みで `:app:assembleDebug`（arm64-v8a）成功
 - `AdventureAssemblerTest`（app unit test）: 5件（マッピング、初期HP、ID一意性、戦闘値正規化、タイトル補完）

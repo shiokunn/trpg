@@ -316,6 +316,9 @@ class MemoryRepository(private val db: AppDatabase) {
     suspend fun topMemories(sessionId: String, limit: Int): List<StoryMemory> =
         db.storyMemoryDao().getTop(sessionId, limit).map { it.toDomain() }
 
+    suspend fun allMemories(sessionId: String): List<StoryMemory> =
+        db.storyMemoryDao().getBySession(sessionId).map { it.toDomain() }
+
     suspend fun searchMemories(sessionId: String, keyword: String, limit: Int): List<StoryMemory> =
         db.storyMemoryDao().search(sessionId, keyword, limit).map { it.toDomain() }
 
@@ -327,6 +330,9 @@ class MemoryRepository(private val db: AppDatabase) {
 
     fun observeNpcMemories(npcId: String): Flow<List<NpcMemory>> =
         db.npcMemoryDao().observeByNpc(npcId).map { list -> list.map { it.toDomain() } }
+
+    fun observeNpcMemoriesBySession(sessionId: String): Flow<List<NpcMemory>> =
+        db.npcMemoryDao().observeBySession(sessionId).map { list -> list.map { it.toDomain() } }
 
     fun observeEvents(sessionId: String): Flow<List<GameEvent>> =
         db.gameEventDao().observeBySession(sessionId).map { list -> list.map { it.toDomain() } }

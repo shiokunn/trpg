@@ -81,7 +81,7 @@ class AdventureCreator(
         return generateWithRepair(settings, messages, CharacterDraftParser::parse)
     }
 
-    private fun readySettings(): Pair<ModelSettings, EngineStatus.Ready>? {
+    private suspend fun readySettings(): Pair<ModelSettings, EngineStatus.Ready>? {
         val status = engine.status.value as? EngineStatus.Ready ?: return null
         val settings = (models.settings() ?: ModelSettings()).normalized()
         return settings to status

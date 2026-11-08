@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.shiokunn.trpg.core.domain.Location
 import io.github.shiokunn.trpg.core.domain.Npc
+import io.github.shiokunn.trpg.core.domain.NpcMemory
 import io.github.shiokunn.trpg.core.domain.Quest
 import io.github.shiokunn.trpg.core.domain.World
 import io.github.shiokunn.trpg.ui.WorldViewModel
@@ -39,6 +40,7 @@ import io.github.shiokunn.trpg.ui.components.TrpgScaffold
 fun WorldScreen(viewModel: WorldViewModel, onBack: () -> Unit) {
     val bundle by viewModel.bundle.collectAsStateWithLifecycle()
     val memories by viewModel.memories.collectAsStateWithLifecycle()
+    val npcMemories by viewModel.npcMemories.collectAsStateWithLifecycle()
 
     TrpgScaffold(title = "世界情報", onBack = onBack) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
@@ -113,7 +115,14 @@ fun WorldScreen(viewModel: WorldViewModel, onBack: () -> Unit) {
                             )
                         }
                     } else {
-                        npcs.forEach { npc -> item { NpcCard(npc) } }
+                        npcs.forEach { npc ->
+                            item {
+                                NpcCard(
+                                    npc = npc,
+                                    memories = npcMemories.filter { it.npcId == npc.id && !it.isSecret },
+                                )
+                            }
+                        }
                     }
 
                     item { SectionTitle("クエスト") }
@@ -237,7 +246,7 @@ private fun LocationCard(location: Location, current: Boolean) {
 }
 
 @Composable
-private fun NpcCard(npc: Npc) {
+private fun NpcCard(npc: Npc, memories: List<NpcMemory>) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         modifier = Modifier.fillMaxWidth(),
@@ -264,6 +273,21 @@ private fun NpcCard(npc: Npc) {
             if (npc.description.isNotBlank()) {
                 Spacer(Modifier.height(4.dp))
                 Text(npc.description, style = MaterialTheme.typography.bodySmall)
+            }
+            if (memories.isNotEmpty()) {
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    "この人物の記憶",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                memories.take(3).forEach { memory ->
+                    Text(
+                        "・${memory.content}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
     }
