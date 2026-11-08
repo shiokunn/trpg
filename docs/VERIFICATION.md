@@ -45,7 +45,7 @@
 | --- | --- | --- |
 | [42481150919](https://github.com/shiokunn/trpg/actions/runs/42481150919) | llama.cpp JNI / arm64-v8a APK の初回ビルド | 成功 |
 | [42484039490](https://github.com/shiokunn/trpg/actions/runs/42484039490) | core 89件 + app 5件 + Debug APK（プロンプトID修正時点） | 成功 |
-| 最新実行 | UI アクセシビリティ/エラー表示の修正 | `PROGRESS.md` の CI ログを参照 |
+| [42485089100](https://github.com/shiokunn/trpg/actions/runs/42485089100) | Phase 7 一式（core 89 + app 5 + arm64-v8a APK + Room スキーマ） | 成功 |
 
 CI で確認できること:
 
@@ -66,9 +66,10 @@ CI で確認できること:
 3. **メモリ不足時の挙動** — OOM を捕捉して日本語メッセージを返す実装はあるが、
    実際に OOM を発生させた検証はしていない。OS によるプロセス kill は防げない。
 4. **Vulkan バックエンド** — `-Ptrpg.vulkan=true` のビルドも実行も未検証。既定は CPU。
-5. **Room マイグレーション** — スキーマは version 1 のみ。マイグレーションコードは
-   未実装（破壊的フォールバックも置いていない）。将来のバージョンアップ時に
-   スキーマ JSON を比較して明示的な Migration を追加する必要がある。
+5. **Room マイグレーション** — スキーマは version 1 のみ。ベースライン
+   `app/schemas/io.github.shiokunn.trpg.data.db.AppDatabase/1.json` をリポジトリに保存した。
+   マイグレーションコードは未実装（破壊的フォールバックも置いていない）。将来のバージョンアップ時は
+   スキーマ JSON の差分から明示的な Migration を追加し、MigrationTestHelper で検証する必要がある。
 6. **SAF によるモデル取り込み / JSON バックアップ** — 実端末のファイル選択 UI、
    大容量ファイル、空き容量不足、書き込み失敗時の挙動は未確認。
 7. **画面回転・バックグラウンド・プロセス death** — `configChanges` と ViewModel により
