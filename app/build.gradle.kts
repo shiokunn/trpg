@@ -11,6 +11,7 @@ plugins {
 android {
     namespace = "io.github.shiokunn.trpg"
     compileSdk = 36
+    ndkVersion = "29.0.13113456"
 
     defaultConfig {
         applicationId = "io.github.shiokunn.trpg"
@@ -22,6 +23,43 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
+        }
+
+        ndk {
+            // CPU inference is validated for arm64 only. A Vulkan build uses the same ABI.
+            abiFilters += listOf("arm64-v8a")
+        }
+
+        externalNativeBuild {
+            cmake {
+                arguments.addAll(
+                    listOf(
+                        "-DBUILD_SHARED_LIBS=ON",
+                        "-DLLAMA_BUILD_COMMON=OFF",
+                        "-DLLAMA_BUILD_TESTS=OFF",
+                        "-DLLAMA_BUILD_TOOLS=OFF",
+                        "-DLLAMA_BUILD_EXAMPLES=OFF",
+                        "-DLLAMA_BUILD_SERVER=OFF",
+                        "-DLLAMA_BUILD_APP=OFF",
+                        "-DLLAMA_OPENSSL=OFF",
+                        "-DGGML_NATIVE=OFF",
+                        "-DGGML_BACKEND_DL=ON",
+                        "-DGGML_CPU_ALL_VARIANTS=ON",
+                        "-DGGML_LLAMAFILE=OFF",
+                        "-DGGML_OPENMP=OFF",
+                    ),
+                )
+                if ((project.findProperty("trpg.vulkan") as String?) == "true") {
+                    arguments.add("-DGGML_VULKAN=ON")
+                }
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.31.6"
         }
     }
 

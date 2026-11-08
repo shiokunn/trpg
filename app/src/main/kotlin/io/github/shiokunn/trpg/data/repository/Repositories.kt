@@ -13,7 +13,6 @@ import io.github.shiokunn.trpg.core.domain.Quest
 import io.github.shiokunn.trpg.core.domain.StoryMemory
 import io.github.shiokunn.trpg.core.domain.World
 import io.github.shiokunn.trpg.data.db.AppDatabase
-import io.github.shiokunn.trpg.data.db.QuestEntity
 import io.github.shiokunn.trpg.data.db.WorldFlagEntity
 import io.github.shiokunn.trpg.data.db.toDomain
 import io.github.shiokunn.trpg.data.db.toEntity
@@ -174,7 +173,7 @@ class SessionRepository(private val db: AppDatabase) {
             if (partial == null) {
                 flowOf(null)
             } else {
-                val buildBundle: suspend (List<QuestEntity>, List<WorldFlagEntity>) -> SessionBundle =
+                val buildBundle: suspend (List<Quest>, List<WorldFlagEntity>) -> SessionBundle =
                     { quests, flags ->
                         SessionBundle(
                             session = partial.session,
@@ -182,7 +181,7 @@ class SessionRepository(private val db: AppDatabase) {
                             character = partial.character,
                             npcs = partial.npcs,
                             locations = partial.locations,
-                            quests = quests.map { it.toDomain() },
+                            quests = quests,
                             flags = flags.associate { it.toPairValue() },
                         )
                     }

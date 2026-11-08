@@ -472,7 +472,7 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeGenerate(
         return env->NewStringUTF(error_json("プロンプトが空です").c_str());
     }
 
-    std::vector<llama_token> prompt_tokens = tokenize(vocab, prompt_text, false);
+    std::vector<llama_token> prompt_tokens = tokenize(vocab, prompt_text, true);
     if (prompt_tokens.empty()) {
         return env->NewStringUTF(error_json("プロンプトのトークン化に失敗しました").c_str());
     }

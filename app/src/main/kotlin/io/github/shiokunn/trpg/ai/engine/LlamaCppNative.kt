@@ -9,7 +9,6 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.longOrNull
-import kotlinx.serialization.json.parseToJsonElement
 
 /** Callback invoked from the native decode loop for every generated piece. */
 fun interface TokenCallback {

@@ -34,7 +34,20 @@ jobs:
 
       - name: Install SDK packages
         run: |
-          yes | sdkmanager --install "platforms;android-36" "build-tools;36.0.0"
+          yes | sdkmanager --install \
+            "platforms;android-36" \
+            "build-tools;36.0.0" \
+            "ndk;29.0.13113456" \
+            "cmake;3.31.6"
+
+      - name: Cache pinned llama.cpp source
+        uses: actions/cache@v4
+        with:
+          path: third_party/llama.cpp
+          key: llama-cpp-v0.9.0-cd959bae99ff4bed22bef2604f45241c09bbb8c8
+
+      - name: Fetch pinned llama.cpp
+        run: ./scripts/fetch-llama.sh
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
