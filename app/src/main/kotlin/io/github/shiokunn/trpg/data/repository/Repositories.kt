@@ -174,17 +174,19 @@ class SessionRepository(private val db: AppDatabase) {
             if (partial == null) {
                 flowOf(null)
             } else {
-                combine(questsFlow, flagsFlow) { quests: List<QuestEntity>, flags: List<WorldFlagEntity> ->
-                    SessionBundle(
-                        session = partial.session,
-                        world = partial.world,
-                        character = partial.character,
-                        npcs = partial.npcs,
-                        locations = partial.locations,
-                        quests = quests.map { it.toDomain() },
-                        flags = flags.associate { it.toPairValue() },
-                    )
-                }
+                val buildBundle: suspend (List<QuestEntity>, List<WorldFlagEntity>) -> SessionBundle =
+                    { quests, flags ->
+                        SessionBundle(
+                            session = partial.session,
+                            world = partial.world,
+                            character = partial.character,
+                            npcs = partial.npcs,
+                            locations = partial.locations,
+                            quests = quests.map { it.toDomain() },
+                            flags = flags.associate { it.toPairValue() },
+                        )
+                    }
+                combine(questsFlow, flagsFlow, buildBundle)
             }
         }
     }
