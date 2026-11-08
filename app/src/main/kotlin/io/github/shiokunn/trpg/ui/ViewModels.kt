@@ -10,19 +10,30 @@ import io.github.shiokunn.trpg.AppContainer
 import io.github.shiokunn.trpg.ai.engine.BackendInfo
 import io.github.shiokunn.trpg.ai.engine.EngineStatus
 import io.github.shiokunn.trpg.ai.model.ModelFileManager
+import io.github.shiokunn.trpg.core.ai.GmChoice
+import io.github.shiokunn.trpg.core.ai.TurnChoices
+import io.github.shiokunn.trpg.core.domain.DiceResult
 import io.github.shiokunn.trpg.core.domain.ModelSettings
 import io.github.shiokunn.trpg.data.db.RecentSessionRow
 import io.github.shiokunn.trpg.data.repository.AppPreferences
 import io.github.shiokunn.trpg.data.repository.SessionBundle
 import io.github.shiokunn.trpg.data.repository.ThemeMode
+import io.github.shiokunn.trpg.game.GameEventTypes
+import io.github.shiokunn.trpg.game.GmTurnListener
+import io.github.shiokunn.trpg.game.GmTurnPhase
+import io.github.shiokunn.trpg.game.GmTurnResult
+import io.github.shiokunn.trpg.game.PlayerTurnAction
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 
 inline fun <reified VM : ViewModel> createFactory(crossinline create: () -> VM): ViewModelProvider.Factory =
     viewModelFactory { initializer { create() } }
@@ -41,6 +52,16 @@ class SavesViewModel(private val container: AppContainer) : ViewModel() {
     }
 }
 
+/** UI state for one GM turn. Nothing here is written to the database until the turn succeeds. */
+data class GameTurnUiState(
+    val running: Boolean = false,
+    val phase: GmTurnPhase? = null,
+    val streamedText: String = "",
+    val error: String? = null,
+    val errorDetails: List<String> = emptyList(),
+    val lastCheck: DiceResult? = null,
+)
+
 class GameViewModel(
     private val container: AppContainer,
     val sessionId: String,
@@ -50,6 +71,86 @@ class GameViewModel(
 
     val chat = container.memories.observeChat(sessionId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val choices: StateFlow<TurnChoices?> = container.memories.observeEvents(sessionId)
+        .map { events ->
+            events.lastOrNull { it.type == GameEventTypes.CHOICES }?.let { event ->
+                runCatching {
+                    ChoicesJson.decodeFromString(TurnChoices.serializer(), event.payloadJson)
+                }.getOrNull()
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    val engineStatus: StateFlow<EngineStatus> = container.engine.status
+
+    private val _turn = MutableStateFlow(GameTurnUiState())
+    val turn: StateFlow<GameTurnUiState> = _turn.asStateFlow()
+
+    private var turnJob: Job? = null
+
+    fun beginAdventure() {
+        startTurn(PlayerTurnAction("冒険を開始する"))
+    }
+
+    fun act(text: String) {
+        startTurn(PlayerTurnAction(text))
+    }
+
+    fun choose(choice: GmChoice) {
+        startTurn(PlayerTurnAction(choice.text, choice.check))
+    }
+
+    fun cancelGeneration() {
+        container.engine.cancel()
+    }
+
+    fun clearError() {
+        _turn.update { it.copy(error = null, errorDetails = emptyList()) }
+    }
+
+    private fun startTurn(action: PlayerTurnAction) {
+        if (turnJob?.isActive == true) return
+        if (action.text.isBlank()) return
+        _turn.value = GameTurnUiState(running = true, phase = GmTurnPhase.Preparing)
+        turnJob = viewModelScope.launch {
+            val listener = object : GmTurnListener {
+                override suspend fun onPhase(phase: GmTurnPhase) {
+                    _turn.update {
+                        val restart = phase is GmTurnPhase.Generating || phase is GmTurnPhase.Repairing
+                        it.copy(phase = phase, streamedText = if (restart) "" else it.streamedText)
+                    }
+                }
+
+                override suspend fun onToken(piece: String) {
+                    _turn.update { it.copy(streamedText = it.streamedText + piece) }
+                }
+            }
+            val result = container.gmTurns.playTurn(sessionId, action, listener)
+            _turn.update { previous ->
+                when (result) {
+                    is GmTurnResult.Success -> GameTurnUiState(lastCheck = result.dice)
+                    is GmTurnResult.Cancelled -> previous.copy(
+                        running = false,
+                        phase = null,
+                        streamedText = "",
+                        error = "生成をキャンセルしました。このターンは保存されていません。",
+                    )
+                    is GmTurnResult.Failed -> previous.copy(
+                        running = false,
+                        phase = null,
+                        streamedText = "",
+                        error = result.message,
+                        errorDetails = result.errors,
+                    )
+                }
+            }
+        }
+    }
+
+    private companion object {
+        val ChoicesJson = Json { ignoreUnknownKeys = true }
+    }
 }
 
 class CharacterViewModel(
@@ -77,6 +178,7 @@ class JournalViewModel(
     val chat = container.memories.observeChat(sessionId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
     val events = container.memories.observeEvents(sessionId)
+        .map { list -> list.filter { it.type != GameEventTypes.CHOICES } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
     val memories = container.memories.observeMemories(sessionId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())

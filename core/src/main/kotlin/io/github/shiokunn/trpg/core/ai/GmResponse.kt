@@ -43,6 +43,16 @@ data class NpcMemoryDraft(
     val isSecret: Boolean = false,
 )
 
+/**
+ * Choices persisted for the current scene so they survive app restarts.
+ * Stored as the payload of a `CHOICES` game event.
+ */
+@Serializable
+data class TurnChoices(
+    val sceneTitle: String = "",
+    val choices: List<GmChoice> = emptyList(),
+)
+
 /** The single JSON contract for one GM turn. */
 @Serializable
 data class GmResponse(

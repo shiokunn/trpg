@@ -11,6 +11,7 @@ import io.github.shiokunn.trpg.data.repository.ModelRepository
 import io.github.shiokunn.trpg.data.repository.SessionRepository
 import io.github.shiokunn.trpg.data.repository.SettingsRepository
 import io.github.shiokunn.trpg.data.repository.WorldRepository
+import io.github.shiokunn.trpg.game.GmTurnService
 
 /**
  * Manual dependency container. Keeps Android specifics out of the core module
@@ -27,6 +28,9 @@ class AppContainer(context: Context) {
     val modelFiles = ModelFileManager(context)
     val engine: InferenceEngine by lazy {
         LlamaCppEngine(context.applicationInfo.nativeLibraryDir.orEmpty())
+    }
+    val gmTurns: GmTurnService by lazy {
+        GmTurnService(sessions, memories, models, engine)
     }
     val appContext: Context = context.applicationContext
 }
