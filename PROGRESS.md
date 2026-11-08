@@ -49,6 +49,7 @@
 | 42483091454 | 記憶選別コミット | 成功 |
 | 42484039490 | プロンプトのエンティティID修正（core 89 + app 5 + APK） | 成功 |
 | 42485089100 | Phase 7 一式（core 89 + app 5 + arm64-v8a APK + Room スキーマ） | 成功 |
+| 42485846213 | 最終実行（core 89 + app 5 + arm64-v8a APK） | 成功 |
 
 失敗して修正した主な CI 問題: Gradle wrapper タイムアウト、enum マッピング、
 `combine` の型推論、JNI v0.9.0 の `use_mmap`/`use_mlock`、非 suspend からの

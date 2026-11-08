@@ -46,6 +46,7 @@
 | [42481150919](https://github.com/shiokunn/trpg/actions/runs/42481150919) | llama.cpp JNI / arm64-v8a APK の初回ビルド | 成功 |
 | [42484039490](https://github.com/shiokunn/trpg/actions/runs/42484039490) | core 89件 + app 5件 + Debug APK（プロンプトID修正時点） | 成功 |
 | [42485089100](https://github.com/shiokunn/trpg/actions/runs/42485089100) | Phase 7 一式（core 89 + app 5 + arm64-v8a APK + Room スキーマ） | 成功 |
+| [42485846213](https://github.com/shiokunn/trpg/actions/runs/42485846213) | Room スキーマ基準のコミット（最終実行、core 89 + app 5 + APK） | 成功 |
 
 CI で確認できること:
 
