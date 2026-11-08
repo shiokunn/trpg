@@ -251,7 +251,9 @@ private fun GameContent(
             }
         }
 
-        if (!busy && hasNarrative && turn.error == null && choices.isNotEmpty()) {
+        if (!busy && hasNarrative && turn.error == null && choices.isNotEmpty() &&
+            current.session.activeCombat == null
+        ) {
             item {
                 Text(
                     "選択してください",
@@ -268,7 +270,9 @@ private fun GameContent(
             }
         }
 
-        if (!busy && modelReady && (hasNarrative || choices.isNotEmpty())) {
+        if (!busy && modelReady && current.session.activeCombat == null &&
+            (hasNarrative || choices.isNotEmpty())
+        ) {
             item {
                 FreeActionRow(onSend = onAct)
             }
