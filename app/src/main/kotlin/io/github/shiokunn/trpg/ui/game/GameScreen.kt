@@ -41,6 +41,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
@@ -59,6 +61,7 @@ import io.github.shiokunn.trpg.ui.GameViewModel
 import io.github.shiokunn.trpg.ui.components.EmptyState
 import io.github.shiokunn.trpg.ui.components.LoadingPane
 import io.github.shiokunn.trpg.ui.components.NarrativeText
+import io.github.shiokunn.trpg.ui.components.SessionMissingState
 import io.github.shiokunn.trpg.ui.components.TrpgScaffold
 
 @Composable
@@ -70,6 +73,7 @@ fun GameScreen(
     onJournal: () -> Unit,
 ) {
     val bundle by viewModel.bundle.collectAsStateWithLifecycle()
+    val missing by viewModel.missing.collectAsStateWithLifecycle()
     val chat by viewModel.chat.collectAsStateWithLifecycle()
     val choices by viewModel.choices.collectAsStateWithLifecycle()
     val turn by viewModel.turn.collectAsStateWithLifecycle()
@@ -88,7 +92,9 @@ fun GameScreen(
         },
     ) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
-            if (bundle == null) {
+            if (missing) {
+                SessionMissingState(onBack = onBack)
+            } else if (bundle == null) {
                 LoadingPane()
             } else {
                 GameContent(
@@ -254,7 +260,11 @@ private fun GameContent(
                 )
             }
             items(choices, key = { it.id }) { choice ->
-                ChoiceButton(choice = choice, onClick = { onChoose(choice) })
+                ChoiceButton(
+                    choice = choice,
+                    enabled = modelReady && !busy,
+                    onClick = { onChoose(choice) },
+                )
             }
         }
 
@@ -312,7 +322,9 @@ private fun StatusCard(
             Spacer(Modifier.height(8.dp))
             LinearProgressIndicator(
                 progress = { if (maxHp <= 0) 0f else hp.toFloat() / maxHp },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics { contentDescription = "HP $hp / $maxHp" },
                 color = MaterialTheme.colorScheme.tertiary,
                 trackColor = MaterialTheme.colorScheme.surfaceVariant,
             )
@@ -364,7 +376,11 @@ private fun CombatCard(
                     if (combat.enemyMaxHp <= 0) 0f
                     else combat.enemyHp.toFloat() / combat.enemyMaxHp
                 },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics {
+                        contentDescription = "敵HP ${combat.enemyHp} / ${combat.enemyMaxHp}"
+                    },
                 color = MaterialTheme.colorScheme.error,
                 trackColor = MaterialTheme.colorScheme.errorContainer,
             )
@@ -436,7 +452,12 @@ private fun StreamingCard(
     ) {
         Column(Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(18.dp)
+                        .semantics { contentDescription = "ゲームマスターが生成中" },
+                    strokeWidth = 2.dp,
+                )
                 Text(
                     text = when (phase) {
                         is GmTurnPhase.Repairing -> "応答を修正しています（再試行 1/1）"
@@ -458,9 +479,10 @@ private fun StreamingCard(
 }
 
 @Composable
-private fun ChoiceButton(choice: GmChoice, onClick: () -> Unit) {
+private fun ChoiceButton(choice: GmChoice, enabled: Boolean, onClick: () -> Unit) {
     OutlinedButton(
         onClick = onClick,
+        enabled = enabled,
         modifier = Modifier.fillMaxWidth(),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
     ) {

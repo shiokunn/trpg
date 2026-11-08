@@ -24,6 +24,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.shiokunn.trpg.core.domain.Location
@@ -34,18 +36,22 @@ import io.github.shiokunn.trpg.core.domain.World
 import io.github.shiokunn.trpg.ui.WorldViewModel
 import io.github.shiokunn.trpg.ui.components.LoadingPane
 import io.github.shiokunn.trpg.ui.components.SectionTitle
+import io.github.shiokunn.trpg.ui.components.SessionMissingState
 import io.github.shiokunn.trpg.ui.components.TrpgScaffold
 
 @Composable
 fun WorldScreen(viewModel: WorldViewModel, onBack: () -> Unit) {
     val bundle by viewModel.bundle.collectAsStateWithLifecycle()
+    val missing by viewModel.missing.collectAsStateWithLifecycle()
     val memories by viewModel.memories.collectAsStateWithLifecycle()
     val npcMemories by viewModel.npcMemories.collectAsStateWithLifecycle()
 
     TrpgScaffold(title = "世界情報", onBack = onBack) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
             val current = bundle
-            if (current == null) {
+            if (missing) {
+                SessionMissingState(onBack = onBack)
+            } else if (current == null) {
                 LoadingPane()
             } else {
                 val world = current.world
@@ -319,7 +325,9 @@ private fun QuestCard(quest: Quest) {
                 Spacer(Modifier.height(6.dp))
                 LinearProgressIndicator(
                     progress = { quest.progress },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .semantics { contentDescription = "達成度 ${(quest.progress * 100).toInt()}%" },
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant,
                 )

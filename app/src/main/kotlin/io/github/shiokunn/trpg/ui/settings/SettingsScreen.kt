@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -27,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.shiokunn.trpg.BuildConfig
@@ -87,14 +89,23 @@ fun SettingsScreen(viewModel: SettingsViewModel, onBack: () -> Unit) {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
+                                        .selectable(
+                                            selected = preferences.themeMode == mode,
+                                            onClick = { viewModel.setTheme(mode) },
+                                            role = Role.RadioButton,
+                                        )
                                         .padding(horizontal = 12.dp, vertical = 2.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     RadioButton(
                                         selected = preferences.themeMode == mode,
-                                        onClick = { viewModel.setTheme(mode) },
+                                        onClick = null,
                                     )
-                                    Text(mode.label, style = MaterialTheme.typography.bodyMedium)
+                                    Text(
+                                        mode.label,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        modifier = Modifier.padding(start = 8.dp),
+                                    )
                                 }
                             }
                         }

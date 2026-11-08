@@ -31,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.shiokunn.trpg.core.domain.ChatRole
 import io.github.shiokunn.trpg.ui.JournalViewModel
 import io.github.shiokunn.trpg.ui.components.EmptyState
+import io.github.shiokunn.trpg.ui.components.SessionMissingState
 import io.github.shiokunn.trpg.ui.components.TrpgScaffold
 import io.github.shiokunn.trpg.ui.components.formatDateTime
 import androidx.compose.material.icons.Icons
@@ -43,10 +44,13 @@ fun JournalScreen(viewModel: JournalViewModel, onBack: () -> Unit) {
     val events by viewModel.events.collectAsStateWithLifecycle()
     val memories by viewModel.memories.collectAsStateWithLifecycle()
     val dice by viewModel.dice.collectAsStateWithLifecycle()
+    val missing by viewModel.missing.collectAsStateWithLifecycle()
     var tab by remember { mutableIntStateOf(0) }
 
     TrpgScaffold(title = "履歴と記録", onBack = onBack) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding)) {
+        if (missing) {
+            SessionMissingState(onBack = onBack, modifier = Modifier.fillMaxSize().padding(padding))
+        } else Column(Modifier.fillMaxSize().padding(padding)) {
             TabRow(
                 selectedTabIndex = tab,
                 containerColor = MaterialTheme.colorScheme.background,

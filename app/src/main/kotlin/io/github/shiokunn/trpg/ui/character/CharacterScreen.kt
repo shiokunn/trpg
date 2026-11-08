@@ -25,6 +25,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.shiokunn.trpg.core.domain.AttributeId
@@ -32,16 +34,20 @@ import io.github.shiokunn.trpg.core.rules.CharacterRules
 import io.github.shiokunn.trpg.ui.CharacterViewModel
 import io.github.shiokunn.trpg.ui.components.LoadingPane
 import io.github.shiokunn.trpg.ui.components.SectionTitle
+import io.github.shiokunn.trpg.ui.components.SessionMissingState
 import io.github.shiokunn.trpg.ui.components.TrpgScaffold
 
 @Composable
 fun CharacterScreen(viewModel: CharacterViewModel, onBack: () -> Unit) {
     val bundle by viewModel.bundle.collectAsStateWithLifecycle()
+    val missing by viewModel.missing.collectAsStateWithLifecycle()
 
     TrpgScaffold(title = "キャラクター", onBack = onBack) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
             val current = bundle
-            if (current == null) {
+            if (missing) {
+                SessionMissingState(onBack = onBack)
+            } else if (current == null) {
                 LoadingPane()
             } else {
                 val character = current.character
@@ -76,7 +82,11 @@ fun CharacterScreen(viewModel: CharacterViewModel, onBack: () -> Unit) {
                                         progress = {
                                             if (character.maxHp <= 0) 0f else character.hp.toFloat() / character.maxHp
                                         },
-                                        modifier = Modifier.weight(1f),
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .semantics {
+                                                contentDescription = "HP ${character.hp} / ${character.maxHp}"
+                                            },
                                         color = MaterialTheme.colorScheme.tertiary,
                                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
                                     )
@@ -92,7 +102,11 @@ fun CharacterScreen(viewModel: CharacterViewModel, onBack: () -> Unit) {
                                     Spacer(Modifier.size(8.dp))
                                     LinearProgressIndicator(
                                         progress = { xpInLevel / 10f },
-                                        modifier = Modifier.weight(1f),
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .semantics {
+                                                contentDescription = "次のレベルまで $xpInLevel / 10"
+                                            },
                                         color = MaterialTheme.colorScheme.primary,
                                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
                                     )

@@ -51,8 +51,11 @@ class LlamaCppEngine(
                 Result.success(info)
             } catch (t: Throwable) {
                 if (t is CancellationException) throw t
-                val message = t.message?.takeIf { it.isNotBlank() }
-                    ?: "モデルの読み込みに失敗しました（ネイティブライブラリまたはメモリを確認してください）"
+                val message = when {
+                    t is OutOfMemoryError -> OOM_LOAD_MESSAGE
+                    else -> t.message?.takeIf { it.isNotBlank() }
+                        ?: "モデルの読み込みに失敗しました（ネイティブライブラリまたはメモリを確認してください）"
+                }
                 _status.value = EngineStatus.Failed(message)
                 Result.failure(IllegalStateException(message, t))
             }
@@ -150,7 +153,11 @@ class LlamaCppEngine(
                 if (failure != null) {
                     if (failure is CancellationException) throw failure
                     return@coroutineScope GenerationOutcome.Failure(
-                        failure.message ?: "推論中にエラーが発生しました",
+                        when {
+                            failure is OutOfMemoryError -> OOM_GENERATE_MESSAGE
+                            else -> failure.message?.takeIf { it.isNotBlank() }
+                                ?: "推論中にエラーが発生しました"
+                        },
                     )
                 }
 
@@ -178,6 +185,13 @@ class LlamaCppEngine(
 
     private fun defaultThreads(): Int =
         Runtime.getRuntime().availableProcessors().coerceIn(2, 8)
+
+    private companion object {
+        const val OOM_LOAD_MESSAGE =
+            "メモリが不足してモデルを読み込めませんでした。コンテキストサイズを下げるか、より小さいGGUFモデルを使用してください。"
+        const val OOM_GENERATE_MESSAGE =
+            "メモリが不足して生成を継続できませんでした。コンテキストサイズを下げるか、より小さいモデルを使用してください。"
+    }
 
     private fun fallbackChatPrompt(messages: List<PromptMessage>): String = buildString {
         for (message in messages) {

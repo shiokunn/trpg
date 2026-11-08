@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -116,6 +117,19 @@ fun EmptyState(
             Spacer(Modifier.height(20.dp))
             Button(onClick = onAction) { Text(actionLabel) }
         }
+    }
+}
+
+@Composable
+fun SessionMissingState(onBack: () -> Unit, modifier: Modifier = Modifier) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        EmptyState(
+            icon = Icons.Default.SearchOff,
+            title = "冒険が見つかりません",
+            message = "この冒険は削除されたか、データを読み込めませんでした。セーブ一覧から別の冒険を開いてください。",
+            actionLabel = "戻る",
+            onAction = onBack,
+        )
     }
 }
 

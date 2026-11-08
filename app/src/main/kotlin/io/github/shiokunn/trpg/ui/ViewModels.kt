@@ -50,6 +50,15 @@ import kotlinx.serialization.json.Json
 inline fun <reified VM : ViewModel> createFactory(crossinline create: () -> VM): ViewModelProvider.Factory =
     viewModelFactory { initializer { create() } }
 
+/** Maps an unexpected crash-level failure (including OOM) to a user-facing Japanese message. */
+private fun unexpectedFailureMessage(error: Throwable): String {
+    if (error is OutOfMemoryError) {
+        return "メモリが不足しています。モデルのコンテキストサイズを下げるか、より小さいGGUFモデルを使用してください。"
+    }
+    val message = error.message
+    return if (message.isNullOrBlank()) "予期しないエラーが発生しました。もう一度お試しください。" else message
+}
+
 class HomeViewModel(private val container: AppContainer) : ViewModel() {
     val recent: StateFlow<List<RecentSessionRow>> = container.sessions.observeRecentDetails(8)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -80,6 +89,11 @@ class GameViewModel(
 ) : ViewModel() {
     val bundle: StateFlow<SessionBundle?> = container.sessions.observeBundle(sessionId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** True once the session row is gone, so the UI can stop showing a spinner. */
+    val missing: StateFlow<Boolean> = container.sessions.observe(sessionId)
+        .map { it == null }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
     val chat = container.memories.observeChat(sessionId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -151,7 +165,13 @@ class GameViewModel(
                     _turn.update { it.copy(streamedText = it.streamedText + piece) }
                 }
             }
-            val result = container.gmTurns.playTurn(sessionId, action, listener)
+            val result = try {
+                container.gmTurns.playTurn(sessionId, action, listener)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Throwable) {
+                GmTurnResult.Failed(unexpectedFailureMessage(error))
+            }
             _turn.update { previous ->
                 when (result) {
                     is GmTurnResult.Success -> GameTurnUiState(lastCheck = result.dice)
@@ -185,6 +205,10 @@ class CharacterViewModel(
     val bundle: StateFlow<SessionBundle?> = container.sessions.observeBundle(sessionId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
+    val missing: StateFlow<Boolean> = container.sessions.observe(sessionId)
+        .map { it == null }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+
     fun toggleEquipment(itemId: String) {
         viewModelScope.launch { container.characters.toggleEquipment(sessionId, itemId) }
     }
@@ -196,6 +220,10 @@ class WorldViewModel(
 ) : ViewModel() {
     val bundle: StateFlow<SessionBundle?> = container.sessions.observeBundle(sessionId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    val missing: StateFlow<Boolean> = container.sessions.observe(sessionId)
+        .map { it == null }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
     val memories = container.memories.observeMemories(sessionId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
     val npcMemories = container.memories.observeNpcMemoriesBySession(sessionId)
@@ -206,6 +234,10 @@ class JournalViewModel(
     private val container: AppContainer,
     val sessionId: String,
 ) : ViewModel() {
+    val missing: StateFlow<Boolean> = container.sessions.observe(sessionId)
+        .map { it == null }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+
     val chat = container.memories.observeChat(sessionId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
     val events = container.memories.observeEvents(sessionId)
@@ -294,29 +326,35 @@ class NewAdventureViewModel(private val container: AppContainer) : ViewModel() {
             difficulty = current.difficulty.trim(),
         )
         job = viewModelScope.launch {
-            val worldResult = container.adventureCreator.generateWorld(input)
-            val world = when (worldResult) {
-                is CreationResult.Success -> worldResult.value
-                is CreationResult.Cancelled -> {
-                    failGeneration("生成をキャンセルしました。", emptyList())
-                    return@launch
+            try {
+                val worldResult = container.adventureCreator.generateWorld(input)
+                val world = when (worldResult) {
+                    is CreationResult.Success -> worldResult.value
+                    is CreationResult.Cancelled -> {
+                        failGeneration("生成をキャンセルしました。", emptyList())
+                        return@launch
+                    }
+                    is CreationResult.Failed -> {
+                        failGeneration(worldResult.message, worldResult.errors)
+                        return@launch
+                    }
                 }
-                is CreationResult.Failed -> {
-                    failGeneration(worldResult.message, worldResult.errors)
-                    return@launch
+                _state.update { it.copy(world = world, statusText = "主人公を生成しています…") }
+                when (val characterResult = container.adventureCreator.generateCharacter(world, input)) {
+                    is CreationResult.Success -> _state.update {
+                        it.copy(
+                            stage = CreationStage.PREVIEW,
+                            character = characterResult.value,
+                            statusText = "",
+                        )
+                    }
+                    is CreationResult.Cancelled -> failGeneration("生成をキャンセルしました。", emptyList())
+                    is CreationResult.Failed -> failGeneration(characterResult.message, characterResult.errors)
                 }
-            }
-            _state.update { it.copy(world = world, statusText = "主人公を生成しています…") }
-            when (val characterResult = container.adventureCreator.generateCharacter(world, input)) {
-                is CreationResult.Success -> _state.update {
-                    it.copy(
-                        stage = CreationStage.PREVIEW,
-                        character = characterResult.value,
-                        statusText = "",
-                    )
-                }
-                is CreationResult.Cancelled -> failGeneration("生成をキャンセルしました。", emptyList())
-                is CreationResult.Failed -> failGeneration(characterResult.message, characterResult.errors)
+            } catch (cancelled: CancellationException) {
+                failGeneration("生成をキャンセルしました。", emptyList())
+            } catch (error: Throwable) {
+                failGeneration(unexpectedFailureMessage(error), emptyList())
             }
         }
     }
@@ -340,7 +378,7 @@ class NewAdventureViewModel(private val container: AppContainer) : ViewModel() {
                 _state.update {
                     it.copy(
                         saving = false,
-                        error = error.message ?: "冒険の保存に失敗しました。",
+                        error = unexpectedFailureMessage(error),
                     )
                 }
             }
