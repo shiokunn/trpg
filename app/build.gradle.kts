@@ -87,6 +87,13 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+        jniLibs {
+            // ggml loads its CPU backends from nativeLibraryDir at runtime. With the
+            // default APK-embedded packaging that directory is empty, so the model
+            // loader reports "no backends are loaded". Extracting the .so files
+            // makes ggml_backend_load_all_from_path() work.
+            useLegacyPackaging = true
+        }
     }
 
     testOptions {
