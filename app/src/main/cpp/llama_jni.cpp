@@ -494,7 +494,11 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeGenerate(
 
     llama_memory_clear(llama_get_memory(g_ctx), false);
 
+    LOGI("generate start: prompt_tokens=%d budget=%d temp=%.2f top_p=%.2f top_k=%d",
+         n_prompt, budget, temperature, top_p, top_k);
+
     // Decode the prompt in batches, requesting logits only for the final token.
+    const auto prompt_start = std::chrono::steady_clock::now();
     int32_t n_pos = 0;
     while (n_pos < n_prompt) {
         if (g_cancel.load()) {
@@ -520,6 +524,7 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeGenerate(
         }
         n_pos += chunk;
     }
+    const auto prompt_end = std::chrono::steady_clock::now();
 
     llama_sampler_chain_params sparams = llama_sampler_chain_default_params();
     sparams.no_perf = true;
@@ -544,6 +549,8 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeGenerate(
     output.reserve(static_cast<size_t>(budget) * 6);
     bool cancelled = false;
     std::string failure;
+    std::chrono::steady_clock::time_point first_token_at{};
+    int32_t generated_tokens = 0;
 
     for (int32_t generated = 0; generated < budget; ++generated) {
         if (g_cancel.load()) {
@@ -560,9 +567,13 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeGenerate(
             break;
         }
 
+        if (generated_tokens == 0) {
+            first_token_at = std::chrono::steady_clock::now();
+        }
         const std::string piece = token_to_piece(vocab, token);
         output += piece;
         jvm_callback.emit(piece);
+        ++generated_tokens;
 
         if (n_pos + 1 >= g_n_ctx) {
             break;
@@ -591,6 +602,26 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeGenerate(
 
     llama_sampler_free(sampler);
     llama_memory_clear(llama_get_memory(g_ctx), false);
+
+    const auto generation_end = std::chrono::steady_clock::now();
+    auto elapsed_ms = [](auto from, auto to) {
+        return std::chrono::duration_cast<std::chrono::milliseconds>(to - from).count();
+    };
+    const auto prompt_ms = elapsed_ms(prompt_start, prompt_end);
+    const auto gen_ms = generated_tokens > 0 ? elapsed_ms(first_token_at, generation_end) : 0LL;
+    const auto ttft_ms = generated_tokens > 0 ? elapsed_ms(prompt_start, first_token_at) : -1LL;
+    const double tok_per_sec = gen_ms > 0
+        ? static_cast<double>(generated_tokens) * 1000.0 / static_cast<double>(gen_ms)
+        : 0.0;
+    LOGI("generate: prompt_tokens=%d prompt_ms=%lld generated_tokens=%d gen_ms=%lld tok_per_sec=%.2f ttft_ms=%lld cancelled=%d failed=%d",
+         n_prompt,
+         static_cast<long long>(prompt_ms),
+         generated_tokens,
+         static_cast<long long>(gen_ms),
+         tok_per_sec,
+         static_cast<long long>(ttft_ms),
+         cancelled ? 1 : 0,
+         failure.empty() ? 0 : 1);
 
     std::ostringstream out;
     out << "{\"ok\":" << (failure.empty() ? "true" : "false");

@@ -183,8 +183,14 @@ class LlamaCppEngine(
         _status.value = EngineStatus.Unloaded
     }
 
+    /**
+     * Cap inference at six threads. On big.LITTLE phones the little cores are much
+     * slower, and llama.cpp synchronises at every matrix multiply, so using every
+     * core makes the big cores wait for the little ones. Six threads keeps the
+     * barrier cost down while still using the three big cores and the prime core.
+     */
     private fun defaultThreads(): Int =
-        Runtime.getRuntime().availableProcessors().coerceIn(2, 8)
+        Runtime.getRuntime().availableProcessors().coerceAtMost(6).coerceAtLeast(2)
 
     private companion object {
         const val OOM_LOAD_MESSAGE =
