@@ -5,7 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.shiokunn.trpg.data.repository.AppPreferences
 import io.github.shiokunn.trpg.data.repository.ThemeMode
@@ -27,7 +31,12 @@ class MainActivity : ComponentActivity() {
                 ThemeMode.SYSTEM -> systemDark
             }
             TrpgTheme(darkTheme = darkTheme) {
-                TrpgNavHost(container = container)
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background,
+                ) {
+                    TrpgNavHost(container = container)
+                }
             }
         }
     }
