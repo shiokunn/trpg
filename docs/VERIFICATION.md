@@ -1,6 +1,6 @@
 # 検証レポート
 
-最終更新: 2026-11-08
+最終更新: 2026-11-10
 
 このファイルは「実際に検証できたこと」と「この開発環境では検証できなかったこと」を
 分けて記録します。未検証の項目を検証済みとして扱いません。
@@ -90,3 +90,32 @@ CI で確認できること:
 - ダイス、戦闘、HP、所持品の更新はアプリ側の決定論的コードのみが行う。
 - GM 専用の秘密はプロンプトには含まれるが、プレイヤー向け画面（履歴・世界情報）から除外される。
 - バックアップのインポートは検証後に単一トランザクションで置換し、失敗時は既存データを変更しない。
+
+## Phase 8（llama.cpp v0.9.0 推論エンジン改善）
+
+### この環境で実施した検証
+
+| 検証 | 方法 | 結果 |
+| --- | --- | --- |
+| JNI シグネチャ照合 | Kotlin の `external fun` 13件と `llama_jni.cpp` の `JNIEXPORT` 13件を引数個数・型で機械照合 | **全一致** |
+| C++ 構文検証 | `g++ -std=c++17 -fsyntax-only -Wall -Wextra`、`llama_jni.cpp` を llama.cpp v0.9.0 の実ヘッダに対して profile A/B/C で | **当方コード警告ゼロ**（残る警告は llama.cpp 上流ヘッダ由来） |
+| UTF-8 ヘルパー | `utf8_utils.cpp` をホストコンパイルし、日本語・絵文字・非BMP・分割・不完全末尾・孤立継続・overlong・surrogate・範囲外・clear の 13 ケースを実行 | **13/13 成功** |
+| エンジン Kotlin | `kotlinc` で `ai/engine` 3ファイルを `:core` クラス・coroutines・serialization jar 付きで単体コンパイル | **成功** |
+| Core ビルド | `gradle -p core build` | **成功** |
+| llama.cpp シンボル実在 | `common_chat_templates_*` / `llama_attach_threadpool` / `llama_set_abort_callback` / `common_chat_prompt.parts`/`is_input` / `additional_stops` / `llama-common` ターゲット | **すべて実在** |
+| threadpool 解放順序 | `llama_detach_threadpool` の実装（ポインタを nullptr 化するだけ）を確認 | detach 後に解放する当方の順序が安全と判断 |
+
+### 未検証（Phase 8）
+
+- **Android arm64-v8a ビルド / APK 生成** — Android SDK/NDK がローカルに無く、
+  この変更の NDK ビルドは未実施。`common`（`chat.cpp` / minja / jinja）の
+  コンパイル可否、`llama-common` 共有ライブラリの APK パッケージングは未確認。
+- **CI 実行** — 既存の承認条件を守り、未実行。
+- **ADB 実機** — 未実施。テンプレート適用（Gemma 4 / Qwen3 / LFM2.5）、
+  fail closed、BOS の二重付与なし、`enable_thinking=false`、stop 文字列、
+  キャンセル（待機中 / prompt decode 中 / 生成中）、絵文字ストリーミング、
+  threadpool attach / affinity、各計測ログの実出力はすべて未確認。
+- **実モデル（Kyalulu）** — モデルファイルが未取得のため、テンプレート評価・
+  トークン化・停止原因の再現は未実施。
+- **A/B/C 計測** — 未実施。既定は profile A のまま。
+- **P1-3 ゴールデンテスト / CI host job** — 未着手。
