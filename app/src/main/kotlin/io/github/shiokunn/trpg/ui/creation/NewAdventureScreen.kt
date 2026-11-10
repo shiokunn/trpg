@@ -228,7 +228,10 @@ private fun FormContent(
                             Text(state.statusText.ifBlank { "生成しています…" }, style = MaterialTheme.typography.bodyMedium)
                         }
                         Spacer(Modifier.height(8.dp))
-                        TextButton(onClick = onCancel) { Text("生成を中止") }
+                        TextButton(
+                            onClick = onCancel,
+                            enabled = !state.cancelling,
+                        ) { Text(if (state.cancelling) "中止中" else "生成を中止") }
                     }
                 }
             }

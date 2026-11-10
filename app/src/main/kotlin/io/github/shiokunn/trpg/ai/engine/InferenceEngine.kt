@@ -53,6 +53,10 @@ data class ModelInfo(
     val nCtxTrain: Int,
     val nCtx: Int,
     val hasChatTemplate: Boolean,
+    val chatTemplateStatus: String = "unknown",
+    val chatTemplateError: String = "",
+    val chatTemplateSupportsThinking: Boolean = false,
+    val chatTemplateAddBos: Boolean = false,
 )
 
 sealed interface EngineStatus {
@@ -83,7 +87,7 @@ interface InferenceEngine {
     suspend fun unload()
 
     /** Applies the model's chat template. Returns null when the model has no template. */
-    fun formatChat(messages: List<PromptMessage>, addAssistant: Boolean = true): String?
+    suspend fun formatChat(messages: List<PromptMessage>, addAssistant: Boolean = true): String?
 
     suspend fun countTokens(text: String): Int
 

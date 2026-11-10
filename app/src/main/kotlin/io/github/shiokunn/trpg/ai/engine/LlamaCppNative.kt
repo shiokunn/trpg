@@ -21,6 +21,16 @@ internal data class NativeGeneration(
     val error: String?,
 )
 
+internal data class NativeFormatResult(
+    val ok: Boolean,
+    val prompt: String,
+    val status: String,
+    val error: String?,
+    val stops: List<String>,
+    val addBos: Boolean,
+    val supportsThinking: Boolean,
+)
+
 /**
  * Thin JNI bridge. Every method maps 1:1 to `app/src/main/cpp/llama_jni.cpp`.
  * The library is loaded lazily so a build without native code still starts and can
@@ -58,6 +68,12 @@ internal object LlamaCppNative {
         addAssistant: Boolean,
     ): String?
 
+    external fun nativeFormatChatEx(
+        roles: Array<String>,
+        contents: Array<String>,
+        addAssistant: Boolean,
+    ): String?
+
     external fun nativeCountTokens(text: String): Int
 
     external fun nativeGenerate(
@@ -71,7 +87,37 @@ internal object LlamaCppNative {
         callback: TokenCallback?,
     ): String?
 
+    external fun nativeGenerateEx(
+        prompt: String,
+        maxTokens: Int,
+        temperature: Float,
+        topP: Float,
+        topK: Int,
+        repeatPenalty: Float,
+        seed: Int,
+        generationId: Long,
+        callback: TokenCallback?,
+        stops: Array<String>,
+        addSpecial: Boolean,
+    ): String?
+
+    external fun nativeGenerateChatEx(
+        roles: Array<String>,
+        contents: Array<String>,
+        addAssistant: Boolean,
+        maxTokens: Int,
+        temperature: Float,
+        topP: Float,
+        topK: Int,
+        repeatPenalty: Float,
+        seed: Int,
+        generationId: Long,
+        callback: TokenCallback?,
+    ): String?
+
     external fun nativeCancel()
+
+    external fun nativeCancelGeneration(generationId: Long)
 
     external fun nativeBackendInfo(): String?
 
@@ -93,6 +139,30 @@ internal object LlamaCppNative {
             nCtxTrain = obj.int("nCtxTrain") ?: 0,
             nCtx = obj.int("nCtx") ?: 0,
             hasChatTemplate = obj.boolean("hasChatTemplate") ?: false,
+            chatTemplateStatus = obj.string("chatTemplateStatus") ?: "unknown",
+            chatTemplateError = obj.string("chatTemplateError") ?: "",
+            chatTemplateSupportsThinking = obj.boolean("chatTemplateSupportsThinking") ?: false,
+            chatTemplateAddBos = obj.boolean("chatTemplateAddBos") ?: false,
+        )
+    }
+
+    fun parseFormatResult(raw: String?): NativeFormatResult? {
+        if (raw.isNullOrBlank()) return null
+        val obj = runCatching { json.parseToJsonElement(raw).jsonObject }.getOrNull() ?: return null
+        val stops = (obj["stops"] as? JsonArray)
+            ?.mapNotNull { (it as? JsonPrimitive)?.contentOrNull }
+            ?: emptyList()
+        val error = obj.string("error")?.takeIf { it.isNotBlank() }
+        val ok = obj.boolean("ok") ?: false
+        val status = obj.string("status") ?: if (!ok) "unsupported" else "unknown"
+        return NativeFormatResult(
+            ok = ok,
+            prompt = obj.string("prompt") ?: "",
+            status = status,
+            error = error,
+            stops = stops,
+            addBos = obj.boolean("addBos") ?: false,
+            supportsThinking = obj.boolean("supportsThinking") ?: false,
         )
     }
 

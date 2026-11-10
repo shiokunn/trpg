@@ -230,6 +230,7 @@ private fun GameContent(
                 StreamingCard(
                     phase = turn.phase,
                     streamedText = turn.streamedText,
+                    cancelling = turn.cancelling,
                     onCancel = onCancel,
                 )
             }
@@ -448,6 +449,7 @@ private fun ChatMessageRow(message: ChatMessage) {
 private fun StreamingCard(
     phase: GmTurnPhase?,
     streamedText: String,
+    cancelling: Boolean,
     onCancel: () -> Unit,
 ) {
     Card(
@@ -466,7 +468,7 @@ private fun StreamingCard(
                     text = when (phase) {
                         is GmTurnPhase.Repairing -> "応答を修正しています（再試行 1/1）"
                         is GmTurnPhase.Committing -> "ターンを保存しています"
-                        else -> "ゲームマスターが応答を生成しています"
+                        else -> if (cancelling) "生成を中止しています" else "ゲームマスターが応答を生成しています"
                     },
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -477,7 +479,10 @@ private fun StreamingCard(
                 NarrativeText(streamedText)
             }
             Spacer(Modifier.height(8.dp))
-            TextButton(onClick = onCancel) { Text("生成を中止") }
+            TextButton(
+                onClick = onCancel,
+                enabled = !cancelling,
+            ) { Text(if (cancelling) "中止中" else "生成を中止") }
         }
     }
 }

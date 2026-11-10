@@ -81,6 +81,7 @@ data class GameTurnUiState(
     val error: String? = null,
     val errorDetails: List<String> = emptyList(),
     val lastCheck: DiceResult? = null,
+    val cancelling: Boolean = false,
 )
 
 class GameViewModel(
@@ -128,6 +129,9 @@ class GameViewModel(
     }
 
     fun cancelGeneration() {
+        if (container.engine.status.value !is EngineStatus.Ready) return
+        if (turn.value.cancelling) return
+        _turn.update { it.copy(cancelling = true) }
         container.engine.cancel()
     }
 
@@ -157,7 +161,7 @@ class GameViewModel(
                 override suspend fun onPhase(phase: GmTurnPhase) {
                     _turn.update {
                         val restart = phase is GmTurnPhase.Generating || phase is GmTurnPhase.Repairing
-                        it.copy(phase = phase, streamedText = if (restart) "" else it.streamedText)
+                        it.copy(phase = phase, streamedText = if (restart) "" else it.streamedText, cancelling = false)
                     }
                 }
 
@@ -179,12 +183,14 @@ class GameViewModel(
                         running = false,
                         phase = null,
                         streamedText = "",
+                        cancelling = false,
                         error = "生成をキャンセルしました。このターンは保存されていません。",
                     )
                     is GmTurnResult.Failed -> previous.copy(
                         running = false,
                         phase = null,
                         streamedText = "",
+                        cancelling = false,
                         error = result.message,
                         errorDetails = result.errors,
                     )
@@ -266,6 +272,7 @@ data class NewAdventureUiState(
     val details: List<String> = emptyList(),
     val saving: Boolean = false,
     val createdSessionId: String? = null,
+    val cancelling: Boolean = false,
 )
 
 class NewAdventureViewModel(private val container: AppContainer) : ViewModel() {
@@ -292,6 +299,9 @@ class NewAdventureViewModel(private val container: AppContainer) : ViewModel() {
     fun clearError() = _state.update { it.copy(error = null, details = emptyList()) }
 
     fun cancelGeneration() {
+        if (_state.value.stage != CreationStage.GENERATING) return
+        if (_state.value.cancelling) return
+        _state.update { it.copy(cancelling = true, statusText = "生成を中止しています…") }
         container.engine.cancel()
     }
 
@@ -315,6 +325,7 @@ class NewAdventureViewModel(private val container: AppContainer) : ViewModel() {
                 character = null,
                 error = null,
                 details = emptyList(),
+                cancelling = false,
             )
         }
         val input = CreationInput(
@@ -346,6 +357,7 @@ class NewAdventureViewModel(private val container: AppContainer) : ViewModel() {
                             stage = CreationStage.PREVIEW,
                             character = characterResult.value,
                             statusText = "",
+                            cancelling = false,
                         )
                     }
                     is CreationResult.Cancelled -> failGeneration("生成をキャンセルしました。", emptyList())
@@ -392,6 +404,7 @@ class NewAdventureViewModel(private val container: AppContainer) : ViewModel() {
                 statusText = "",
                 error = message,
                 details = details,
+                cancelling = false,
             )
         }
     }

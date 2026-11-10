@@ -8,6 +8,11 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+val threadProfile = ((project.findProperty("trpg.threadProfile") as String?) ?: "A").uppercase()
+check(threadProfile in setOf("A", "B", "C")) {
+    "trpg.threadProfile must be one of A, B, C (was: $threadProfile)"
+}
+
 android {
     namespace = "io.github.shiokunn.trpg"
     compileSdk = 36
@@ -19,6 +24,8 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
+
+        buildConfigField("String", "THREAD_PROFILE", "\"$threadProfile\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -35,7 +42,7 @@ android {
                 arguments.addAll(
                     listOf(
                         "-DBUILD_SHARED_LIBS=ON",
-                        "-DLLAMA_BUILD_COMMON=OFF",
+                        "-DLLAMA_BUILD_COMMON=ON",
                         "-DLLAMA_BUILD_TESTS=OFF",
                         "-DLLAMA_BUILD_TOOLS=OFF",
                         "-DLLAMA_BUILD_EXAMPLES=OFF",
@@ -47,6 +54,7 @@ android {
                         "-DGGML_CPU_ALL_VARIANTS=ON",
                         "-DGGML_LLAMAFILE=OFF",
                         "-DGGML_OPENMP=OFF",
+                        "-DTRPG_THREAD_PROFILE=$threadProfile",
                     ),
                 )
                 if ((project.findProperty("trpg.vulkan") as String?) == "true") {

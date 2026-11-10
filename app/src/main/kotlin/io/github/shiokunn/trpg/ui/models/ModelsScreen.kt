@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.shiokunn.trpg.ai.engine.BackendInfo
 import io.github.shiokunn.trpg.ai.engine.EngineStatus
+import io.github.shiokunn.trpg.ai.engine.ModelInfo
 import io.github.shiokunn.trpg.ai.model.ModelFileManager
 import io.github.shiokunn.trpg.ai.model.formatFileSize
 import io.github.shiokunn.trpg.core.domain.ModelSettings
@@ -265,7 +266,7 @@ private fun EngineStatusCard(status: EngineStatus, backend: BackendInfo) {
                     }
                     Text(
                         "コンテキスト ${status.info.nCtx} / 学習時 ${status.info.nCtxTrain}・" +
-                            "チャットテンプレート ${if (status.info.hasChatTemplate) "あり" else "なし"}",
+                            "チャットテンプレート ${templateStatusLabel(status.info)}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -587,6 +588,18 @@ private fun MemoryNoteCard() {
                 )
             }
         }
+    }
+}
+
+private fun templateStatusLabel(info: ModelInfo): String {
+    if (info.chatTemplateError.isNotBlank() && info.chatTemplateStatus == "unsupported") {
+        return "あり（未対応）"
+    }
+    return when (info.chatTemplateStatus) {
+        "applied" -> "あり（対応済み）"
+        "none" -> if (info.hasChatTemplate) "あり" else "なし（ChatMLフォールバック）"
+        "unsupported" -> "あり（未対応）"
+        else -> if (info.hasChatTemplate) "あり" else "なし"
     }
 }
 

@@ -1,5 +1,6 @@
 package io.github.shiokunn.trpg.ai.engine
 
+import io.github.shiokunn.trpg.BuildConfig
 import io.github.shiokunn.trpg.core.domain.ModelSettings
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -12,6 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * llama.cpp backed engine. The native layer is fully synchronous, so every call is
@@ -24,6 +26,8 @@ class LlamaCppEngine(
 ) : InferenceEngine {
 
     private val mutex = Mutex()
+    private val nextGenerationId = AtomicLong(1)
+    private val activeGenerationId = AtomicLong(0)
     private val _status = MutableStateFlow<EngineStatus>(EngineStatus.Unloaded)
 
     override val status: StateFlow<EngineStatus> = _status.asStateFlow()
@@ -73,16 +77,18 @@ class LlamaCppEngine(
         }
     }
 
-    override fun formatChat(messages: List<PromptMessage>, addAssistant: Boolean): String? {
+    override suspend fun formatChat(messages: List<PromptMessage>, addAssistant: Boolean): String? {
         if (messages.isEmpty()) return null
-        return runCatching {
-            LlamaCppNative.ensureInitialized(nativeLibraryDir)
-            LlamaCppNative.nativeFormatChat(
-                roles = messages.map { it.role }.toTypedArray(),
-                contents = messages.map { it.content }.toTypedArray(),
-                addAssistant = addAssistant,
-            )?.takeIf { it.isNotBlank() }
-        }.getOrNull()
+        return withContext(Dispatchers.Default) {
+            runCatching {
+                LlamaCppNative.ensureInitialized(nativeLibraryDir)
+                LlamaCppNative.nativeFormatChat(
+                    roles = messages.map { it.role }.toTypedArray(),
+                    contents = messages.map { it.content }.toTypedArray(),
+                    addAssistant = addAssistant,
+                )?.takeIf { it.isNotBlank() }
+            }.getOrNull()
+        }
     }
 
     override suspend fun countTokens(text: String): Int {
@@ -110,100 +116,162 @@ class LlamaCppEngine(
     override suspend fun generate(
         request: GenerationRequest,
         onToken: suspend (String) -> Unit,
-    ): GenerationOutcome = mutex.withLock {
-        if (_status.value !is EngineStatus.Ready) {
-            return@withLock GenerationOutcome.Failure("モデルが読み込まれていません")
-        }
-        val prompt = request.prompt?.takeIf { it.isNotBlank() }
-            ?: formatChat(request.messages, addAssistant = true)?.takeIf { it.isNotBlank() }
-            ?: fallbackChatPrompt(request.messages)
-        val params = request.params
+    ): GenerationOutcome {
+        // Allocate the generation id before waiting on the mutex so a cancel request
+        // issued while another generation still owns the engine is not lost.
+        val id = nextGenerationId.getAndIncrement()
+        activeGenerationId.set(id)
+        try {
+            return mutex.withLock {
+                if (_status.value !is EngineStatus.Ready) {
+                    return@withLock GenerationOutcome.Failure("モデルが読み込まれていません")
+                }
+                val params = request.params
+                val roles = request.messages.map { it.role }.toTypedArray()
+                val contents = request.messages.map { it.content }.toTypedArray()
 
-        withContext(Dispatchers.Default) {
-            coroutineScope {
-                val pieces = Channel<String>(Channel.UNLIMITED)
-                val consumer = launch {
-                    for (piece in pieces) {
-                        onToken(piece)
+                withContext(Dispatchers.Default) {
+                    coroutineScope {
+                        val pieces = Channel<String>(Channel.UNLIMITED)
+                        val consumer = launch {
+                            for (piece in pieces) {
+                                onToken(piece)
+                            }
+                        }
+
+                        var thrown: Throwable? = null
+                        val raw = try {
+                            if (request.prompt.isNullOrBlank()) {
+                                // Fail closed on an unsupported template: never silently
+                                // fall back to ChatML when a template exists but cannot
+                                // be applied. A model with no template at all is allowed
+                                // to use the explicit ChatML fallback (status "none").
+                                val formatResult = runCatching {
+                                    LlamaCppNative.parseFormatResult(
+                                        LlamaCppNative.nativeFormatChatEx(
+                                            roles = roles,
+                                            contents = contents,
+                                            addAssistant = true,
+                                        ),
+                                    )
+                                }.getOrNull()
+                                val formatFailure = when {
+                                    formatResult == null -> "チャットテンプレートを適用できません"
+                                    !formatResult.ok -> formatResult.error
+                                        ?: "チャットテンプレートを適用できません"
+                                    formatResult.prompt.isBlank() ->
+                                        "チャットテンプレートによるプロンプト生成が空です"
+                                    else -> null
+                                }
+                                if (formatFailure != null) {
+                                    pieces.close()
+                                    consumer.join()
+                                    return@coroutineScope GenerationOutcome.Failure(formatFailure)
+                                }
+                                LlamaCppNative.nativeGenerateChatEx(
+                                    roles = roles,
+                                    contents = contents,
+                                    addAssistant = true,
+                                    maxTokens = params.maxTokens,
+                                    temperature = params.temperature,
+                                    topP = params.topP,
+                                    topK = params.topK,
+                                    repeatPenalty = params.repeatPenalty,
+                                    seed = params.seed,
+                                    generationId = id,
+                                    callback = TokenCallback { piece -> pieces.trySend(piece) },
+                                )
+                            } else {
+                                LlamaCppNative.nativeGenerateEx(
+                                    prompt = request.prompt,
+                                    maxTokens = params.maxTokens,
+                                    temperature = params.temperature,
+                                    topP = params.topP,
+                                    topK = params.topK,
+                                    repeatPenalty = params.repeatPenalty,
+                                    seed = params.seed,
+                                    generationId = id,
+                                    callback = TokenCallback { piece -> pieces.trySend(piece) },
+                                    stops = emptyArray(),
+                                    addSpecial = true,
+                                )
+                            }
+                        } catch (t: Throwable) {
+                            thrown = t
+                            null
+                        } finally {
+                            pieces.close()
+                        }
+
+                        consumer.join()
+
+                        val failure = thrown
+                        if (failure != null) {
+                            if (failure is CancellationException) throw failure
+                            return@coroutineScope GenerationOutcome.Failure(
+                                when {
+                                    failure is OutOfMemoryError -> OOM_GENERATE_MESSAGE
+                                    else -> failure.message?.takeIf { it.isNotBlank() }
+                                        ?: "推論中にエラーが発生しました"
+                                },
+                            )
+                        }
+
+                        val result = LlamaCppNative.parseGeneration(raw)
+                        when {
+                            result.cancelled -> GenerationOutcome.Cancelled
+                            result.error != null -> GenerationOutcome.Failure(result.error)
+                            else -> GenerationOutcome.Success(result.text)
+                        }
                     }
                 }
-
-                var thrown: Throwable? = null
-                val raw = try {
-                    LlamaCppNative.nativeGenerate(
-                        prompt = prompt,
-                        maxTokens = params.maxTokens,
-                        temperature = params.temperature,
-                        topP = params.topP,
-                        topK = params.topK,
-                        repeatPenalty = params.repeatPenalty,
-                        seed = params.seed,
-                        callback = TokenCallback { piece -> pieces.trySend(piece) },
-                    )
-                } catch (t: Throwable) {
-                    thrown = t
-                    null
-                } finally {
-                    pieces.close()
-                }
-
-                consumer.join()
-
-                val failure = thrown
-                if (failure != null) {
-                    if (failure is CancellationException) throw failure
-                    return@coroutineScope GenerationOutcome.Failure(
-                        when {
-                            failure is OutOfMemoryError -> OOM_GENERATE_MESSAGE
-                            else -> failure.message?.takeIf { it.isNotBlank() }
-                                ?: "推論中にエラーが発生しました"
-                        },
-                    )
-                }
-
-                val result = LlamaCppNative.parseGeneration(raw)
-                when {
-                    result.cancelled -> GenerationOutcome.Cancelled
-                    result.error != null -> GenerationOutcome.Failure(result.error)
-                    else -> GenerationOutcome.Success(result.text)
-                }
+            }
+        } finally {
+            if (activeGenerationId.get() == id) {
+                activeGenerationId.set(0)
             }
         }
     }
 
     override fun cancel() {
         if (!LlamaCppNative.isInitialized()) return
-        runCatching { LlamaCppNative.nativeCancel() }
+        val id = activeGenerationId.get()
+        runCatching {
+            if (id != 0L) {
+                LlamaCppNative.nativeCancelGeneration(id)
+            } else {
+                LlamaCppNative.nativeCancel()
+            }
+        }
     }
 
     override fun release() {
         runCatching {
-            if (LlamaCppNative.isInitialized()) LlamaCppNative.nativeUnloadModel()
+            if (LlamaCppNative.isInitialized()) {
+                LlamaCppNative.nativeCancelGeneration(0)
+                LlamaCppNative.nativeUnloadModel()
+            }
         }
         _status.value = EngineStatus.Unloaded
+        activeGenerationId.set(0)
     }
 
     /**
-     * Cap inference at six threads. On big.LITTLE phones the little cores are much
-     * slower, and llama.cpp synchronises at every matrix multiply, so using every
-     * core makes the big cores wait for the little ones. Six threads keeps the
-     * barrier cost down while still using the three big cores and the prime core.
+     * Use the build-time thread profile: profile A uses 4 threads, B/C use 6.
+     * The native side applies CPU affinity for the selected profile.
      */
-    private fun defaultThreads(): Int =
-        Runtime.getRuntime().availableProcessors().coerceAtMost(6).coerceAtLeast(2)
+    private fun defaultThreads(): Int {
+        val profileThreads = when (BuildConfig.THREAD_PROFILE) {
+            "B", "C" -> 6
+            else -> 4
+        }
+        return profileThreads.coerceAtLeast(2)
+    }
 
     private companion object {
         const val OOM_LOAD_MESSAGE =
             "メモリが不足してモデルを読み込めませんでした。コンテキストサイズを下げるか、より小さいGGUFモデルを使用してください。"
         const val OOM_GENERATE_MESSAGE =
             "メモリが不足して生成を継続できませんでした。コンテキストサイズを下げるか、より小さいモデルを使用してください。"
-    }
-
-    private fun fallbackChatPrompt(messages: List<PromptMessage>): String = buildString {
-        for (message in messages) {
-            append("<|im_start|>").append(message.role).append('\n')
-            append(message.content.trimEnd()).append("<|im_end|>\n")
-        }
-        append("<|im_start|>assistant\n")
     }
 }
