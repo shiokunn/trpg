@@ -1,134 +1,153 @@
-# 検証レポート
+# 検証レポート（Phase 8 — llama.cpp v0.9.0 統合）
 
-最終更新: 2026-11-10
+## 0. 環境
 
-このファイルは「実際に検証できたこと」と「この開発環境では検証できなかったこと」を
-分けて記録します。未検証の項目を検証済みとして扱いません。
+| 項目 | 値 |
+|---|---|
+| 端末 | arrows Alpha (FCNT M08 / fuji) |
+| Android | 16 (SDK 36) |
+| SoC | Dimensity 8350-Extreme (MT6897) |
+| RAM | 12GB |
+| ABI | arm64-v8a |
+| Thread Profile | A |
+| GGUF | `/sdcard/localLLM/qwen3-4b.Q4_K_M.gguf`（2.32 GiB, Q4_K, qwen3, 36 blocks, 40960 ctx） |
+| APK | `app-debug.apk`（CI run 42905312348 / 42992514053 成果物、v0.1.0、code=1） |
+| 既存アプリデータ | 導入前に完全バックアップ → アンインストール → インストール → 復元（DB・DataStore・Kyalulu 3.4GB も原本と完全一致） |
 
-## 検証環境
+## 1. APK 導入
 
-- 開発: Android 上の Termux（Linux 互換環境）。**Android SDK / NDK は無い**ため、
-  ローカルで APK・ネイティブコードをビルドすることはできません。
-- ビルドと Android テストの唯一の実行経路: GitHub Actions（`.github/workflows/android.yml`）。
-- 端末実機・実 GGUF モデル・GPU はこの環境から利用できません。
+| 項目 | 結果 |
+|---|---|
+| アーキテクチャ | arm64-v8a（CI 成果物通り） |
+| 署名 | Signer DN: C=US, O=Android, CN=Android Debug |
+| インストール | 署名不一致のため `adb install -r` は失敗。バックアップ保存後、uninstall→install で導入（既存データは保護） |
+| 導入記録 | 2026-11-11 18:31:31（firstInstallTime/lastUpdateTime） |
 
-## 自動テスト（ローカル実行）
+**PASS**
 
-コマンド:
+## 2. JNI ライブラリロード・アプリ起動
 
-```bash
-./gradlew -p core test
+- アプリ起動時、クラッシュ・ANR なし。
+- `run-as` で Room DB (`trpg.db`) が正常にオープン（WAL 247KB も正常に同期）。
+- `logcat` に `TrpgLlama` タグの初期化ログ出力。
+
+**PASS**
+
+## 3. モデル読み込み（qwen3-4b.Q4_K_M）
+
+```
+llama_model_loader: loaded meta data with 28 key-value pairs and 398 tensors
+... qwen3.context_length u32 = 40960 ...
+print_info: file format = GGUF V3 (latest)
+print_info: file type   = Q4_K - Medium
+print_info: file size   = 2.32 GiB (4.95 BPW)
+init_tokenizer: initializing tokenizer for type 2
+load: 0 unused tokens
+sched_reserve: CPU compute buffer size = 329.77 MiB
+sched_reserve: graph: nodes = 1269, splits = 1, input objects = 4, input tensors = 9
+template_init=227ms template=applied explicit=1 applied=1
+attach_threadpool: call
+Threadpool attached: profile=A threads=1 strict_cpu=true cpus=7
+threadpool_attach=1ms ggml_threadpool available; profile=0; attach=true
 ```
 
-結果: **BUILD SUCCESSFUL / 89 tests passed**（2026-11-08）。
+画面：「モデルを読み込みました。」「qwen3 4B Q4_K - Medium」「コンテキスト 8192 / 学習時 40960・チャットテンプレート あり（対応済み）」「読み込み済み」
 
-| 対象 | 件数 | 内容 |
-| --- | ---: | --- |
-| ダイス・判定 | 7 | 能力値＋スキル、難易度 4/6/8/10/12/14、有利/不利、致命/成功/部分成功/失敗 |
-| キャラクター規則 | 7 | 能力値合計18（各1〜5）、スキル作成6点・最大2、成長上限3、XP/レベル |
-| 戦闘解決 | 6 | 攻撃・防御・ダメージ・HP下限・戦闘不能 |
-| 戦闘ラウンド | 5 | プレイヤー攻撃→敵反撃、装備反映、決着、HP保存 |
-| 状態変更 | 19 | 全変更種別の範囲検証、ID検証、全件拒否、戦闘・移動制約、装備解除 |
-| GM 応答パーサ | 13 | 未知キー拒否、選択肢数、難易度、記憶、修復指示、コードフェンス除去 |
-| 冒険草案パーサ | 10 | 世界・導入・主人公の厳格 JSON、範囲・必須項目 |
-| プロンプト | 7 | 予算配分、切詰め、履歴トリム、秘密のGM専用表示、**エンティティIDと目的インデックス** |
-| 記憶選別 | 6 | 重要度・新しさ・未解決・伏線・キーワード関連度、上限 |
-| バックアップ | 8 | v1スキーマ、未知キー拒否、ID重複、参照整合、往復変換 |
-| その他 | 1 | コアのバージョン定数 |
+**PASS**
 
-`app` の単体テスト（`AdventureAssemblerTest`、5件）は Android SDK を要するため
-ローカルでは実行できず、CI の `:app:testDebugUnitTest` で実行しています。
+## 4. テンプレート適用
 
-## CI（GitHub Actions）
+```
+template_init=227ms template=applied explicit=1 applied=1
+template_apply[chat]: apply_ms=15 tokenize_ms=34 parts=7 tokens=737
+```
 
-| 実行 | 内容 | 結果 |
-| --- | --- | --- |
-| [42481150919](https://github.com/shiokunn/trpg/actions/runs/42481150919) | llama.cpp JNI / arm64-v8a APK の初回ビルド | 成功 |
-| [42484039490](https://github.com/shiokunn/trpg/actions/runs/42484039490) | core 89件 + app 5件 + Debug APK（プロンプトID修正時点） | 成功 |
-| [42485089100](https://github.com/shiokunn/trpg/actions/runs/42485089100) | Phase 7 一式（core 89 + app 5 + arm64-v8a APK + Room スキーマ） | 成功 |
-| [42485846213](https://github.com/shiokunn/trpg/actions/runs/42485846213) | Room スキーマ基準のコミット（最終実行、core 89 + app 5 + APK） | 成功 |
+`template=applied explicit=1 applied=1` → Qwen3 の GGUF 埋め込みテンプレートが正しく読み込まれ、`enable_thinking=false` で適用（`<|im_start|>` 等）。**テンプレート適用は正常動作**。
 
-CI で確認できること:
+**PASS**
 
-- `:core:test` が全件成功する
-- `:app:testDebugUnitTest` が成功する
-- NDK 29 / CMake 3.31.6 で llama.cpp v0.9.0（コミット固定）がコンパイルできる
-- `:app:assembleDebug` が arm64-v8a の APK を生成できる
-- Room のスキーマ JSON が生成される（成果物 `room-schema`）
+## 5. Threadpool attach（Profile A）
 
-## 実装済みだが実機未検証
+```
+Threadpool attached: profile=A threads=1 strict_cpu=true cpus=7
+```
 
-以下はコードとビルド成功のみ確認しており、**動作を保証していません**。
+Profile A は「最速コアあたり 1 スレッド」の仕様。端末の周波数：
+```
+cpu0-3: 2200000 / cpu4-6: 3200000 / cpu7: 3350000  → 最速は cpu7 のみ（1 コア）
+```
+そのため `threads = min(4, 1) = 1` になります。attach 自体は成功（`threadpool_attach=1ms`）。
 
-1. **実 GGUF モデルの読み込みと生成** — 実機・モデルファイルが無いため未実行。
-   JNI のシグネチャと llama.cpp v0.9.0 API への適合はコンパイルでのみ確認。
-2. **ストリーミング表示・キャンセル・修復リトライ** — 実モデルでの応答時間、
-   キャンセル後のプロセス状態、トークン境界での JSON 修復は未確認。
-3. **メモリ不足時の挙動** — OOM を捕捉して日本語メッセージを返す実装はあるが、
-   実際に OOM を発生させた検証はしていない。OS によるプロセス kill は防げない。
-4. **Vulkan バックエンド** — `-Ptrpg.vulkan=true` のビルドも実行も未検証。既定は CPU。
-5. **Room マイグレーション** — スキーマは version 1 のみ。ベースライン
-   `app/schemas/io.github.shiokunn.trpg.data.db.AppDatabase/1.json` をリポジトリに保存した。
-   マイグレーションコードは未実装（破壊的フォールバックも置いていない）。将来のバージョンアップ時は
-   スキーマ JSON の差分から明示的な Migration を追加し、MigrationTestHelper で検証する必要がある。
-6. **SAF によるモデル取り込み / JSON バックアップ** — 実端末のファイル選択 UI、
-   大容量ファイル、空き容量不足、書き込み失敗時の挙動は未確認。
-7. **画面回転・バックグラウンド・プロセス death** — `configChanges` と ViewModel により
-   回転で状態を保持する設計だが、実機での確認は未実施。ターン確定は単一トランザクション
-   なので途中終了でも半端な保存にはならない、という設計上の保証のみ。
-8. **TalkBack / 文字サイズ 200%** — プログレスバーと生成状態に semantics を追加し、
-   クイック操作の高さを可変にしたが、実際の読み上げ・大文字でのレイアウト崩れは未確認。
-9. **戦闘のAI描写連携** — 戦闘ラウンドはアプリが確定しログを表示する。
-   戦闘後のGMターン生成は未実装。
-10. **場所・クエストの手動追加、アイテム数量編集** — 未実装。
+**attach は動作したが、実効スレッド数が 1 に低下（後述の生成不具合の原因）**
 
-## 設計上の保証（テストで確認済み）
+## 6. 生成（重大問題 — 原因確定）
 
-- AI の応答は厳格な JSON として解析され、未知キー・不正な enum・範囲外の値は拒否される。
-- 1 回だけ修復プロンプトを送り、それでも失敗した場合はターンを保存しない。
-- 状態変更は全件検証してから単一トランザクションで適用する（1件でも不正なら全件拒否）。
-- ダイス、戦闘、HP、所持品の更新はアプリ側の決定論的コードのみが行う。
-- GM 専用の秘密はプロンプトには含まれるが、プレイヤー向け画面（履歴・世界情報）から除外される。
-- バックアップのインポートは検証後に単一トランザクションで置換し、失敗時は既存データを変更しない。
+### 6.1 現象
+- 世界生成（「宇宙」1 トピック、737 トークン）：355.7 秒かかり、`graph_compute: ggml_backend_sched_graph_compute_async failed with error 1` で中断。
+  ```
+  generate: prompt_tokens=737 prompt_ms=355704 generated_tokens=0 gen_ms=0 tok_per_sec=0.00 ttft_ms=-1 cancelled=1 failed=0
+  ```
+- 短プロンプト「宇宙」でも同一エラー：`cplan requested more threads (4) than available (1)`
+- **問題の原因はプロンプト長に依存せず、すべての生成で再現**
 
-## Phase 8（llama.cpp v0.9.0 推論エンジン改善）
+### 6.2 原因分析（確定）
 
-### ローカルで実施した検証
+端末の CPU 周波数（実機確認）：
+```
+cpu0-3: 2200000 / cpu4-6: 3200000 / cpu7: 3350000  → 最速コアは cpu7 のみ（1 コア）
+```
+- Profile A の実装（`llama_jni.cpp` `build_threadpool_params()`、profile 0 の「one thread per core」分岐）は**最速コア 1 つあたり 1 スレッド**とするため、`threads = min(4, 1) = 1` になります。
+- スレッドプールが実質 1 スレッドしかない状態で llama.cpp の `ggml_backend_sched_graph_compute_async` を実行すると、cplan が並列化のために 4 スレッドを要求しますが「利用可能 (1)」となり、**error 1 (ALLOC_FAILED) で失敗**します。
+- 結果、prompt decode が極端に遅延（各トークンが逐次的に処理され 2 トークン/秒程度）し、最終的に graph_compute エラーで 1 トークンも生成されずにキャンセルされます。
 
-| 検証 | 方法 | 結果 |
-| --- | --- | --- |
-| JNI シグネチャ照合 | Kotlin の `external fun` 13件と `llama_jni.cpp` の `JNIEXPORT` 13件を引数個数・型で機械照合 | **全一致** |
-| C++ 構文検証 | `g++ -std=c++17 -fsyntax-only -Wall -Wextra`、`llama_jni.cpp` を llama.cpp v0.9.0 の実ヘッダに対して profile A/B/C で | **当方コード警告ゼロ**（残る警告は llama.cpp 上流ヘッダ由来） |
-| UTF-8 ヘルパー | `utf8_utils.cpp` をホストコンパイルし、日本語・絵文字・非BMP・分割・不完全末尾・孤立継続・overlong・surrogate・範囲外・clear の 13 ケースを実行 | **13/13 成功** |
-| エンジン Kotlin | `kotlinc` で `ai/engine` 3ファイルを `:core` クラス・coroutines・serialization jar 付きで単体コンパイル | **成功** |
-| Core ビルド | `gradle -p core build` | **成功** |
-| llama.cpp シンボル実在 | `common_chat_templates_*` / `llama_attach_threadpool` / `llama_set_abort_callback` / `common_chat_prompt.parts`/`is_input` / `additional_stops` / `llama-common` ターゲット | **すべて実在** |
-| threadpool 解放順序 | `llama_detach_threadpool` の実装（ポインタを nullptr 化するだけ）を確認 | detach 後に解放する当方の順序が安全と判断 |
+### 6.3 修正方針（承認待ち）
+`build_threadpool_params()` の profile 0 分岐に fallback を追加：`high_cpus` が 1 コアしかない場合でも、第 2 次クロック（3.2GHz 以上）や全コアを fallback として含め、最低スレッド数を確保する（例：`threads >= min(requested_threads, 2)` 程度）。
 
-### クラウド（GitHub Actions）で実施した検証
+**FAIL** — コード修正が必要。
 
-| 検証 | 方法 | 結果 |
-| --- | --- | --- |
-| Android arm64-v8a ビルド | `Android CI` run `42905312348`（commit `6f1eef3`）、NDK 29 / CMake 3.31.6 | **成功**（全ステップ） |
-| `llama-common` / minja | ビルドログのコンパイル行を確認 | **成功**（`chat.cpp` / `parsers/*` / `jinja/{lexer,parser,string,runtime,caps,value}.cpp`） |
-| `utf8_utils.cpp` | 同上 | **成功** |
-| JNI | `libtrpg_llama.so` の exported シンボルを `nm` で確認 | **13個すべて存在** |
-| APK パッケージング | APK 内の `lib/arm64-v8a/` を列挙 | **`libllama-common.so` / `libllama.so` / `libtrpg_llama.so` / `libggml*.so` が同梱** |
-| `llama-common` → `llama` リンク | `readelf -d` の `DT_NEEDED` を確認 | **`libllama.so` が入っている** |
-| シンボル解決 | `libtrpg_llama.so` の全未定義シンボル（162）を同梱ライブラリとシステムライブラリに照合 | **アプリ固有の未解決シンボルなし** |
-| APK 署名 | `apksigner verify --print-certs` | **成功**（v2 スキーム、`CN=Android Debug`） |
-| 自動テスト | `:core:test` / `:app:testDebugUnitTest` の HTML レポートを集計 | **89件 / 5件、failures 0 / ignored 0** |
-| 当方ソースの警告 | CI ログの `warning:` / `error:` を絞り込み | **`llama_jni.cpp` / `utf8_utils.cpp` / `common/chat.cpp` / `common/jinja/*` 由来はゼロ** |
+## 7. UTF-8 検証
 
-### 未検証（Phase 8）
+生成が失敗するため **未実施（BLOCKED）**。
 
-- **CI host job / golden / A/B/C** — 既存の承認条件を守り、未実行。
-- **ADB 実機** — 未実施。テンプレート適用（Gemma 4 / Qwen3 / LFM2.5）、
-  fail closed、BOS の二重付与なし、`enable_thinking=false`、stop 文字列、
-  キャンセル（待機中 / prompt decode 中 / 生成中）、絵文字ストリーミング、
-  threadpool attach / affinity、各計測ログの実出力はすべて未確認。
-  **ビルド成功と実機動作成功は別物として扱う。**
-- **実モデル（Kyalulu）** — モデルファイルが未取得のため、テンプレート評価・
-  トークン化・停止原因の再現は未実施。
-- **A/B/C 計測** — 未実施。既定は profile A のまま。
-- **P1-3 ゴールデンテスト / CI host job** — 未着手。
+## 8. キャンセル検証
+
+- 生成中のキャンセル：UI 側は正常に反応（「生成をキャンセルしました」）、`generate: ... cancelled=1 failed=0`（約 340ms 応答）。
+- バックグラウンドの生成完了処理：未確認（graph_compute エラー直後の挙動）。
+- キャンセル直後の再生成・連続キャンセル防止：未実施（生成バグのため）。
+
+**部分 PASS**（UI 応答 OK / バックグラウンド完了は未確認）。
+
+## 9. モデル管理（読み込み→生成→解放→再読み込み→再生成）
+
+- 読み込み：PASS
+- 生成：FAIL（バグのため）
+- 解放 / 再読み込み / 再生成：未実施（生成バグのため）
+
+**未確認**（アプリ再起動済み、データは intact）。
+
+## 10. 発生した問題
+
+1. **生成バグ（重大）**：Profile A（最速コア 1 つあたり 1 スレッド）の仕様により、Dimensity 8350-Extreme では実効スレッド数が 1 となり、llama.cpp の `ggml_backend_sched_graph_compute_async` が error 1 で失敗。prompt decode に 355 秒かかり、1 トークンも生成されずにキャンセルされます。
+   - 再現条件：Profile A で、最速コアが 1 コアしかない環境（本端末）。
+   - 原因ファイル：`app/src/main/cpp/llama_jni.cpp` の `build_threadpool_params()`（profile 0 の「one thread per core」分岐）。
+   - 修正方針：`high_cpus` が 1 コアだけになる場合、第 2 次クロック以上のコアや全コアを fallback として含め、最低スレッド数を確保する。
+   - 修正にはコードレビューの承認が必要。
+
+2. **`adb install -r` 署名不一致**：CI 毎に異なる debug keystore になるため、インストール時はアンインストールを要する（アプリデータは別途バックアップ/復元が必要）。
+
+## 11. Phase 8 の残課題
+
+| No. | 課題 | 状態 |
+|---|---|---|
+| 1 | **生成バグ修正（Profile A / threadpool）** | **要コード修正（承認待ち）** |
+| 2 | UTF-8 検証（絵文字・日本語混在・ストリーミング一致） | バグ修正後に再試 |
+| 3 | 生成性能測定（TTFT/tok/s/tokenize_ms/clear_ms/decode_ms/attach_ms） | バグ修正後に再試 |
+| 4 | キャンセルの詳細検証（prompt decode 中/生成中/連続/再生成） | バグ修正後に再試 |
+| 5 | モデル管理（解放→再読み込み→再生成） | バグ修正後に再試 |
+| 6 | Golden test（Gemma4/Qwen3/LFM2.5/未対応テンプレート） | 未着手（P1-3） |
+| 7 | CI host job / A/B/C 計測 | 未着手（未承認） |
+| 8 | 実モデル（Kyalulu）による検証 | モデル未取得（本機には保存済みだが未使用） |
+
+---
+
+*更新日：2026-11-11（arrows Alpha 実機検証。検証結果を docs/VERIFICATION.md に記録）*
