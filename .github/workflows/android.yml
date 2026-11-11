@@ -43,6 +43,7 @@ jobs:
           mkdir -p "$HOME/.android"
           printf '%s' "$KEYSTORE_B64" | base64 -d > "$HOME/.android/debug.keystore"
           chmod 600 "$HOME/.android/debug.keystore"
+          echo "TRPG_DEBUG_KEYSTORE=$HOME/.android/debug.keystore" >> "$GITHUB_ENV"
           echo "debug keystore restored (sha256: $(sha256sum "$HOME/.android/debug.keystore" | cut -d' ' -f1))"
 
       - name: Install SDK packages
@@ -76,9 +77,23 @@ jobs:
 
       - name: Verify APK signing certificate
         run: |
+          set -euo pipefail
           BT="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)"
-          "$BT/apksigner" verify --print-certs app/build/outputs/apk/debug/app-debug.apk \
-            | grep -E "Signer #1 certificate (DN|SHA-256)" || true
+          APK=app/build/outputs/apk/debug/app-debug.apk
+          "$BT/apksigner" verify --print-certs "$APK"
+
+          EXPECTED="$(keytool -list -v -keystore "$TRPG_DEBUG_KEYSTORE" -storepass android \
+              -alias androiddebugkey | sed -n 's/^[[:space:]]*SHA256: //p' | head -1 | tr -d ':' | tr 'A-F' 'a-f')"
+          ACTUAL="$("$BT/apksigner" verify --print-certs "$APK" \
+              | sed -n 's/.*SHA-256 digest: //p' | head -1 | tr -d ':' | tr 'A-F' 'a-f')"
+
+          echo "keystore cert: $EXPECTED"
+          echo "apk cert     : $ACTUAL"
+          if [ "$EXPECTED" != "$ACTUAL" ]; then
+            echo "::error::APK is not signed with the stable debug keystore (expected $EXPECTED, got $ACTUAL)"
+            exit 1
+          fi
+          echo "APK is signed with the stable debug keystore."
 
       - name: Upload APK
         uses: actions/upload-artifact@v4

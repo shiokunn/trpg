@@ -13,10 +13,30 @@ check(threadProfile in setOf("A", "B", "C")) {
     "trpg.threadProfile must be one of A, B, C (was: $threadProfile)"
 }
 
+// Stable debug signing: CI restores a fixed debug keystore (see android.yml) so that
+// `adb install -r` keeps working across builds. Without this the runner would generate a
+// fresh random keystore on every run and every install would need an uninstall first.
+val debugKeystoreFile = file(
+    System.getenv("TRPG_DEBUG_KEYSTORE")
+        ?: "${System.getProperty("user.home")}/.android/debug.keystore",
+)
+
 android {
     namespace = "io.github.shiokunn.trpg"
     compileSdk = 36
     ndkVersion = "29.0.13113456"
+
+    signingConfigs {
+        getByName("debug") {
+            if (debugKeystoreFile.isFile) {
+                storeFile = debugKeystoreFile
+                storeType = "PKCS12"
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            }
+        }
+    }
 
     defaultConfig {
         applicationId = "io.github.shiokunn.trpg"
