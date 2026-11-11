@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <atomic>
 #include <chrono>
+#include <cmath>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -369,36 +370,40 @@ bool build_threadpool_params(
 
         // Fallback: on some devices (e.g. Dimensity 8350-Extreme on arrows Alpha) only a
         // single core reports the highest clock, so `threads` collapses to 1. A 1-thread
-        // threadpool causes llama.cpp cplan to fail (error 1). Safely widen the candidate
-        // set to cores at >=90% of max_freq, then to all online cores, without changing
-        // the intended "one thread per core" semantics.
-        int best_freq = max_freq > 0 ? max_freq : -1;
-        if (threads < std::min(2, requested_threads) && !selected.empty()) {
-            // Second-tier clock: 90% or more of the highest clock.
-            int tier2 = static_cast<int>(std::floor(best_freq * 0.9));
-            for (int cpu : cpus) {
-                int f = read_cpu_max_freq(cpu);
-                if (f == 0) { f = best_freq; }  // unknown freq -> treat as same class
-                if (selected.size() >= static_cast<size_t>(std::min(4, requested_threads)) && f < tier2) {
-                    break;  // cpus are ordered; no more tier-2 cores
+        // threadpool makes llama.cpp's cplan ask for more threads than are available
+        // (error 1) and generation fails. Widen the candidate set to cores at >=90% of
+        // max_freq, then to any online core, and keep one thread per selected core.
+        const int target_threads = std::min(requested_threads > 0 ? requested_threads : 4, 4);
+        if (static_cast<int>(selected.size()) < target_threads) {
+            const auto add_cpu = [&selected, target_threads](int cpu) {
+                if (static_cast<int>(selected.size()) >= target_threads) {
+                    return;
                 }
-                if (f >= tier2) {
-                    selected.push_back(cpu);
+                if (std::find(selected.begin(), selected.end(), cpu) != selected.end()) {
+                    return;
                 }
-            }
-            threads = std::min(threads, static_cast<int>(selected.size()));
-            strict_cpu = static_cast<int>(selected.size()) >= threads;
-        }
-        if (threads < std::min(2, requested_threads) && !selected.empty()) {
-            // All online cores: guarantee at least 2 threads where possible.
-            int need = std::min(2, requested_threads);
-            for (int cpu : cpus) {
-                if (threads >= need) { break; }
-                if (std::find(selected.begin(), selected.end(), cpu) == selected.end()) {
-                    selected.push_back(cpu);
+                selected.push_back(cpu);
+            };
+
+            // Second-tier clock: 90% or more of the highest clock (the big core cluster).
+            if (max_freq > 0) {
+                const int tier2 = static_cast<int>(std::floor(max_freq * 0.9));
+                for (int cpu : cpus) {
+                    const int freq = read_cpu_max_freq(cpu);
+                    if (freq > 0 && freq >= tier2) {
+                        add_cpu(cpu);
+                    }
                 }
             }
-            threads = std::min(threads, static_cast<int>(selected.size()));
+            // Last resort: any online core, so `threads` never has to fall back to 1.
+            for (int cpu : cpus) {
+                add_cpu(cpu);
+            }
+
+            threads = std::min(target_threads, static_cast<int>(selected.size()));
+            if (threads < 1) {
+                threads = 1;
+            }
             strict_cpu = static_cast<int>(selected.size()) >= threads;
         }
     } else if (profile == 1) {

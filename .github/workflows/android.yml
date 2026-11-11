@@ -32,6 +32,19 @@ jobs:
         with:
           packages: platform-tools
 
+      - name: Restore stable debug keystore
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_DEBUG_KEYSTORE }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ]; then
+            echo "::warning::ANDROID_DEBUG_KEYSTORE is not set; the runner will generate a random debug keystore."
+            exit 0
+          fi
+          mkdir -p "$HOME/.android"
+          printf '%s' "$KEYSTORE_B64" | base64 -d > "$HOME/.android/debug.keystore"
+          chmod 600 "$HOME/.android/debug.keystore"
+          echo "debug keystore restored (sha256: $(sha256sum "$HOME/.android/debug.keystore" | cut -d' ' -f1))"
+
       - name: Install SDK packages
         run: |
           yes | sdkmanager --install \
@@ -60,6 +73,12 @@ jobs:
 
       - name: Build Debug APK
         run: ./gradlew :app:assembleDebug --stacktrace
+
+      - name: Verify APK signing certificate
+        run: |
+          BT="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)"
+          "$BT/apksigner" verify --print-certs app/build/outputs/apk/debug/app-debug.apk \
+            | grep -E "Signer #1 certificate (DN|SHA-256)" || true
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
