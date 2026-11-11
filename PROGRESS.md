@@ -77,7 +77,7 @@
 
 # Phase 8 — llama.cpp v0.9.0 推論エンジン改善
 
-**Status: IN_PROGRESS（P0-1〜P1-2 実装完了 / P1-3・CI・実機は未実施）**
+**Status: IN_PROGRESS（P0-1〜P1-2 実装完了 / クラウド Android ビルド検証済み / P1-3・実機は未実施）**
 **Last updated: 2026-11-10**
 **Base commit: `3f3602c`（変更は未 commit）**
 
@@ -173,12 +173,27 @@
 | `gradle -p core build` | 成功 |
 | llama.cpp v0.9.0 のシンボル実在確認 | すべて実在 |
 
+## クラウドビルド検証（Phase 8）
+
+GitHub Actions `Android CI` / run `42905312348` / commit `6f1eef3`（2026-11-10）。
+
+- **全ステップ成功**（Core tests → App unit tests → Build Debug APK → artifact アップロード）。
+- `:core:test` 89件 / `:app:testDebugUnitTest` 5件、failures 0 / ignored 0。
+- `llama-common`（`chat.cpp` / `parsers/*` / `jinja/*`）が NDK 29 でコンパイル成功。
+- `app-debug.apk`（arm64-v8a のみ）に `libllama-common.so` / `libllama.so` /
+  `libtrpg_llama.so` / `libggml*.so` が同梱。
+- `libllama-common.so` の `DT_NEEDED` に `libllama.so` が入っていることを確認。
+- `libtrpg_llama.so` の全未定義シンボル（162）が同梱ライブラリ + システム
+  ライブラリで解決することを確認（アプリ固有の未解決シンボルなし）。
+- `apksigner verify` 成功（v2、`CN=Android Debug`）。
+- 当方のソース（`llama_jni.cpp` / `utf8_utils.cpp` / `common/chat.cpp` /
+  `common/jinja/*`）に関する警告・エラーはログに無し。
+
 ## 未実施・未確定
 
-- **Android arm64-v8a ビルド / APK**: Android SDK/NDK がローカルに無いため未実施。
-  `common` の NDK コンパイル可否と `llama-common` のパッケージングは未確認。
 - **CI host job / golden / A/B/C**: 承認条件を守り未実行。
 - **ADB 実機**: 未実施。テンプレート適用・キャンセル・絵文字・threadpool attach は未確認。
+  ビルド成功と実機動作成功は別物。
 - Kyalulu の停止原因と、停止が Phase 8 で解消するか
 - A/B/C の性能・消費電力・熱
 - Qwen3 の `enable_thinking=false` の実機出力
@@ -186,8 +201,6 @@
 
 ## 次にやること
 
-1. 承認を得て CI を実行し、`common` の NDK ビルドと arm64-v8a APK 成否を確認。
-2. 承認を得て commit / push する。
-3. 承認を得て ADB 実機でテンプレート適用・キャンセル・絵文字・計測ログを確認。
-4. P1-3（ゴールデンテスト、CI host job）と P2（A/B/C 計測）に着手。
-5. ADB 実機テストは別途承認を得てから行う。
+1. 承認を得て ADB 実機でテンプレート適用・キャンセル・絵文字・計測ログを確認。
+2. P1-3（ゴールデンテスト、CI host job）と P2（A/B/C 計測）に着手。
+3. ADB 実機テストは別途承認を得てから行う。

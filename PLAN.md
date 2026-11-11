@@ -263,7 +263,7 @@ app/src/main/res/values/strings.xml, themes.xml
 
 # Phase 8 — llama.cpp v0.9.0 推論エンジン改善
 
-**Status: IN_PROGRESS（実装 P0-1〜P1-2 完了 / P1-3・CI・実機は未実施）**
+**Status: IN_PROGRESS（実装 P0-1〜P1-2 完了 / クラウド Android ビルド検証済み / P1-3・実機は未実施）**
 **開始日: 2026-11-10**
 **実装完了日: 2026-11-10**
 **対象: 既存のアプリ本体・D6/状態変更ルールは変更しない。推論層とその状態表示、検証コードのみ。**
@@ -724,7 +724,7 @@ app/src/main/res/values/strings.xml, themes.xml
 
 ## 8.9 実装結果と検証状態（2026-11-10）
 
-**Status: 実装完了 / ローカルで可能な静的検証のみ実施。CI・実機は未実施。**
+**Status: 実装完了 / クラウド Android ビルド検証済み（実機は未実施）**
 
 ### 実装した内容
 
@@ -793,21 +793,32 @@ app/src/main/res/values/strings.xml, themes.xml
 | llama.cpp v0.9.0 のシンボル実在確認（`common_chat_templates_*`、`llama_attach_threadpool`、`llama_set_abort_callback`、`common_chat_prompt.parts/is_input`、`additional_stops`、`llama-common` ターゲット） | すべて実在 |
 | `llama_detach_threadpool` の実装確認（ポインタを nullptr 化するだけ） | detach 後に threadpool を解放する当方の順序が安全であることを確認 |
 
+### クラウドビルド検証（2026-11-10）
+
+GitHub Actions `Android CI`（`.github/workflows/android.yml`、run `42905312348`、
+commit `6f1eef3`）で arm64-v8a のビルド検証を実施。**全ステップ成功**。
+
+| 確認項目 | 結果 |
+| --- | --- |
+| `llama.cpp` | ビルド成功（`llama-chat.cpp` 等 665 タスク） |
+| `llama-common` / minja | `common/chat.cpp`・`common/parsers/*`・`common/jinja/{lexer,parser,string,runtime,caps,value}.cpp` が NDK 29 でコンパイル成功 |
+| `utf8_utils.cpp` | コンパイル成功 |
+| JNI | `llama_jni.cpp` コンパイル・`libtrpg_llama.so` リンク成功。13 個の `Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_*` シンボルがすべて exported |
+| APK パッケージング | `app-debug.apk`（arm64-v8a のみ）に `libllama-common.so` / `libllama.so` / `libtrpg_llama.so` / `libggml*.so` が同梱 |
+| `llama-common` → `llama` リンク | `libllama-common.so` の `DT_NEEDED` に `libllama.so` が入っていることを確認（upstream が宣言していない依存を `CMakeLists.txt` で明示した効果） |
+| シンボル解決 | `libtrpg_llama.so` の全未定義シンボル（162）が、同梱 5 ライブラリ + `libc`/`libm`/`libdl`/`libandroid`/`liblog` で解決することを確認。アプリ固有の未解決シンボルなし |
+| APK 署名 | `apksigner verify` 成功（v2 スキーム、`CN=Android Debug`） |
+| 自動テスト | `:core:test` 89件・`:app:testDebugUnitTest` 5件、ともに failures 0 / ignored 0 |
+
 ### 未実施・未検証（重要）
 
-- **Android arm64-v8a ビルド / APK**: ローカルに Android SDK/NDK が無いため未実施。
-  CI のみがビルド経路。`common`（`chat.cpp` / minja / jinja）の NDK コンパイル可否、
-  `llama-common` 共有ライブラリのパッケージングは **未確認**。
 - **CI host job / golden / A/B/C**: 既存の承認条件を守り、未承認のため未実行。
-- **ADB 実機**:未実施。テンプレート適用・キャンセル・絵文字ストリーミング・
-  threadpool attach の実挙動は未確認。
+- **ADB 実機**: 未実施。テンプレート適用・キャンセル・絵文字ストリーミング・
+  threadpool attach の実挙動は未確認。**ビルド成功と実機動作成功は別物**。
 - 実モデル（Kyalulu）のテンプレートを使った検証はモデル未取得のため未実施。
 
 ### 未解決のリスク
 
-- `llama-common` は `llama_*` を呼ぶが upstream は `llama` をリンクしていない。
-  当方の `CMakeLists.txt` で `target_link_libraries(llama-common PUBLIC llama)` を
-  明示したが、NDK 実ビルドでの確認は未実施。
-- `BUILD_SHARED_LIBS=ON` + `LLAMA_BUILD_COMMON=ON` の組み合わせは
-  upstream の既定（OFF）と異なる。ビルド可否は CI で確認する必要がある。
 - `minja` が実モデルの独自テンプレートを評価できるかは未確認（fail closed で安全側）。
+- `BUILD_SHARED_LIBS=ON` + `LLAMA_BUILD_COMMON=ON` の組み合わせは upstream の
+  既定（OFF）と異なるが、NDK 29 / CMake 3.31.6 でのビルド・パッケージングは確認済み。

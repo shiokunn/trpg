@@ -93,7 +93,7 @@ CI で確認できること:
 
 ## Phase 8（llama.cpp v0.9.0 推論エンジン改善）
 
-### この環境で実施した検証
+### ローカルで実施した検証
 
 | 検証 | 方法 | 結果 |
 | --- | --- | --- |
@@ -105,16 +105,29 @@ CI で確認できること:
 | llama.cpp シンボル実在 | `common_chat_templates_*` / `llama_attach_threadpool` / `llama_set_abort_callback` / `common_chat_prompt.parts`/`is_input` / `additional_stops` / `llama-common` ターゲット | **すべて実在** |
 | threadpool 解放順序 | `llama_detach_threadpool` の実装（ポインタを nullptr 化するだけ）を確認 | detach 後に解放する当方の順序が安全と判断 |
 
+### クラウド（GitHub Actions）で実施した検証
+
+| 検証 | 方法 | 結果 |
+| --- | --- | --- |
+| Android arm64-v8a ビルド | `Android CI` run `42905312348`（commit `6f1eef3`）、NDK 29 / CMake 3.31.6 | **成功**（全ステップ） |
+| `llama-common` / minja | ビルドログのコンパイル行を確認 | **成功**（`chat.cpp` / `parsers/*` / `jinja/{lexer,parser,string,runtime,caps,value}.cpp`） |
+| `utf8_utils.cpp` | 同上 | **成功** |
+| JNI | `libtrpg_llama.so` の exported シンボルを `nm` で確認 | **13個すべて存在** |
+| APK パッケージング | APK 内の `lib/arm64-v8a/` を列挙 | **`libllama-common.so` / `libllama.so` / `libtrpg_llama.so` / `libggml*.so` が同梱** |
+| `llama-common` → `llama` リンク | `readelf -d` の `DT_NEEDED` を確認 | **`libllama.so` が入っている** |
+| シンボル解決 | `libtrpg_llama.so` の全未定義シンボル（162）を同梱ライブラリとシステムライブラリに照合 | **アプリ固有の未解決シンボルなし** |
+| APK 署名 | `apksigner verify --print-certs` | **成功**（v2 スキーム、`CN=Android Debug`） |
+| 自動テスト | `:core:test` / `:app:testDebugUnitTest` の HTML レポートを集計 | **89件 / 5件、failures 0 / ignored 0** |
+| 当方ソースの警告 | CI ログの `warning:` / `error:` を絞り込み | **`llama_jni.cpp` / `utf8_utils.cpp` / `common/chat.cpp` / `common/jinja/*` 由来はゼロ** |
+
 ### 未検証（Phase 8）
 
-- **Android arm64-v8a ビルド / APK 生成** — Android SDK/NDK がローカルに無く、
-  この変更の NDK ビルドは未実施。`common`（`chat.cpp` / minja / jinja）の
-  コンパイル可否、`llama-common` 共有ライブラリの APK パッケージングは未確認。
-- **CI 実行** — 既存の承認条件を守り、未実行。
+- **CI host job / golden / A/B/C** — 既存の承認条件を守り、未実行。
 - **ADB 実機** — 未実施。テンプレート適用（Gemma 4 / Qwen3 / LFM2.5）、
   fail closed、BOS の二重付与なし、`enable_thinking=false`、stop 文字列、
   キャンセル（待機中 / prompt decode 中 / 生成中）、絵文字ストリーミング、
   threadpool attach / affinity、各計測ログの実出力はすべて未確認。
+  **ビルド成功と実機動作成功は別物として扱う。**
 - **実モデル（Kyalulu）** — モデルファイルが未取得のため、テンプレート評価・
   トークン化・停止原因の再現は未実施。
 - **A/B/C 計測** — 未実施。既定は profile A のまま。
