@@ -1,6 +1,6 @@
 # DEBUG_MODE_PLAN — 一時的なデバッグモード（推論計測）
 
-**Status: IN_PROGRESS**
+**Status: COMPLETED**
 **Created: 2026-11-12**
 **Goal owner: 一時的な調査用機能（恒久機能ではない）**
 **Related: `docs/LLAMA_V090_INVESTIGATION.md`（原因調査。本計画では性能改善は行わない）**
