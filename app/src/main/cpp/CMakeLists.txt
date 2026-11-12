@@ -7,6 +7,17 @@ set(CMAKE_C_STANDARD_REQUIRED true)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 
+# AGP passes -DCMAKE_BUILD_TYPE=Debug for the debug variant. Force RelWithDebInfo
+# before llama.cpp/ggml are added so the debug APK still gets optimized native code
+# (-O2 -g -DNDEBUG) while keeping symbols. The Gradle argument requests the same
+# value; this guard makes the result independent of AGP argument ordering.
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Build type" FORCE)
+endif()
+
+message(STATUS "TRPG native build type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "TRPG native RelWithDebInfo C flags: ${CMAKE_C_FLAGS_RELWITHDEBINFO}")
+
 # llama.cpp is fetched by scripts/fetch-llama.sh and pinned to v0.9.0.
 set(LLAMA_SRC "${CMAKE_CURRENT_LIST_DIR}/../../../../third_party/llama.cpp")
 if(NOT EXISTS "${LLAMA_SRC}/CMakeLists.txt")

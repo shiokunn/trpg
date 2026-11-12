@@ -61,6 +61,13 @@ android {
             cmake {
                 arguments.addAll(
                     listOf(
+                        // Keep debug symbols but compile llama.cpp/ggml with optimizations.
+                        // The debug APK is the one used for on-device testing, so this is
+                        // applied to the defaultConfig (all variants).
+                        "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                        // Verification only: let CI show the real compile command lines.
+                        // Remove this once the optimization flags are confirmed.
+                        "-DCMAKE_VERBOSE_MAKEFILE=ON",
                         "-DBUILD_SHARED_LIBS=ON",
                         "-DLLAMA_BUILD_COMMON=ON",
                         "-DLLAMA_BUILD_TESTS=OFF",
