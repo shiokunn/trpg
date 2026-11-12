@@ -43,6 +43,7 @@ endif()
 
 add_library(trpg_llama SHARED
     llama_jni.cpp
+    debug_jni.cpp   # DEBUG MODE (temporary)
     utf8_utils.cpp
 )
 

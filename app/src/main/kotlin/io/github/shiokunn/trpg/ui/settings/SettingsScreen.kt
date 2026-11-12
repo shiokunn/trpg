@@ -22,6 +22,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.shiokunn.trpg.BuildConfig
 import io.github.shiokunn.trpg.backup.BackupFileManager
+import io.github.shiokunn.trpg.core.debug.DebugConfig
 import io.github.shiokunn.trpg.data.repository.ThemeMode
 import io.github.shiokunn.trpg.ui.BackupUiState
 import io.github.shiokunn.trpg.ui.SettingsViewModel
@@ -40,9 +42,15 @@ import io.github.shiokunn.trpg.ui.components.SectionTitle
 import io.github.shiokunn.trpg.ui.components.TrpgScaffold
 
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel, onBack: () -> Unit) {
+fun SettingsScreen(
+    viewModel: SettingsViewModel,
+    onBack: () -> Unit,
+    onOpenDebug: () -> Unit = {},
+) {
     val preferences by viewModel.preferences.collectAsStateWithLifecycle()
     val backup by viewModel.backup.collectAsStateWithLifecycle()
+    // DEBUG MODE (temporary)
+    val debugEnabled by DebugConfig.enabled.collectAsStateWithLifecycle()
 
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument(BackupFileManager.MIME_TYPE),
@@ -146,6 +154,53 @@ fun SettingsScreen(viewModel: SettingsViewModel, onBack: () -> Unit) {
                         },
                         onDismiss = viewModel::clearBackupMessage,
                     )
+                }
+
+                // DEBUG MODE (temporary) — remove this item together with the debug package.
+                item { SectionTitle("開発者向け（一時）") }
+                item {
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Column(Modifier.weight(1f)) {
+                                    Text("デバッグモード", style = MaterialTheme.typography.titleSmall)
+                                    Text(
+                                        if (debugEnabled) {
+                                            "ON — 推論の処理時間・メモリ・実行設定を記録します"
+                                        } else {
+                                            "OFF — 通常動作"
+                                        },
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = if (debugEnabled) {
+                                            MaterialTheme.colorScheme.primary
+                                        } else {
+                                            MaterialTheme.colorScheme.onSurfaceVariant
+                                        },
+                                    )
+                                }
+                                Switch(
+                                    checked = debugEnabled,
+                                    onCheckedChange = { DebugConfig.setEnabled(it) },
+                                )
+                            }
+                            Text(
+                                "推論の処理時間・メモリ・llama.cppの実行設定を確認するための一時的な機能です。" +
+                                    "アプリを再起動するとOFFに戻り、進行中の推論やKVキャッシュには影響しません。",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            if (debugEnabled) {
+                                TextButton(onClick = onOpenDebug) { Text("デバッグ画面を開く") }
+                            }
+                        }
+                    }
                 }
 
                 item { SectionTitle("このアプリについて") }

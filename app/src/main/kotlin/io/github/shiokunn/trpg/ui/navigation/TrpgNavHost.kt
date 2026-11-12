@@ -20,6 +20,9 @@ import io.github.shiokunn.trpg.ui.WorldViewModel
 import io.github.shiokunn.trpg.ui.character.CharacterScreen
 import io.github.shiokunn.trpg.ui.components.LoadingPane
 import io.github.shiokunn.trpg.ui.creation.NewAdventureScreen
+// DEBUG MODE (temporary)
+import io.github.shiokunn.trpg.debug.DebugScreen
+import io.github.shiokunn.trpg.debug.DebugViewModel
 import io.github.shiokunn.trpg.ui.game.GameScreen
 import io.github.shiokunn.trpg.ui.home.HomeScreen
 import io.github.shiokunn.trpg.ui.journal.JournalScreen
@@ -34,6 +37,8 @@ object Routes {
     const val SAVES = "saves"
     const val MODELS = "models"
     const val SETTINGS = "settings"
+    // DEBUG MODE (temporary)
+    const val DEBUG = "debug"
 
     const val GAME = "game/{sessionId}"
     const val CHARACTER = "character/{sessionId}"
@@ -94,7 +99,17 @@ fun TrpgNavHost(container: AppContainer) {
 
         composable(Routes.SETTINGS) {
             val vm: SettingsViewModel = viewModel(factory = io.github.shiokunn.trpg.ui.createFactory { SettingsViewModel(container) })
-            SettingsScreen(viewModel = vm, onBack = { navController.popBackStack() })
+            SettingsScreen(
+                viewModel = vm,
+                onBack = { navController.popBackStack() },
+                onOpenDebug = { navController.navigate(Routes.DEBUG) },
+            )
+        }
+
+        // DEBUG MODE (temporary)
+        composable(Routes.DEBUG) {
+            val vm: DebugViewModel = viewModel(factory = io.github.shiokunn.trpg.ui.createFactory { DebugViewModel() })
+            DebugScreen(viewModel = vm, onBack = { navController.popBackStack() })
         }
 
         composable(

@@ -121,6 +121,9 @@ internal object LlamaCppNative {
 
     external fun nativeBackendInfo(): String?
 
+    // DEBUG MODE (temporary) — read-only runtime values for the debug screen.
+    external fun nativeRuntimeInfo(): String?
+
     external fun nativeModelInfo(): String?
 
     private val json = Json {

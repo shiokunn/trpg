@@ -24,6 +24,7 @@
 #include "ggml-backend.h"
 #include "chat.h"
 #include "utf8_utils.h"
+#include "debug_bridge.h" // DEBUG MODE (temporary)
 
 #define TAG "TrpgLlama"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, TAG, __VA_ARGS__)
@@ -469,6 +470,11 @@ void free_threadpool_locked() {
     g_threadpool_batch = nullptr;
     g_threadpool_new_fn = nullptr;
     g_threadpool_free_fn = nullptr;
+    // DEBUG MODE (temporary)
+    {
+        std::lock_guard<std::mutex> debug_lock(g_trpg_debug_mutex);
+        g_trpg_debug.threadpool.clear();
+    }
 }
 
 bool create_threadpool_locked(llama_context * ctx, int n_threads) {
@@ -514,6 +520,11 @@ bool create_threadpool_locked(llama_context * ctx, int n_threads) {
     llama_attach_threadpool(ctx, g_threadpool, g_threadpool_batch);
     g_threadpool_attached = true;
     LOGI("Threadpool attached: %s", mask_description.c_str());
+    // DEBUG MODE (temporary) — report what was actually requested/attached.
+    {
+        std::lock_guard<std::mutex> debug_lock(g_trpg_debug_mutex);
+        g_trpg_debug.threadpool = mask_description;
+    }
     return true;
 }
 
@@ -592,6 +603,12 @@ void free_model_locked() {
         g_model = nullptr;
     }
     g_n_ctx = 0;
+
+    // DEBUG MODE (temporary) — also invalidates the reported runtime values.
+    {
+        std::lock_guard<std::mutex> debug_lock(g_trpg_debug_mutex);
+        g_trpg_debug = TrpgDebugState{};
+    }
 }
 
 std::vector<std::pair<std::string, std::string>> parse_messages(
@@ -788,7 +805,8 @@ std::string run_generation_locked(
     float top_p,
     int32_t top_k,
     float repeat_penalty,
-    int32_t seed) {
+    int32_t seed,
+    const TrpgGenerationTiming & timing = TrpgGenerationTiming{}) {
     const llama_vocab * vocab = llama_model_get_vocab(g_model);
     const int32_t n_prompt = static_cast<int32_t>(prompt_tokens.size());
     const int32_t headroom = 8;
@@ -814,11 +832,12 @@ std::string run_generation_locked(
     const auto clear_start = std::chrono::steady_clock::now();
     clear_memory();
     const auto clear_end = std::chrono::steady_clock::now();
+    const auto clear_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+        clear_end - clear_start).count();
 
     LOGI("generate start: prompt_tokens=%d budget=%d clear_ms=%lld temp=%.2f top_p=%.2f top_k=%d",
          n_prompt, budget,
-         static_cast<long long>(std::chrono::duration_cast<std::chrono::milliseconds>(
-             clear_end - clear_start).count()),
+         static_cast<long long>(clear_ms),
          temperature, top_p, top_k);
 
     bool cancelled = false;
@@ -1014,7 +1033,28 @@ std::string run_generation_locked(
     out << "{\"ok\":" << (failure.empty() ? "true" : "false");
     out << ",\"cancelled\":" << (cancelled ? "true" : "false");
     out << ",\"text\":\"" << json_escape(generated_raw) << "\"";
-    out << ",\"error\":\"" << json_escape(failure) << "\"}";
+    out << ",\"error\":\"" << json_escape(failure) << "\"";
+    // DEBUG MODE (temporary) — measurement only. All values below are already
+    // computed for the log line above; this adds no work to the inference path.
+    int debug_threads = 0;
+    {
+        std::lock_guard<std::mutex> debug_lock(g_trpg_debug_mutex);
+        debug_threads = g_trpg_debug.n_threads;
+    }
+    out << ",\"metrics\":{";
+    out << "\"applyMs\":" << timing.apply_ms;
+    out << ",\"tokenizeMs\":" << timing.tokenize_ms;
+    out << ",\"clearMs\":" << static_cast<long long>(clear_ms);
+    out << ",\"promptMs\":" << static_cast<long long>(prompt_ms);
+    out << ",\"genMs\":" << static_cast<long long>(gen_ms);
+    out << ",\"ttftMs\":" << static_cast<long long>(ttft_ms);
+    out << ",\"promptTokens\":" << n_prompt;
+    out << ",\"generatedTokens\":" << generated_tokens;
+    out << ",\"budget\":" << budget;
+    out << ",\"threads\":" << debug_threads;
+    out << ",\"nBatch\":" << g_n_batch;
+    out << "}";
+    out << "}";
     return out.str();
 }
 
@@ -1126,6 +1166,29 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeLoadModel(
     g_ctx = ctx;
     g_n_ctx = ctx_size;
     g_n_batch = batch_size;
+
+    // DEBUG MODE (temporary) — record the actual values for the debug screen.
+    // Reading getters after init does not change inference behaviour.
+    {
+        std::lock_guard<std::mutex> debug_lock(g_trpg_debug_mutex);
+        g_trpg_debug = TrpgDebugState{};
+        g_trpg_debug.model_loaded = true;
+        g_trpg_debug.n_ctx_requested = ctx_size;
+        g_trpg_debug.n_ctx = static_cast<int>(llama_n_ctx(ctx));
+        g_trpg_debug.n_ctx_train = static_cast<int>(llama_model_n_ctx_train(model));
+        g_trpg_debug.n_batch_requested = batch_size;
+        g_trpg_debug.n_batch = static_cast<int>(llama_n_batch(ctx));
+        g_trpg_debug.n_ubatch_requested = std::min<int32_t>(batch_size, 512);
+        g_trpg_debug.n_ubatch = static_cast<int>(llama_n_ubatch(ctx));
+        g_trpg_debug.n_seq_max = static_cast<int>(llama_n_seq_max(ctx));
+        g_trpg_debug.n_threads_requested = thread_count;
+        g_trpg_debug.n_threads = thread_count;
+        g_trpg_debug.n_threads_batch = thread_count;
+        g_trpg_debug.gpu_layers = n_gpu_layers;
+        g_trpg_debug.flash_attn = llama_flash_attn_type_name(ctx_params.flash_attn_type);
+        g_trpg_debug.type_k = ggml_type_name(ctx_params.type_k);
+        g_trpg_debug.type_v = ggml_type_name(ctx_params.type_v);
+    }
 
     const auto init_start = std::chrono::steady_clock::now();
     initialize_chat_templates_locked();
@@ -1279,10 +1342,11 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeGenerateEx(
     std::vector<llama_token> prompt_tokens = tokenize(
         llama_model_get_vocab(g_model), prompt_text, add_special == JNI_TRUE, true);
     const auto tokenize_end = std::chrono::steady_clock::now();
+    const auto tokenize_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+        tokenize_end - tokenize_start).count();
     LOGI("tokenize[ex]: tokens=%zu ms=%lld",
          prompt_tokens.size(),
-         static_cast<long long>(std::chrono::duration_cast<std::chrono::milliseconds>(
-             tokenize_end - tokenize_start).count()));
+         static_cast<long long>(tokenize_ms));
     if (prompt_tokens.empty()) {
         return new_string_utf8(env, error_json("プロンプトのトークン化に失敗しました"));
     }
@@ -1299,7 +1363,8 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeGenerateEx(
         top_p,
         top_k,
         repeat_penalty,
-        seed);
+        seed,
+        TrpgGenerationTiming{0, static_cast<long long>(tokenize_ms)});
     return new_string_utf8(env, result);
 }
 
@@ -1350,11 +1415,13 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeGenerateChatEx(
         first_part = false;
     }
     const auto tokenize_end = std::chrono::steady_clock::now();
+    const auto apply_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+        apply_end - apply_start).count();
+    const auto tokenize_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+        tokenize_end - tokenize_start).count();
     LOGI("template_apply[chat]: apply_ms=%lld tokenize_ms=%lld parts=%zu tokens=%zu",
-         static_cast<long long>(std::chrono::duration_cast<std::chrono::milliseconds>(
-             apply_end - apply_start).count()),
-         static_cast<long long>(std::chrono::duration_cast<std::chrono::milliseconds>(
-             tokenize_end - tokenize_start).count()),
+         static_cast<long long>(apply_ms),
+         static_cast<long long>(tokenize_ms),
          params.prompt.parts.size(),
          prompt_tokens.size());
     if (prompt_tokens.empty()) {
@@ -1389,7 +1456,10 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeGenerateChatEx(
         top_p,
         top_k,
         repeat_penalty,
-        seed);
+        seed,
+        TrpgGenerationTiming{
+            static_cast<long long>(apply_ms),
+            static_cast<long long>(tokenize_ms)});
     return new_string_utf8(env, result);
 }
 

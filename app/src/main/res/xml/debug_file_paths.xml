@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- DEBUG MODE (temporary) — FileProvider paths for the debug JSON export. -->
+<paths>
+    <external-files-path name="debug_external" path="debug/" />
+    <files-path name="debug_internal" path="debug/" />
+</paths>

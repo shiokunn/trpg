@@ -2,6 +2,8 @@ package io.github.shiokunn.trpg.ai.engine
 
 import io.github.shiokunn.trpg.BuildConfig
 import io.github.shiokunn.trpg.core.domain.ModelSettings
+// DEBUG MODE (temporary)
+import io.github.shiokunn.trpg.debug.DebugRecorder
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -121,12 +123,19 @@ class LlamaCppEngine(
         // issued while another generation still owns the engine is not lost.
         val id = nextGenerationId.getAndIncrement()
         activeGenerationId.set(id)
+        // DEBUG MODE (temporary) — stays null unless the debug toggle is ON.
+        var recording: DebugRecorder.Recording? = null
         try {
             return mutex.withLock {
                 if (_status.value !is EngineStatus.Ready) {
                     return@withLock GenerationOutcome.Failure("モデルが読み込まれていません")
                 }
                 val params = request.params
+                recording = DebugRecorder.begin(
+                    modelFileName = (_status.value as? EngineStatus.Ready)?.modelFileName ?: "",
+                    params = params,
+                    messageCount = request.messages.size,
+                )
                 val roles = request.messages.map { it.role }.toTypedArray()
                 val contents = request.messages.map { it.content }.toTypedArray()
 
@@ -166,6 +175,8 @@ class LlamaCppEngine(
                                 if (formatFailure != null) {
                                     pieces.close()
                                     consumer.join()
+                                    // DEBUG MODE (temporary)
+                                    recording?.finish(GenerationOutcome.Failure(formatFailure))
                                     return@coroutineScope GenerationOutcome.Failure(formatFailure)
                                 }
                                 LlamaCppNative.nativeGenerateChatEx(
@@ -179,7 +190,10 @@ class LlamaCppEngine(
                                     repeatPenalty = params.repeatPenalty,
                                     seed = params.seed,
                                     generationId = id,
-                                    callback = TokenCallback { piece -> pieces.trySend(piece) },
+                                    callback = TokenCallback { piece ->
+                                        pieces.trySend(piece)
+                                        recording?.onToken() // DEBUG MODE (temporary)
+                                    },
                                 )
                             } else {
                                 LlamaCppNative.nativeGenerateEx(
@@ -191,7 +205,10 @@ class LlamaCppEngine(
                                     repeatPenalty = params.repeatPenalty,
                                     seed = params.seed,
                                     generationId = id,
-                                    callback = TokenCallback { piece -> pieces.trySend(piece) },
+                                    callback = TokenCallback { piece ->
+                                        pieces.trySend(piece)
+                                        recording?.onToken() // DEBUG MODE (temporary)
+                                    },
                                     stops = emptyArray(),
                                     addSpecial = true,
                                 )
@@ -208,24 +225,42 @@ class LlamaCppEngine(
                         val failure = thrown
                         if (failure != null) {
                             if (failure is CancellationException) throw failure
-                            return@coroutineScope GenerationOutcome.Failure(
+                            val outcome = GenerationOutcome.Failure(
                                 when {
                                     failure is OutOfMemoryError -> OOM_GENERATE_MESSAGE
                                     else -> failure.message?.takeIf { it.isNotBlank() }
                                         ?: "推論中にエラーが発生しました"
                                 },
                             )
+                            recording?.finish(outcome) // DEBUG MODE (temporary)
+                            return@coroutineScope outcome
                         }
 
+                        // DEBUG MODE (temporary) — parses the metrics object only.
+                        recording?.attachResult(raw)
                         val result = LlamaCppNative.parseGeneration(raw)
-                        when {
+                        val outcome = when {
                             result.cancelled -> GenerationOutcome.Cancelled
                             result.error != null -> GenerationOutcome.Failure(result.error)
                             else -> GenerationOutcome.Success(result.text)
                         }
+                        recording?.finish(outcome)
+                        outcome
                     }
                 }
             }
+        } catch (t: Throwable) {
+            // DEBUG MODE (temporary) — close the session on cancelled/failed runs.
+            if (t is CancellationException) {
+                recording?.finish(GenerationOutcome.Cancelled)
+            } else {
+                recording?.finish(
+                    GenerationOutcome.Failure(
+                        t.message?.takeIf { it.isNotBlank() } ?: "推論中にエラーが発生しました",
+                    ),
+                )
+            }
+            throw t
         } finally {
             if (activeGenerationId.get() == id) {
                 activeGenerationId.set(0)
