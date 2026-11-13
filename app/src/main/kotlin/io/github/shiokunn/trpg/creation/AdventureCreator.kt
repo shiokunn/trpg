@@ -169,6 +169,7 @@ class AdventureCreator(
     private fun repairInstruction(errors: List<String>): String = buildString {
         append("前回の応答は次の理由で契約に違反していました。\n")
         errors.take(10).forEach { error -> append("- ").append(error).append('\n') }
+        append("スキーマの型を維持してください。配列フィールドが文字列で出力されている場合は、1要素の配列に修正してください。\n")
         append("説明やコードフェンスを含めず、指定のJSONオブジェクトを1つだけ出力してください。")
     }
 
@@ -182,6 +183,10 @@ class AdventureCreator(
             - すべての文字列は日本語。空の必須項目を作らない。
             - 既存の特定作品の固有名詞をそのまま使わない。
             - secrets にはGM専用の秘密（真相・黒幕・隠された事実）を入れる。
+            - スキーマで配列（List<String>）と定義されている項目は、必ずJSON配列 "[]" で出力する。
+            - 要素が1つでも文字列単体で出力してはいけない。要素がない場合は空配列 "[]" にする。
+            - secrets の正しい例: "secrets": ["GM専用の秘密"]
+            - secrets の間違った例: "secrets": "GM専用の秘密"
             - NPCのcombatは戦闘になる場合のみ設定し、hpは1〜30、攻撃力・防御は0〜20、技能は0〜3。
 
             【JSONスキーマ】

@@ -131,6 +131,81 @@ class DraftParsersTest {
     }
 
     @Test
+    fun normalizesStringSecretsToSingleElementArray() {
+        val raw = validWorld.replace(
+            "\"secrets\": []",
+            "\"secrets\": \"このカフェは情報集積所である\"",
+        )
+        val result = WorldDraftParser.parse(raw)
+        assertTrue(result is AiParseResult.Success)
+        assertEquals(
+            listOf("このカフェは情報集積所である"),
+            (result as AiParseResult.Success).value.opening.location.secrets,
+        )
+    }
+
+    @Test
+    fun keepsAlreadyValidSecretsArray() {
+        val raw = validWorld.replace(
+            "\"secrets\": []",
+            "\"secrets\": [\"秘密A\", \"秘密B\"]",
+        )
+        val result = WorldDraftParser.parse(raw)
+        assertTrue(result is AiParseResult.Success)
+        assertEquals(
+            listOf("秘密A", "秘密B"),
+            (result as AiParseResult.Success).value.opening.location.secrets,
+        )
+    }
+
+    @Test
+    fun keepsEmptySecretsArray() {
+        val result = WorldDraftParser.parse(validWorld)
+        assertTrue(result is AiParseResult.Success)
+        assertTrue((result as AiParseResult.Success).value.opening.location.secrets.isEmpty())
+    }
+
+    @Test
+    fun doesNotConvertNonStringSecrets() {
+        listOf(
+            "\"secrets\": null",
+            "\"secrets\": 1",
+            "\"secrets\": {\"value\": \"秘密\"}",
+        ).forEach { secrets ->
+            val raw = validWorld.replace("\"secrets\": []", secrets)
+            assertTrue("expected failure for $secrets", WorldDraftParser.parse(raw) is AiParseResult.Failure)
+        }
+    }
+
+    @Test
+    fun normalizationKeepsLengthAndItemLimits() {
+        val tooLong = "秘".repeat(501)
+        val longRaw = validWorld.replace("\"secrets\": []", "\"secrets\": \"$tooLong\"")
+        val longErrors = (WorldDraftParser.parse(longRaw) as AiParseResult.Failure).errors
+        assertTrue(longErrors.any { it.contains("opening.location.secrets[0]") && it.contains("長すぎます") })
+
+        val tooMany = (1..13).joinToString(",") { "\"秘密$it\"" }
+        val manyRaw = validWorld.replace("\"secrets\": []", "\"secrets\": [$tooMany]")
+        val manyErrors = (WorldDraftParser.parse(manyRaw) as AiParseResult.Failure).errors
+        assertTrue(manyErrors.any { it.contains("opening.location.secrets") && it.contains("多すぎます") })
+    }
+
+    @Test
+    fun doesNotNormalizeOtherListFields() {
+        val connections = validWorld.replace(
+            "\"connections\": [\"桟橋\"]",
+            "\"connections\": \"桟橋\"",
+        )
+        assertTrue(WorldDraftParser.parse(connections) is AiParseResult.Failure)
+
+        val worldSecrets = validWorld.replace(
+            "\"secrets\": [\"灯台守は密輸の証拠を隠している\"]",
+            "\"secrets\": \"灯台守は密輸の証拠を隠している\"",
+        )
+        assertTrue(WorldDraftParser.parse(worldSecrets) is AiParseResult.Failure)
+    }
+
+    @Test
     fun parsesCharacterDraftAndConvertsToDomain() {
         val result = CharacterDraftParser.parse(validCharacter)
         assertTrue(result is AiParseResult.Success)
