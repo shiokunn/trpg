@@ -1,6 +1,7 @@
 package io.github.shiokunn.trpg.core.ai
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -127,6 +128,67 @@ class DraftParsersTest {
     @Test
     fun worldRejectsUnknownKey() {
         val raw = validWorld.replaceFirst("{", "{\"mood\": \"dark\",")
+        assertTrue(WorldDraftParser.parse(raw) is AiParseResult.Failure)
+    }
+
+    @Test
+    fun worldAcceptsNullCombat() {
+        val raw = validWorld.replace(
+            Regex("\"combat\": \\{[\\s\\S]*?\\}"),
+            "\"combat\": null",
+        )
+        val result = WorldDraftParser.parse(raw)
+        assertTrue(result is AiParseResult.Success)
+        assertNull((result as AiParseResult.Success).value.opening.npcs.single().combat)
+    }
+
+    @Test
+    fun normalizesStringOpeningLocationSecrets() {
+        val raw = validWorld.replaceFirst("\"secrets\": []", "\"secrets\": \"秘密\"")
+        val result = WorldDraftParser.parse(raw)
+        assertTrue(result is AiParseResult.Success)
+        assertEquals(
+            listOf("秘密"),
+            (result as AiParseResult.Success).value.opening.location.secrets,
+        )
+    }
+
+    @Test
+    fun doesNotNormalizeOtherStringLists() {
+        val raw = validWorld.replaceFirst(
+            "\"factions\": [\"灯台守の会\", \"密輸業者\"]",
+            "\"factions\": \"灯台守の会\"",
+        )
+        assertTrue(WorldDraftParser.parse(raw) is AiParseResult.Failure)
+    }
+
+    @Test
+    fun doesNotNormalizeNonStringOpeningLocationSecrets() {
+        listOf("\"secrets\": null", "\"secrets\": 1", "\"secrets\": {\"value\": \"秘密\"}")
+            .forEach { replacement ->
+                val raw = validWorld.replaceFirst("\"secrets\": []", replacement)
+                assertTrue(
+                    "expected failure for $replacement",
+                    WorldDraftParser.parse(raw) is AiParseResult.Failure,
+                )
+            }
+    }
+
+    @Test
+    fun worldRejectsMissingClosingQuote() {
+        val raw = validWorld.replaceFirst("\"secrets\": []", "\"secrets\": [\"秘密]")
+        assertTrue(WorldDraftParser.parse(raw) is AiParseResult.Failure)
+    }
+
+    @Test
+    fun worldRejectsTrailingComma() {
+        val raw = validWorld.replaceFirst("\"name\": \"霧の港\",", "\"name\": \"霧の港\",,")
+        assertTrue(WorldDraftParser.parse(raw) is AiParseResult.Failure)
+    }
+
+    @Test
+    fun worldRejectsStringCombatNumber() {
+        val raw = validWorld.replaceFirst("\"hp\": 8", "\"hp\": \"8\"")
         assertTrue(WorldDraftParser.parse(raw) is AiParseResult.Failure)
     }
 

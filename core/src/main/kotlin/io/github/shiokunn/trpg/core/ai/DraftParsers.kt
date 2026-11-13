@@ -6,6 +6,9 @@ import io.github.shiokunn.trpg.core.domain.Item
 import io.github.shiokunn.trpg.core.domain.Skill
 import io.github.shiokunn.trpg.core.rules.CharacterRules
 import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import java.util.UUID
 
 object WorldDraftParser {
@@ -14,7 +17,8 @@ object WorldDraftParser {
         val candidate = AiJson.extractObject(raw)
             ?: return AiParseResult.Failure(listOf("JSONオブジェクトが見つかりません。JSONのみを出力してください。"))
         val draft = try {
-            AiJson.strict.decodeFromString(WorldDraft.serializer(), candidate)
+            val normalized = normalizeOpeningLocationSecrets(candidate)
+            AiJson.strict.decodeFromString(WorldDraft.serializer(), normalized)
         } catch (t: SerializationException) {
             return AiParseResult.Failure(listOf("JSONスキーマが不正です: ${t.message ?: "解析に失敗しました"}"))
         } catch (t: IllegalArgumentException) {
@@ -22,6 +26,32 @@ object WorldDraftParser {
         }
         val errors = validate(draft)
         return if (errors.isEmpty()) AiParseResult.Success(draft) else AiParseResult.Failure(errors)
+    }
+
+    /**
+     * Compatibility fix for the one known string/array mismatch.
+     *
+     * Only opening.location.secrets is converted, and only when it is a JSON
+     * string. null, numbers, objects and existing arrays are left untouched so the
+     * strict decoder still rejects every other type error.
+     */
+    private fun normalizeOpeningLocationSecrets(candidate: String): String {
+        val root = AiJson.strict.parseToJsonElement(candidate) as? JsonObject ?: return candidate
+        val opening = root["opening"] as? JsonObject ?: return candidate
+        val location = opening["location"] as? JsonObject ?: return candidate
+        val secrets = location["secrets"]
+        if (secrets !is JsonPrimitive || !secrets.isString) return candidate
+
+        val normalizedLocation = JsonObject(
+            location + ("secrets" to JsonArray(listOf(secrets))),
+        )
+        val normalizedOpening = JsonObject(
+            opening + ("location" to normalizedLocation),
+        )
+        val normalizedRoot = JsonObject(
+            root + ("opening" to normalizedOpening),
+        )
+        return normalizedRoot.toString()
     }
 
     fun validate(draft: WorldDraft): List<String> {

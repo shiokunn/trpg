@@ -69,7 +69,9 @@ class AdventureCreator(
             PromptMessage("system", WORLD_SYSTEM),
             PromptMessage("user", worldRequest(input)),
         )
-        return generateWithRepair(settings, messages, onProgress, WorldDraftParser::parse)
+        return generateWithRepair(
+            settings, messages, onProgress, WorldDraftParser::parse, WORLD_REPAIR_RULES,
+        )
     }
 
     suspend fun generateCharacter(
@@ -101,6 +103,7 @@ class AdventureCreator(
         messages: List<PromptMessage>,
         onProgress: (GenerationProgress) -> Unit,
         parser: (String) -> AiParseResult<T>,
+        repairRules: String = "",
     ): CreationResult<T> {
         val first = generate(settings, messages, onProgress)
         val firstText = when (first) {
@@ -113,7 +116,7 @@ class AdventureCreator(
             is AiParseResult.Success -> return CreationResult.Success(parsed.value)
             is AiParseResult.Failure -> {
                 val repair = messages + PromptMessage("assistant", firstText) +
-                    PromptMessage("user", repairInstruction(parsed.errors))
+                    PromptMessage("user", repairInstruction(parsed.errors, repairRules))
                 val second = generate(settings, repair, onProgress)
                 return when (second) {
                     is GenerationOutcome.Cancelled -> CreationResult.Cancelled
@@ -175,13 +178,26 @@ class AdventureCreator(
         append("能力値は各1〜5で合計18、スキルはレベル合計6（各0〜2）、所持品は2〜5個にしてください。")
     }
 
-    private fun repairInstruction(errors: List<String>): String = buildString {
+    private fun repairInstruction(errors: List<String>, extraRules: String = ""): String = buildString {
         append("前回の応答は次の理由で契約に違反していました。\n")
         errors.take(10).forEach { error -> append("- ").append(error).append('\n') }
+        if (extraRules.isNotBlank()) {
+            append(extraRules.trimEnd()).append('\n')
+        }
         append("説明やコードフェンスを含めず、指定のJSONオブジェクトを1つだけ出力してください。")
     }
 
     private companion object {
+        val WORLD_REPAIR_RULES = """
+            - JSONオブジェクト1つだけを出力する。
+            - 文字列の開始・終了にはASCIIの " だけを使い、閉じ括弧 」 の直後にも " を置く。スマートクォートは使わない。
+            - 末尾カンマとJSONコメントを使わない。
+            - 配列は要素が1つでも必ず配列にし、配列フィールドに文字列を直接入れない。任意配列は [] にする。
+            - 数値は数値で出力する。
+            - NPCのcombatが不要なら null にし、空の {} は使わない。
+            - キー名・階層は元のJSONスキーマと一致させる。
+        """.trimIndent()
+
         val WORLD_SYSTEM = """
             あなたは完全オフラインのAndroid TRPGアプリで、世界観とシナリオを設計するゲームデザイナーです。
             日本語で、プレイヤーが自由に探索できる具体的な世界を作ってください。
@@ -191,7 +207,14 @@ class AdventureCreator(
             - すべての文字列は日本語。空の必須項目を作らない。
             - 既存の特定作品の固有名詞をそのまま使わない。
             - secrets にはGM専用の秘密（真相・黒幕・隠された事実）を入れる。
-            - NPCのcombatは戦闘になる場合のみ設定し、hpは1〜30、攻撃力・防御は0〜20、技能は0〜3。
+            - JSONのキー名・階層は【JSONスキーマ】と一致させる。キーを追加・変更しない。
+            - 文字列の開始・終了にはASCIIの " だけを使う。スマートクォート（“ ”）や日本語の引用符をJSONの区切りに使わない。
+            - 日本語の 「」『』 は文字列の内容としてのみ使い、閉じ括弧 」 の直後にも必ずASCIIの " を置いて文字列を閉じる。
+            - 末尾カンマとJSONコメント（//、/* */）は禁止。
+            - 配列フィールドは要素が1つでも必ず配列にする。配列フィールドに文字列を直接入れない。任意配列が不要なら [] にする。
+            - 数値フィールドは数値で出力し、文字列にしない。
+            - NPCのcombatは不要なら null にする。空のcombatオブジェクト {} は出力しない。戦闘時のみ hp 1〜30、攻撃力・防御 0〜20、技能 0〜3。
+            - 戦闘NPCのcombat例: {"attackPower": 3, "defense": 1, "attackSkillLevel": 1, "defenseSkillLevel": 1, "hp": 10}
 
             【JSONスキーマ】
             {
@@ -203,12 +226,12 @@ class AdventureCreator(
               "history": "歴史",
               "geography": "地理",
               "socialStructure": "社会構造",
-              "factions": ["勢力名"],
+              "factions": ["勢力A", "勢力B"],
               "techMagic": "技術・魔法",
-              "specialSettings": ["特殊設定"],
+              "specialSettings": ["特殊設定A", "特殊設定B"],
               "objective": "プレイヤーの目的",
               "problem": "世界が抱える問題",
-              "secrets": ["GM専用の秘密"],
+              "secrets": ["秘密A", "秘密B"],
               "scenario": {
                 "title": "シナリオ名",
                 "premise": "あらすじ",
@@ -220,8 +243,8 @@ class AdventureCreator(
                 "location": {
                   "name": "開始地点名",
                   "description": "説明",
-                  "connections": ["つながる場所"],
-                  "secrets": ["GM専用の秘密"]
+                  "connections": ["場所A", "場所B"],
+                  "secrets": ["秘密A", "秘密B"]
                 },
                 "npcs": [
                   {
@@ -231,14 +254,8 @@ class AdventureCreator(
                     "occupation": "職業",
                     "disposition": "プレイヤーへの態度",
                     "locationName": "開始地点名",
-                    "secrets": ["GM専用の秘密"],
-                    "combat": {
-                      "attackPower": 3,
-                      "defense": 1,
-                      "attackSkillLevel": 1,
-                      "defenseSkillLevel": 1,
-                      "hp": 10
-                    }
+                    "secrets": ["秘密A", "秘密B"],
+                    "combat": null
                   }
                 ],
                 "quests": [
@@ -246,7 +263,7 @@ class AdventureCreator(
                     "title": "クエスト名",
                     "description": "説明",
                     "objectives": ["目的1", "目的2"],
-                    "rewards": ["報酬"]
+                    "rewards": ["報酬A", "報酬B"]
                   }
                 ]
               }
