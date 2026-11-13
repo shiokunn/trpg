@@ -227,7 +227,8 @@ class GmTurnService(
                 messages = messages,
                 params = SamplingParams.from(settings),
             ),
-        ) { piece -> listener.onToken(piece) }
+            onToken = { piece -> listener.onToken(piece) },
+        )
     } catch (cancelled: CancellationException) {
         throw cancelled
     } catch (error: Throwable) {

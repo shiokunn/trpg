@@ -9,6 +9,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import io.github.shiokunn.trpg.AppContainer
 import io.github.shiokunn.trpg.ai.engine.BackendInfo
 import io.github.shiokunn.trpg.ai.engine.EngineStatus
+import io.github.shiokunn.trpg.ai.engine.GenerationProgress
 import io.github.shiokunn.trpg.BuildConfig
 import io.github.shiokunn.trpg.ai.model.ModelFileManager
 import io.github.shiokunn.trpg.core.ai.CharacterDraft
@@ -273,6 +274,8 @@ data class NewAdventureUiState(
     val saving: Boolean = false,
     val createdSessionId: String? = null,
     val cancelling: Boolean = false,
+    /** Live then final token accounting for the most recent generation. */
+    val generation: GenerationProgress? = null,
 )
 
 class NewAdventureViewModel(private val container: AppContainer) : ViewModel() {
@@ -326,6 +329,7 @@ class NewAdventureViewModel(private val container: AppContainer) : ViewModel() {
                 error = null,
                 details = emptyList(),
                 cancelling = false,
+                generation = null,
             )
         }
         val input = CreationInput(
@@ -336,9 +340,12 @@ class NewAdventureViewModel(private val container: AppContainer) : ViewModel() {
             tone = current.tone.trim(),
             difficulty = current.difficulty.trim(),
         )
+        val onProgress: (GenerationProgress) -> Unit = { progress ->
+            _state.update { it.copy(generation = progress) }
+        }
         job = viewModelScope.launch {
             try {
-                val worldResult = container.adventureCreator.generateWorld(input)
+                val worldResult = container.adventureCreator.generateWorld(input, onProgress)
                 val world = when (worldResult) {
                     is CreationResult.Success -> worldResult.value
                     is CreationResult.Cancelled -> {
@@ -351,7 +358,7 @@ class NewAdventureViewModel(private val container: AppContainer) : ViewModel() {
                     }
                 }
                 _state.update { it.copy(world = world, statusText = "主人公を生成しています…") }
-                when (val characterResult = container.adventureCreator.generateCharacter(world, input)) {
+                when (val characterResult = container.adventureCreator.generateCharacter(world, input, onProgress)) {
                     is CreationResult.Success -> _state.update {
                         it.copy(
                             stage = CreationStage.PREVIEW,

@@ -12,13 +12,20 @@ import kotlinx.serialization.json.longOrNull
 
 /** Callback invoked from the native decode loop for every generated piece. */
 fun interface TokenCallback {
-    fun onToken(token: String)
+    fun onToken(token: String, generatedTokens: Int)
 }
 
 internal data class NativeGeneration(
     val text: String,
     val cancelled: Boolean,
     val error: String?,
+    val generationId: Long = 0L,
+    val promptTokens: Int = -1,
+    val generatedTokens: Int = -1,
+    val maxTokens: Int = -1,
+    val budget: Int = -1,
+    val finishReason: String = "unknown",
+    val limitReached: Boolean? = null,
 )
 
 internal data class NativeFormatResult(
@@ -181,6 +188,13 @@ internal object LlamaCppNative {
             text = obj.string("text") ?: "",
             cancelled = obj.boolean("cancelled") ?: false,
             error = error,
+            generationId = obj.long("generationId") ?: 0L,
+            promptTokens = obj.int("promptTokens") ?: -1,
+            generatedTokens = obj.int("generatedTokens") ?: -1,
+            maxTokens = obj.int("maxTokens") ?: -1,
+            budget = obj.int("budget") ?: -1,
+            finishReason = obj.string("finishReason") ?: "unknown",
+            limitReached = obj.boolean("limitReached"),
         )
     }
 

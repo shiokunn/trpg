@@ -2,6 +2,7 @@ package io.github.shiokunn.trpg.creation
 
 import io.github.shiokunn.trpg.ai.engine.EngineStatus
 import io.github.shiokunn.trpg.ai.engine.GenerationOutcome
+import io.github.shiokunn.trpg.ai.engine.GenerationProgress
 import io.github.shiokunn.trpg.ai.engine.GenerationRequest
 import io.github.shiokunn.trpg.ai.engine.InferenceEngine
 import io.github.shiokunn.trpg.ai.engine.PromptMessage
@@ -58,19 +59,23 @@ class AdventureCreator(
     private val engine: InferenceEngine,
 ) {
 
-    suspend fun generateWorld(input: CreationInput): CreationResult<WorldDraft> {
+    suspend fun generateWorld(
+        input: CreationInput,
+        onProgress: (GenerationProgress) -> Unit = {},
+    ): CreationResult<WorldDraft> {
         val readiness = readySettings() ?: return notReady()
         val (settings, _) = readiness
         val messages = listOf(
             PromptMessage("system", WORLD_SYSTEM),
             PromptMessage("user", worldRequest(input)),
         )
-        return generateWithRepair(settings, messages, WorldDraftParser::parse)
+        return generateWithRepair(settings, messages, onProgress, WorldDraftParser::parse)
     }
 
     suspend fun generateCharacter(
         world: WorldDraft,
         input: CreationInput,
+        onProgress: (GenerationProgress) -> Unit = {},
     ): CreationResult<CharacterDraft> {
         val readiness = readySettings() ?: return notReady()
         val (settings, _) = readiness
@@ -78,7 +83,7 @@ class AdventureCreator(
             PromptMessage("system", CHARACTER_SYSTEM),
             PromptMessage("user", characterRequest(world, input)),
         )
-        return generateWithRepair(settings, messages, CharacterDraftParser::parse)
+        return generateWithRepair(settings, messages, onProgress, CharacterDraftParser::parse)
     }
 
     private suspend fun readySettings(): Pair<ModelSettings, EngineStatus.Ready>? {
@@ -94,9 +99,10 @@ class AdventureCreator(
     private suspend fun <T> generateWithRepair(
         settings: ModelSettings,
         messages: List<PromptMessage>,
+        onProgress: (GenerationProgress) -> Unit,
         parser: (String) -> AiParseResult<T>,
     ): CreationResult<T> {
-        val first = generate(settings, messages)
+        val first = generate(settings, messages, onProgress)
         val firstText = when (first) {
             is GenerationOutcome.Cancelled -> return CreationResult.Cancelled
             is GenerationOutcome.Failure -> return CreationResult.Failed(first.message)
@@ -108,7 +114,7 @@ class AdventureCreator(
             is AiParseResult.Failure -> {
                 val repair = messages + PromptMessage("assistant", firstText) +
                     PromptMessage("user", repairInstruction(parsed.errors))
-                val second = generate(settings, repair)
+                val second = generate(settings, repair, onProgress)
                 return when (second) {
                     is GenerationOutcome.Cancelled -> CreationResult.Cancelled
                     is GenerationOutcome.Failure -> CreationResult.Failed(second.message)
@@ -127,13 +133,16 @@ class AdventureCreator(
     private suspend fun generate(
         settings: ModelSettings,
         messages: List<PromptMessage>,
+        onProgress: (GenerationProgress) -> Unit,
     ): GenerationOutcome = try {
         engine.generate(
             GenerationRequest(
                 messages = messages,
                 params = SamplingParams.from(settings).copy(temperature = (settings.temperature + 0.1f).coerceAtMost(1.2f)),
             ),
-        ) {}
+            onToken = {},
+            onProgress = onProgress,
+        )
     } catch (cancelled: CancellationException) {
         throw cancelled
     } catch (error: Throwable) {

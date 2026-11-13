@@ -2,6 +2,7 @@ package io.github.shiokunn.trpg.ai.engine
 
 import io.github.shiokunn.trpg.BuildConfig
 import io.github.shiokunn.trpg.core.domain.ModelSettings
+import android.util.Log
 // DEBUG MODE (temporary)
 import io.github.shiokunn.trpg.debug.DebugRecorder
 import kotlinx.coroutines.CancellationException
@@ -15,6 +16,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 
 /**
@@ -118,6 +121,7 @@ class LlamaCppEngine(
     override suspend fun generate(
         request: GenerationRequest,
         onToken: suspend (String) -> Unit,
+        onProgress: (GenerationProgress) -> Unit,
     ): GenerationOutcome {
         // Allocate the generation id before waiting on the mutex so a cancel request
         // issued while another generation still owns the engine is not lost.
@@ -125,12 +129,16 @@ class LlamaCppEngine(
         activeGenerationId.set(id)
         // DEBUG MODE (temporary) — stays null unless the debug toggle is ON.
         var recording: DebugRecorder.Recording? = null
+        var reporter: ProgressReporter? = null
         try {
             return mutex.withLock {
                 if (_status.value !is EngineStatus.Ready) {
                     return@withLock GenerationOutcome.Failure("モデルが読み込まれていません")
                 }
                 val params = request.params
+                val progress = ProgressReporter(id, params.maxTokens, onProgress)
+                reporter = progress
+                progress.start()
                 recording = DebugRecorder.begin(
                     modelFileName = (_status.value as? EngineStatus.Ready)?.modelFileName ?: "",
                     params = params,
@@ -141,10 +149,11 @@ class LlamaCppEngine(
 
                 withContext(Dispatchers.Default) {
                     coroutineScope {
-                        val pieces = Channel<String>(Channel.UNLIMITED)
+                        val pieces = Channel<GeneratedPiece>(Channel.UNLIMITED)
                         val consumer = launch {
                             for (piece in pieces) {
-                                onToken(piece)
+                                progress.onToken(piece.generatedTokens)
+                                if (piece.text.isNotEmpty()) onToken(piece.text)
                             }
                         }
 
@@ -175,6 +184,11 @@ class LlamaCppEngine(
                                 if (formatFailure != null) {
                                     pieces.close()
                                     consumer.join()
+                                    progress.finish(
+                                        generatedTokens = 0,
+                                        finishReason = GenerationFinishReason.ERROR,
+                                        limitReached = false,
+                                    )
                                     // DEBUG MODE (temporary)
                                     recording?.finish(GenerationOutcome.Failure(formatFailure))
                                     return@coroutineScope GenerationOutcome.Failure(formatFailure)
@@ -190,8 +204,8 @@ class LlamaCppEngine(
                                     repeatPenalty = params.repeatPenalty,
                                     seed = params.seed,
                                     generationId = id,
-                                    callback = TokenCallback { piece ->
-                                        pieces.trySend(piece)
+                                    callback = TokenCallback { piece, generated ->
+                                        pieces.trySend(GeneratedPiece(piece, generated))
                                         recording?.onToken() // DEBUG MODE (temporary)
                                     },
                                 )
@@ -205,8 +219,8 @@ class LlamaCppEngine(
                                     repeatPenalty = params.repeatPenalty,
                                     seed = params.seed,
                                     generationId = id,
-                                    callback = TokenCallback { piece ->
-                                        pieces.trySend(piece)
+                                    callback = TokenCallback { piece, generated ->
+                                        pieces.trySend(GeneratedPiece(piece, generated))
                                         recording?.onToken() // DEBUG MODE (temporary)
                                     },
                                     stops = emptyArray(),
@@ -232,6 +246,10 @@ class LlamaCppEngine(
                                         ?: "推論中にエラーが発生しました"
                                 },
                             )
+                            progress.finish(
+                                finishReason = GenerationFinishReason.ERROR,
+                                limitReached = false,
+                            )
                             recording?.finish(outcome) // DEBUG MODE (temporary)
                             return@coroutineScope outcome
                         }
@@ -239,6 +257,22 @@ class LlamaCppEngine(
                         // DEBUG MODE (temporary) — parses the metrics object only.
                         recording?.attachResult(raw)
                         val result = LlamaCppNative.parseGeneration(raw)
+                        progress.finish(
+                            generatedTokens = result.generatedTokens.takeIf { it >= 0 }
+                                ?: progress.lastGenerated,
+                            promptTokens = result.promptTokens.takeIf { it >= 0 },
+                            budget = result.budget.takeIf { it > 0 },
+                            finishReason = when {
+                                result.error != null -> GenerationFinishReason.ERROR
+                                result.cancelled -> GenerationFinishReason.CANCELLED
+                                else -> GenerationFinishReason.fromWire(result.finishReason)
+                            },
+                            limitReached = if (result.error != null || result.cancelled) {
+                                false
+                            } else {
+                                result.limitReached
+                            },
+                        )
                         val outcome = when {
                             result.cancelled -> GenerationOutcome.Cancelled
                             result.error != null -> GenerationOutcome.Failure(result.error)
@@ -252,8 +286,16 @@ class LlamaCppEngine(
         } catch (t: Throwable) {
             // DEBUG MODE (temporary) — close the session on cancelled/failed runs.
             if (t is CancellationException) {
+                reporter?.finish(
+                    finishReason = GenerationFinishReason.CANCELLED,
+                    limitReached = false,
+                )
                 recording?.finish(GenerationOutcome.Cancelled)
             } else {
+                reporter?.finish(
+                    finishReason = GenerationFinishReason.ERROR,
+                    limitReached = false,
+                )
                 recording?.finish(
                     GenerationOutcome.Failure(
                         t.message?.takeIf { it.isNotBlank() } ?: "推論中にエラーが発生しました",
@@ -310,3 +352,82 @@ class LlamaCppEngine(
             "メモリが不足して生成を継続できませんでした。コンテキストサイズを下げるか、より小さいモデルを使用してください。"
     }
 }
+
+/** One generated piece plus the exact llama.cpp token count after that piece. */
+private data class GeneratedPiece(val text: String, val generatedTokens: Int)
+
+/**
+ * Bridges native token callbacks to [onProgress]. UI updates and logs are throttled
+ * independently, and the final event is emitted exactly once so a cancellation race
+ * cannot overwrite the real finish reason.
+ */
+private class ProgressReporter(
+    private val id: Long,
+    private val maxTokens: Int,
+    private val onProgress: (GenerationProgress) -> Unit,
+) {
+    private val generatedCount = AtomicInteger(0)
+    private val finished = AtomicBoolean(false)
+    private var lastEmitAt = 0L
+    private var lastLogAt = 0L
+
+    /** Last count delivered by the native callback (used when the result JSON is lost). */
+    val lastGenerated: Int get() = generatedCount.get()
+
+    fun start() {
+        lastEmitAt = System.nanoTime()
+        emit(GenerationProgress(generationId = id, generatedTokens = 0, maxTokens = maxTokens))
+    }
+
+    fun onToken(generatedTokens: Int) {
+        generatedCount.set(generatedTokens)
+        val now = System.nanoTime()
+        if (now - lastEmitAt >= PROGRESS_UPDATE_INTERVAL_NANOS) {
+            lastEmitAt = now
+            emit(
+                GenerationProgress(
+                    generationId = id,
+                    generatedTokens = generatedTokens,
+                    maxTokens = maxTokens,
+                ),
+            )
+        }
+        if (now - lastLogAt >= PROGRESS_LOG_INTERVAL_NANOS) {
+            lastLogAt = now
+            Log.i(
+                TAG,
+                "[TokenCounter] progress generation=$id generated=$generatedTokens maxTokens=$maxTokens",
+            )
+        }
+    }
+
+    fun finish(
+        generatedTokens: Int = lastGenerated,
+        promptTokens: Int? = null,
+        budget: Int? = null,
+        finishReason: GenerationFinishReason,
+        limitReached: Boolean?,
+    ) {
+        if (!finished.compareAndSet(false, true)) return
+        emit(
+            GenerationProgress(
+                generationId = id,
+                promptTokens = promptTokens,
+                generatedTokens = generatedTokens,
+                maxTokens = maxTokens,
+                budget = budget,
+                finishReason = finishReason,
+                limitReached = limitReached,
+            ),
+        )
+    }
+
+    private fun emit(progress: GenerationProgress) {
+        if (finished.get() && progress.finishReason == null) return
+        runCatching { onProgress(progress) }
+    }
+}
+
+private const val TAG = "TrpgLlama"
+private const val PROGRESS_UPDATE_INTERVAL_NANOS = 150_000_000L
+private const val PROGRESS_LOG_INTERVAL_NANOS = 1_000_000_000L

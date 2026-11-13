@@ -34,6 +34,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.shiokunn.trpg.ai.engine.EngineStatus
+import io.github.shiokunn.trpg.ai.engine.GenerationFinishReason
+import io.github.shiokunn.trpg.ai.engine.GenerationProgress
 import io.github.shiokunn.trpg.core.ai.CharacterDraft
 import io.github.shiokunn.trpg.core.ai.WorldDraft
 import io.github.shiokunn.trpg.core.domain.AttributeId
@@ -227,6 +229,10 @@ private fun FormContent(
                             CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                             Text(state.statusText.ifBlank { "生成しています…" }, style = MaterialTheme.typography.bodyMedium)
                         }
+                        state.generation?.let { progress ->
+                            Spacer(Modifier.height(6.dp))
+                            TokenCounterLive(progress)
+                        }
                         Spacer(Modifier.height(8.dp))
                         TextButton(
                             onClick = onCancel,
@@ -241,6 +247,10 @@ private fun FormContent(
             item {
                 ErrorCard(message = message, details = state.details, onDismiss = onDismissError)
             }
+        }
+
+        state.generation?.takeIf { it.finishReason != null }?.let { progress ->
+            item { TokenCounterSummary(progress) }
         }
 
         item {
@@ -308,6 +318,10 @@ private fun PreviewContent(
             )
         }
 
+        state.generation?.takeIf { it.finishReason != null }?.let { progress ->
+            item { TokenCounterSummary(progress) }
+        }
+
         state.error?.let { message ->
             item {
                 ErrorCard(message = message, details = state.details, onDismiss = onDismissError)
@@ -341,6 +355,48 @@ private fun PreviewContent(
             }
         }
     }
+}
+
+@Composable
+private fun TokenCounterLive(progress: GenerationProgress) {
+    Text(
+        text = tokenCounterText(progress),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+@Composable
+private fun TokenCounterSummary(progress: GenerationProgress) {
+    Text(
+        text = tokenCounterText(progress) + "・" + finishReasonText(progress),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+private fun tokenCounterText(progress: GenerationProgress): String {
+    val effective = progress.budget?.takeIf { it in 1 until progress.maxTokens }
+    val suffix = if (effective != null) "（実効上限 $effective）" else ""
+    return "生成トークン: ${progress.generatedTokens} / ${progress.maxTokens}$suffix"
+}
+
+private fun finishReasonText(progress: GenerationProgress): String {
+    val reason = when (progress.finishReason) {
+        GenerationFinishReason.LENGTH -> "上限到達"
+        GenerationFinishReason.EOS -> "完了（EOS）"
+        GenerationFinishReason.STOP -> "停止文字列"
+        GenerationFinishReason.CANCELLED -> "キャンセル"
+        GenerationFinishReason.ERROR -> "エラー"
+        GenerationFinishReason.CONTEXT -> "コンテキスト上限"
+        GenerationFinishReason.UNKNOWN, null -> "不明"
+    }
+    val limit = when (progress.limitReached) {
+        true -> "到達"
+        false -> "未到達"
+        null -> "不明"
+    }
+    return "終了理由: $reason・maxTokens到達: $limit"
 }
 
 @Composable

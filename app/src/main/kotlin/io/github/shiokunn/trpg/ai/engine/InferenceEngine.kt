@@ -72,6 +72,37 @@ sealed interface GenerationOutcome {
     data class Failure(val message: String) : GenerationOutcome
 }
 
+/** Why a generation stopped. Mirrors the finish reason reported by llama.cpp. */
+enum class GenerationFinishReason(val wire: String) {
+    LENGTH("length"),
+    EOS("eos"),
+    STOP("stop"),
+    CANCELLED("cancelled"),
+    ERROR("error"),
+    CONTEXT("context"),
+    UNKNOWN("unknown"),
+    ;
+
+    companion object {
+        fun fromWire(value: String?): GenerationFinishReason =
+            entries.firstOrNull { it.wire == value } ?: UNKNOWN
+    }
+}
+
+/**
+ * Token accounting for one generation. [finishReason] is null while the generation is
+ * still running. Counts come from llama.cpp itself, never from the text length.
+ */
+data class GenerationProgress(
+    val generationId: Long,
+    val promptTokens: Int? = null,
+    val generatedTokens: Int = 0,
+    val maxTokens: Int,
+    val budget: Int? = null,
+    val finishReason: GenerationFinishReason? = null,
+    val limitReached: Boolean? = null,
+)
+
 /**
  * Abstraction over the on-device inference backend.
  *
@@ -96,10 +127,14 @@ interface InferenceEngine {
     /**
      * Streams generated pieces through [onToken] and returns the final outcome.
      * After [cancel] the engine stops within roughly one token.
+     *
+     * [onProgress] receives live token counts and a final event carrying the finish
+     * reason. It is throttled and invoked off the main thread; callers must not block.
      */
     suspend fun generate(
         request: GenerationRequest,
         onToken: suspend (String) -> Unit,
+        onProgress: (GenerationProgress) -> Unit = {},
     ): GenerationOutcome
 
     /** Requests that an in-flight generation stop. Safe to call from any thread. */

@@ -754,12 +754,12 @@ struct JvmCallback {
         if (cls == nullptr) {
             return;
         }
-        on_token = env->GetMethodID(cls, "onToken", "(Ljava/lang/String;)V");
+        on_token = env->GetMethodID(cls, "onToken", "(Ljava/lang/String;I)V");
         env->DeleteLocalRef(cls);
         valid = on_token != nullptr;
     }
 
-    bool emit_utf16(const std::vector<jchar> & utf16) {
+    bool emit_utf16(const std::vector<jchar> & utf16, jint generated_tokens) {
         if (!valid || utf16.empty()) {
             return valid;
         }
@@ -768,7 +768,7 @@ struct JvmCallback {
             valid = false;
             return false;
         }
-        env->CallVoidMethod(callback, on_token, text);
+        env->CallVoidMethod(callback, on_token, text, generated_tokens);
         env->DeleteLocalRef(text);
         if (env->ExceptionCheck()) {
             env->ExceptionClear();
@@ -779,18 +779,18 @@ struct JvmCallback {
         return true;
     }
 
-    bool emit(const std::string & piece) {
+    bool emit(const std::string & piece, jint generated_tokens) {
         if (!valid || piece.empty()) {
             return valid;
         }
-        return emit_utf16(decoder.append(piece));
+        return emit_utf16(decoder.append(piece), generated_tokens);
     }
 
-    bool finish() {
+    bool finish(jint generated_tokens) {
         if (!valid) {
             return false;
         }
-        return emit_utf16(decoder.flush());
+        return emit_utf16(decoder.flush(), generated_tokens);
     }
 };
 
@@ -814,6 +814,8 @@ std::string run_generation_locked(
         std::ostringstream message;
         message << "プロンプトが長すぎます（" << n_prompt << " トークン / コンテキスト " << g_n_ctx
                 << "）。コンテキストサイズを増やすか、記憶や履歴を減らしてください";
+        LOGI("[TokenCounter] finish generation=%llu generated=0 maxTokens=%d budget=0 finishReason=error limitReached=0",
+             static_cast<unsigned long long>(generation_id), max_tokens);
         return error_json(message.str());
     }
 
@@ -839,8 +841,13 @@ std::string run_generation_locked(
          n_prompt, budget,
          static_cast<long long>(clear_ms),
          temperature, top_p, top_k);
+    LOGI("[TokenCounter] start generation=%llu promptTokens=%d maxTokens=%d budget=%d",
+         static_cast<unsigned long long>(generation_id),
+         n_prompt, max_tokens, budget);
 
     bool cancelled = false;
+    bool eos = false;
+    bool context_limit = false;
     std::string failure;
     int32_t n_pos = 0;
 
@@ -925,6 +932,7 @@ std::string run_generation_locked(
                     break;
                 }
                 if (llama_vocab_is_eog(vocab, token)) {
+                    eos = true;
                     break;
                 }
 
@@ -953,7 +961,7 @@ std::string run_generation_locked(
                         sent = generated_raw.size();
                     }
                     if (sent < generated_raw.size()) {
-                        jvm_callback.emit(generated_raw.substr(sent));
+                        jvm_callback.emit(generated_raw.substr(sent), generated_tokens);
                         sent = generated_raw.size();
                     }
                     break;
@@ -965,11 +973,12 @@ std::string run_generation_locked(
                         ? generated_raw.size() - (max_stop_length - 1)
                         : 0);
                 if (safe_length > sent) {
-                    jvm_callback.emit(generated_raw.substr(sent, safe_length - sent));
+                    jvm_callback.emit(generated_raw.substr(sent, safe_length - sent), generated_tokens);
                     sent = safe_length;
                 }
 
                 if (n_pos + 1 >= g_n_ctx) {
+                    context_limit = true;
                     break;
                 }
 
@@ -999,9 +1008,9 @@ std::string run_generation_locked(
             }
 
             if (!stopped && sent < generated_raw.size()) {
-                jvm_callback.emit(generated_raw.substr(sent));
+                jvm_callback.emit(generated_raw.substr(sent), generated_tokens);
             }
-            jvm_callback.finish();
+            jvm_callback.finish(generated_tokens);
 
             llama_sampler_free(sampler);
         }
@@ -1019,6 +1028,26 @@ std::string run_generation_locked(
     const double tok_per_sec = gen_ms > 0
         ? static_cast<double>(generated_tokens) * 1000.0 / static_cast<double>(gen_ms)
         : 0.0;
+    const char * finish_reason = "unknown";
+    bool limit_reached = false;
+    if (cancelled) {
+        finish_reason = "cancelled";
+    } else if (!failure.empty()) {
+        finish_reason = "error";
+    } else if (stopped) {
+        finish_reason = "stop";
+    } else if (eos) {
+        finish_reason = "eos";
+    } else if (context_limit) {
+        finish_reason = "context";
+    } else if (generated_tokens >= budget) {
+        if (max_tokens > 0 && budget == max_tokens) {
+            finish_reason = "length";
+            limit_reached = true;
+        } else if (max_tokens > 0 && budget < max_tokens) {
+            finish_reason = "context";
+        }
+    }
     LOGI("generate: prompt_tokens=%d prompt_ms=%lld generated_tokens=%d gen_ms=%lld tok_per_sec=%.2f ttft_ms=%lld cancelled=%d failed=%d",
          n_prompt,
          static_cast<long long>(prompt_ms),
@@ -1028,10 +1057,27 @@ std::string run_generation_locked(
          static_cast<long long>(ttft_ms),
          cancelled ? 1 : 0,
          failure.empty() ? 0 : 1);
+    const bool limit_unknown = std::string(finish_reason) == "unknown";
+    LOGI("[TokenCounter] finish generation=%llu generated=%d maxTokens=%d budget=%d finishReason=%s limitReached=%d",
+         static_cast<unsigned long long>(generation_id),
+         generated_tokens, max_tokens, budget, finish_reason,
+         limit_unknown ? -1 : (limit_reached ? 1 : 0));
 
     std::ostringstream out;
     out << "{\"ok\":" << (failure.empty() ? "true" : "false");
     out << ",\"cancelled\":" << (cancelled ? "true" : "false");
+    out << ",\"generationId\":" << generation_id;
+    out << ",\"promptTokens\":" << n_prompt;
+    out << ",\"generatedTokens\":" << generated_tokens;
+    out << ",\"maxTokens\":" << max_tokens;
+    out << ",\"budget\":" << budget;
+    out << ",\"finishReason\":\"" << finish_reason << "\"";
+    out << ",\"limitReached\":";
+    if (limit_unknown) {
+        out << "null";
+    } else {
+        out << (limit_reached ? "true" : "false");
+    }
     out << ",\"text\":\"" << json_escape(generated_raw) << "\"";
     out << ",\"error\":\"" << json_escape(failure) << "\"";
     // DEBUG MODE (temporary) — measurement only. All values below are already
