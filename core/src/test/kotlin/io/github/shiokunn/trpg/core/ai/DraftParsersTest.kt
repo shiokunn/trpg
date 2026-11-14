@@ -187,9 +187,19 @@ class DraftParsersTest {
     }
 
     @Test
-    fun worldRejectsStringCombatNumber() {
-        val raw = validWorld.replaceFirst("\"hp\": 8", "\"hp\": \"8\"")
+    fun worldRejectsNonNumericStringCombatValue() {
+        val raw = validWorld.replaceFirst("\"hp\": 8", "\"hp\": \"many\"")
         assertTrue(WorldDraftParser.parse(raw) is AiParseResult.Failure)
+    }
+
+    @Test
+    fun worldAcceptsQuotedNumericCombatValue() {
+        // kotlinx.serialization converts a quoted numeric literal into the Int field
+        // even when isLenient is false, so the parser cannot reject it here.
+        val raw = validWorld.replaceFirst("\"hp\": 8", "\"hp\": \"8\"")
+        val result = WorldDraftParser.parse(raw)
+        assertTrue(result is AiParseResult.Success)
+        assertEquals(8, (result as AiParseResult.Success).value.opening.npcs.single().combat?.hp)
     }
 
     @Test
