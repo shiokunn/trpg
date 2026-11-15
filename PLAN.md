@@ -146,7 +146,7 @@
   実機推論と Vulkan は環境上未検証であることを明記。
 
 ### Phase 3: D6 ゲームエンジン
-- 3.1 `Attributes`（1..5、合計18検証）、`Skill`（0..3、作成時最大2、合計6）。
+- 3.1 `Attributes`（各1..5、合計固定なし）、`Skill`（0..3、作成時最大2、合計固定なし）。
 - 3.2 `DiceEngine`: 1D6 + 能力 + スキル、有利/不利、難易度、大成功/成功/部分的成功/失敗、`DiceResult` 保存。
 - 3.3 `CombatResolver`: 攻撃/防御、命中、`max(1, 威力 + floor((攻撃-防御-1)/3) - 防御力)`、HP 0 で戦闘不能（死亡は自動確定しない）。
 - 3.4 `StateChangeValidator/Applier`: HP_DELTA, XP_DELTA, ITEM_ADD/REMOVE, NPC_RELATION_DELTA (±100), QUEST_PROGRESS/STATUS,

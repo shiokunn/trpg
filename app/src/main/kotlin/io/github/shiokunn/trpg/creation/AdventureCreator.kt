@@ -175,7 +175,7 @@ class AdventureCreator(
         append("シナリオ: ").append(world.scenario.title).append('\n')
         append("あらすじ: ").append(world.scenario.premise).append('\n')
         append("主人公への希望: ").append(input.protagonistWish.ifBlank { "指定なし" }).append('\n')
-        append("能力値は各1〜5で合計18、スキルはレベル合計6（各0〜2）、所持品は2〜5個にしてください。")
+        append("能力値は各1〜5、スキルは3〜5個（各0〜2）、所持品は2〜5個にしてください。合計値の指定はありません。")
     }
 
     private fun repairInstruction(errors: List<String>, extraRules: String = ""): String = buildString {
@@ -275,8 +275,9 @@ class AdventureCreator(
             日本語で、世界とシナリオに合う魅力的なキャラクターを作ってください。
 
             【厳守する作成ルール】
-            - 能力値 str/dex/int/wil/per/cha はそれぞれ1〜5の整数で、合計は必ず18。
-            - スキルは3〜5個。各レベルは0〜2で、レベルの合計は必ず6。
+            - 能力値 str/dex/int/wil/per/cha はそれぞれ1〜5の整数。
+            - スキルは3〜5個。各レベルは0〜2。
+            - 能力値・スキルの合計値を特定の値に合わせる必要はありません。
             - 所持品は2〜5個。quantityは1〜99、power/defenseは0〜20。
             - JSONオブジェクト1つだけを出力する。説明文・コードフェンス・JSON以外の文字を含めない。
 

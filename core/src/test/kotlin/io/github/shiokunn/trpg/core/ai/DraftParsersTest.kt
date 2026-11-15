@@ -218,19 +218,37 @@ class DraftParsersTest {
     }
 
     @Test
-    fun characterRejectsWrongAttributeSum() {
-        val raw = validCharacter.replaceFirst("\"cha\": 3", "\"cha\": 5")
-        val errors = (CharacterDraftParser.parse(raw) as AiParseResult.Failure).errors
-        assertTrue(errors.any { it.contains("合計") })
+    fun characterAcceptsNonStandardAttributeAndSkillTotals() {
+        val lowAttributes = validCharacter.replaceFirst("\"cha\": 3", "\"cha\": 1")
+        val attributeResult = CharacterDraftParser.parse(lowAttributes)
+        assertTrue(attributeResult is AiParseResult.Success)
+        assertEquals(
+            16,
+            (attributeResult as AiParseResult.Success).value.attributes.total(),
+        )
+
+        val lowSkills = validCharacter.replaceFirst(
+            "\"level\": 2, \"description\": \"痕跡を見つける\"",
+            "\"level\": 1, \"description\": \"痕跡を見つける\"",
+        )
+        val skillResult = CharacterDraftParser.parse(lowSkills)
+        assertTrue(skillResult is AiParseResult.Success)
+        assertEquals(
+            5,
+            (skillResult as AiParseResult.Success).value.skills.sumOf { it.level },
+        )
     }
 
     @Test
-    fun characterRejectsWrongSkillSumAndLevel() {
-        val lowSum = validCharacter.replaceFirst("\"level\": 2, \"description\": \"説得する\"", "\"level\": 1, \"description\": \"説得する\"")
-        assertTrue(CharacterDraftParser.parse(lowSum) is AiParseResult.Failure)
-
+    fun characterRejectsSkillLevelAboveCreationMax() {
         val tooHigh = validCharacter.replaceFirst("\"level\": 2, \"description\": \"痕跡を見つける\"", "\"level\": 3, \"description\": \"痕跡を見つける\"")
         assertTrue(CharacterDraftParser.parse(tooHigh) is AiParseResult.Failure)
+    }
+
+    @Test
+    fun characterRejectsOutOfRangeAttribute() {
+        val raw = validCharacter.replaceFirst("\"cha\": 3", "\"cha\": 6")
+        assertTrue(CharacterDraftParser.parse(raw) is AiParseResult.Failure)
     }
 
     @Test
