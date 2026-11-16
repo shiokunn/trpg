@@ -2,13 +2,18 @@
 
 **Status: IN_PROGRESS**
 **Created: 2026-11-08**
-**Updated: 2026-11-10**
-**Current goal: Phase 8 — llama.cpp v0.9.0 推論エンジン改善（テンプレート / スレッドプール / キャンセル / UTF-8）**
-**Prior goal: Phase 0–7 完了（履歴は本ファイル前半と PROGRESS.md に保持）**
+**Updated: 2026-11-16**
+**Current goal: Phase 9 — 推論安定化（①）とドキュメント整合（⑦）。②〜⑥は計画済み・未着手**
+**Prior goal: Phase 8 完了（llama.cpp v0.9.0 / KV キャッシュ。CI run 43841689001）**
 **Working directory: `/data/data/com.termux/files/home/trpg`**
 
 > 注: Phase 8 見出しより前の内容は Phase 0–7 時点の履歴である。現在の作業計画は
-> 末尾の「Phase 8」節に記載する。既存の履歴・完了済み判断は置き換えない。
+> 末尾の「Phase 8」「Phase 9」節に記載する。既存の履歴・完了済み判断は置き換えない。
+>
+> **2026-11-16 追記:** Phase 8 の KV キャッシュは実装・実機確認済み。
+> Phase 9 で ①（CPU cpuset / 実スレッド数 / メモリ推奨 / エラー分類 / タイムアウト /
+> 画面消灯防止）と ⑦（README / PLAN / PROGRESS / VERIFICATION の整合）を実施した。
+> ②〜⑥ の実装状況は末尾のロードマップを正とする。
 
 ---
 
@@ -822,3 +827,89 @@ commit `6f1eef3`）で arm64-v8a のビルド検証を実施。**全ステップ
 - `minja` が実モデルの独自テンプレートを評価できるかは未確認（fail closed で安全側）。
 - `BUILD_SHARED_LIBS=ON` + `LLAMA_BUILD_COMMON=ON` の組み合わせは upstream の
   既定（OFF）と異なるが、NDK 29 / CMake 3.31.6 でのビルド・パッケージングは確認済み。
+
+---
+
+# Phase 9 — 推論安定化（①）とドキュメント整合（⑦）
+
+**Status: 実装済み / CI・実機検証は本節の結果を参照**
+**Started: 2026-11-16**
+**Scope: 指示書 ①（推論エンジン安定化）と ⑦（ロードマップ・技術負債の整理）**
+
+## 9.1 実機で確認した問題
+
+接続端末: FCNT M08 / MT6897（Dimensity 8350 系）/ Android 16 / MemTotal 11.7GB。
+ADB シリアルは `emulator-5554` だが、`ro.product.model=M08`、`ro.soc.model=MT6897` の実機。
+
+| 項目 | 実測 |
+| --- | --- |
+| 前景時のプロセス | `VmRSS 165,068 kB` / `VmSwap 2,041,344 kB` |
+| 端末の空きメモリ | `MemAvailable 3,376,596 kB` |
+| cpuset | 前景 `0-7` / 背景 `0-2` |
+| モデル | Kyalulu-E2B-JP-Rolepaly-beta-Q4_K_M.gguf（3.2GB, `nCtx=16384`） |
+| KV キャッシュ | 初回 2314 tokens / 133,958 ms、再利用時 78 tokens / 15,534 ms（約8.6倍高速） |
+
+`VmSwap` の約2GBはモデル重み（mmap）ではなく、KV キャッシュを含む匿名メモリが
+zram に退避したものと解釈している。16K コンテキストと3GB級モデルの組み合わせが
+初回プロンプトの長時間化に寄与している。
+
+## 9.2 実装内容
+
+### CPU affinity と実スレッド数
+
+- `read_allowed_cpu_list()` で `/proc/self/status` の `Cpus_allowed_list` を読み、
+  online CPU との積集合だけを threadpool の候補にする。
+- `build_threadpool_params()` の `threads` を context 作成前に解決し、
+  `ctx_params.n_threads` / `n_threads_batch` と実際の threadpool のスレッド数を一致させる。
+  これにより、背景時の cpuset 縮小で「cplan が要求するスレッド数 > pool」となる
+  不整合を防ぐ。
+- デバッグ画面の `threads（実値 / 要求）` と `CPU affinity` に `allowed=` を表示する。
+
+### メモリ推奨とデフォルト
+
+- `core/inference/MemoryAdvisor.kt` を追加。モデルサイズ・端末RAM・学習時コンテキストから
+  推奨 `nCtx` を算出する（例: 3.2GBモデル / 12GB RAM → 8192）。
+- `ModelSettings.DEFAULT_N_CTX` を 32768 から 8192 に変更。既存の保存値は変更しない。
+- モデル管理画面に推奨値、`MemAvailable` 相当の警告、「推奨値を使う」ボタンを追加。
+- ネイティブのコンテキスト/モデル/バッチ確保失敗に `errorKind` を付与し、
+  Kotlin 側で日本語の対処メッセージへ分類する。
+
+### タイムアウトと画面消灯
+
+- `NoProgressTimer` と watchdog を追加。5分間トークンが生成されない場合に
+  `nativeCancelGeneration` を呼び、`GenerationFailureKind.TIMEOUT` として返す。
+- 生成中は `View.keepScreenOn` を有効化し、画面消灯による cpuset 縮小を避ける。
+- デバッグのメモリカードに `MemAvailable` / `SwapFree` を追加。
+
+## 9.3 検証
+
+- C++ ホスト構文検証: `clang++ -std=c++17 -fsyntax-only -DTRPG_THREAD_PROFILE=0` 成功。
+- `./gradlew -p core test`: 成功（MemoryAdvisor / DebugSession の追加テストを含む）。
+- GitHub Actions: run `43857282916`（commit `2a2c51b`）— 成功（core 150件 / app 11件 / APK）。
+- 実機: 新しい APK を `adb install -r` で更新し、モデル読み込み・生成・KV 再利用・
+  タイムアウト未発火・キャンセル復帰を確認。詳細は `docs/VERIFICATION.md`。
+
+## 9.4 ②〜⑥ のロードマップ（未着手）
+
+| # | 項目 | 状態 | 優先度 | 依存関係 | 完了条件 |
+| --- | --- | --- | --- | --- | --- |
+| ② | 長期記憶の検索精度 | 未着手 | 高 | ①の安定した生成 | 関連記憶の優先、重複除去、NPC記憶の分離、コンテキスト上限 |
+| ③ | 選択肢の品質 | 未着手 | 高 | ②のプロンプト改善 | 行動タイプ・リスク・条件の表示、重複防止、D6判定との整合 |
+| ④ | 世界の時間・NPC行動 | 未着手 | 中 | ③の状態更新、Roomマイグレーション | 時間経過、NPCの状態変化、イベント/クエスト期限 |
+| ⑤ | ジャーナル | 未着手 | 中 | ④のイベント/クエスト情報 | 冒険記録・NPC・クエスト・場所の整理表示、既存データ維持 |
+| ⑥ | LLM評価・品質測定 | 未着手 | 中 | ①〜⑤の出力経路 | 固定シナリオ、JSON/ゲーム品質/性能の分離測定、結果保存 |
+| ⑦ | ドキュメント整合 | 本Phaseで実施 | 高 | ①の結果 | README/PLAN/PROGRESS/VERIFICATION の一致 |
+
+②のEmbeddingは、決定論的改善（重複除去・固有表現ブースト・NPC別上限）と実測を行った後に、
+明確な改善が見込める場合のみ導入する。④はRoomのバージョンアップを伴うため、
+既存DB・バックアップの互換性を確認してから着手する。
+
+## 9.5 残課題
+
+- タイムアウトの発火、ネイティブOOM、モデル切り替え後のKV整合は、意図的な再現が必要で
+  未検証。実機で強制できる範囲を `docs/VERIFICATION.md` に記録する。
+- 背景移行後に既存 threadpool の affinity がそのまま残るため、cpuset が 0-2 に縮小すると
+  生成が遅くなる可能性がある。`keepScreenOn` と watchdog で緩和するが、前景サービスの導入や
+  「背景移行時にキャンセル」は将来の検討項目。
+- 実機の未コミット変更（`.github/workflows/android.yml` の GBNF 検証、未追跡の調査資料・
+  `scripts/gbnf-*`）は本Phaseでは変更せず保持している。

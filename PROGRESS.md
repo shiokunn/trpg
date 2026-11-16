@@ -1,7 +1,7 @@
 # PROGRESS — Android向け完全オフラインTRPGアプリ
 
-**Status: Phase 7（仕上げ）実装完了 / Phase 8（推論エンジン改善）IN_PROGRESS（P0-1〜P1-2 実装完了、P1-3・CI・実機は未実施）**
-**Last updated: 2026-11-10**
+**Status: Phase 8 完了 / Phase 9（①推論安定化・⑦ドキュメント整合）実装完了 / ②〜⑥ 未着手**
+**Last updated: 2026-11-16**
 
 ---
 
@@ -12,6 +12,52 @@
 - 構成: `:core`（純 Kotlin/JVM）+ `:app`（Android）
 - ビルド/テストは GitHub Actions が唯一の実行経路（Termux に Android SDK/NDK が無い）
 - 検証の詳細と未検証項目: [docs/VERIFICATION.md](docs/VERIFICATION.md)
+
+## 2026-11-16 更新（Phase 8 完了 / Phase 9 ①・⑦）
+
+### KV キャッシュ（Phase 8 の完了分）
+
+- `llama_memory_seq_rm` / `llama_memory_seq_pos_min` / `llama_memory_seq_pos_max` /
+  `llama_memory_clear` を使い、ターン間で共通プロンプト接頭辞の KV を再利用する。
+- モデル・コンテキスト・サンプリング設定が変わった場合は fingerprint で無効化する。
+- 最後のプロンプトトークンは常に再計算し、サンプラーの logits を新鮮に保つ。
+- 実機（Kyalulu E2B Q4_K_M、`nCtx=16384`）の実測:
+  - 初回: prompt 2314 tokens / 133,958 ms
+  - 2回目: 3058 reused + 78 computed / 15,534 ms（約8.6倍高速）
+  - 3回目: 2313 reused + 1 computed / 101 ms
+
+### ① 推論エンジン安定化
+
+- `Cpus_allowed_list` と online CPU の積集合を threadpool に使い、背景時の cpuset 外
+  CPU 選択を防止。
+- コンテキスト作成前に実スレッド数を解決し、`n_threads` と threadpool を一致。
+- `MemoryAdvisor` とモデル画面の推奨コンテキスト表示、`DEFAULT_N_CTX=8192`。
+- ネイティブの `errorKind`（`context_alloc` / `model_load` / `batch_alloc` / `memory`）と
+  日本語の対処メッセージ。
+- 5分間無進捗の watchdog、生成中の `keepScreenOn`、`MemAvailable` / `SwapFree` の記録。
+- 追加テスト: `MemoryAdvisorTest`、`NoProgressTimerTest`、`LlamaCppNativeTest` の
+  エラー種別、`DebugSessionTest` のメモリサンプル。
+
+### 検証結果
+
+| 項目 | 結果 |
+| --- | --- |
+| C++ 構文検証（profile A） | 成功 |
+| `./gradlew -p core test` | 150件成功（2026-11-16） |
+| GitHub Actions | run `43857282916` / commit `2a2c51b` — 成功（core 150件 / app 11件 / APK） |
+| APK 更新インストール | `adb install -r` でデータ保持（`firstInstallTime` 不変） |
+| 実機のモデル読み込み・生成・KV 再利用 | `docs/VERIFICATION.md` に記録（8192 で `VmSwap` 2.04GB → 25MB） |
+| タイムアウト発火・OOM 強制・モデル切替 | 未検証（残課題） |
+
+### ②〜⑥ の状態
+
+- ② 長期記憶: `MemorySelector` の既存スコア方式はあるが、意味検索・重複除去・
+  NPC 別の全体上限は未実装。
+- ③ 選択肢: `GmChoice(id,text,check)` のみ。行動タイプ・リスク・条件は未実装。
+- ④ 世界時間/NPC: `GameSession` にゲーム内時刻、`Quest` に期限、NPC の行動予定は未実装。
+- ⑤ ジャーナル: 会話/イベント/記憶/ダイスの4タブ。NPC/クエスト/場所の専用記録は未実装。
+- ⑥ 評価: デバッグ計測はあるが、固定シナリオ・集計・モデル比較は未実装。
+- ⑦ ドキュメント: 本更新で README / PLAN / PROGRESS / VERIFICATION を現状に合わせた。
 
 ## フェーズ
 
@@ -34,7 +80,10 @@
   - [x] OS クラウド自動バックアップを無効化（明示的な JSON 書き出しのみ）
   - [x] README / 検証レポート / Room スキーマ成果物の CI 保存
 
-## ローカル検証
+## ローカル検証（Phase 7 時点の履歴）
+
+> 2026-11-16 追記: 以下の件数は当時のもの。現在は core 150件が成功している。
+> 実機検証は [docs/VERIFICATION.md](docs/VERIFICATION.md) を参照。
 
 - `./gradlew -p core test` — 89件すべて成功（2026-11-08）
   - 判定・キャラクター規則 14、戦闘解決 6、戦闘ラウンド 5、状態変更 19、
@@ -66,7 +115,9 @@
 - 場所・クエストの手動追加、アイテム数量編集
 - 世界・導入の事後編集 UI
 
-## 次にやること
+## 次にやること（Phase 7 時点の履歴）
+
+> 2026-11-16 追記: 現在の優先順は Phase 9 のロードマップ（①完了 → ②〜⑥）を正とする。
 
 1. 実機でモデル読み込み→冒険開始→数ターン→保存→再起動→続きから、を確認
 2. 実機でバックアップ書き出し→削除→読み込みを確認
