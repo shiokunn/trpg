@@ -478,9 +478,10 @@ private fun ParamCard(
                 label = "最大生成トークン",
                 valueText = "${draft.maxTokens}",
                 value = draft.maxTokens.toFloat(),
-                range = 64f..4096f,
+                range = ModelSettings.MIN_MAX_TOKENS.toFloat()..ModelSettings.MAX_MAX_TOKENS.toFloat(),
                 onChange = { raw ->
-                    val stepped = (raw / 64f).roundToInt().coerceAtLeast(1) * 64
+                    val stepped = ((raw / 64f).roundToInt().coerceAtLeast(1) * 64)
+                        .coerceIn(ModelSettings.MIN_MAX_TOKENS, ModelSettings.MAX_MAX_TOKENS)
                     onChange(draft.copy(maxTokens = stepped))
                 },
             )

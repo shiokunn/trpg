@@ -23,18 +23,20 @@ data class ModelSettings(
         topP = topP.coerceIn(0.05f, 1f),
         topK = topK.coerceIn(1, 200),
         repeatPenalty = repeatPenalty.coerceIn(1f, 2f),
-        maxTokens = maxTokens.coerceIn(64, 4096),
+        maxTokens = maxTokens.coerceIn(MIN_MAX_TOKENS, MAX_MAX_TOKENS),
         gpuLayers = gpuLayers.coerceIn(0, 200),
     )
 
     companion object {
-        const val DEFAULT_N_CTX = 8192
+        const val DEFAULT_N_CTX = 32768
         const val MIN_N_CTX = 512
         const val MAX_N_CTX = 32768
         const val DEFAULT_TEMPERATURE = 0.75f
         const val DEFAULT_TOP_P = 0.9f
         const val DEFAULT_TOP_K = 40
         const val DEFAULT_REPEAT_PENALTY = 1.1f
-        const val DEFAULT_MAX_TOKENS = 1000
+        const val DEFAULT_MAX_TOKENS = 4096
+        const val MIN_MAX_TOKENS = 64
+        const val MAX_MAX_TOKENS = 16384
     }
 }

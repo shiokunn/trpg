@@ -161,7 +161,10 @@ class DebugSessionTest {
         session.attachNativeMetrics(
             """{"ok":true,"text":"hidden","metrics":{"applyMs":13,"tokenizeMs":48,
                "clearMs":1,"promptMs":1000,"genMs":2000,"ttftMs":1010,
-               "promptTokens":735,"generatedTokens":100,"budget":100,"threads":4,"nBatch":1024}}""",
+               "promptTokens":735,"generatedTokens":100,"budget":100,"threads":4,"nBatch":1024,
+               "kvValid":true,"kvHit":true,"kvReusedTokens":600,
+               "kvComputedPromptTokens":135,"kvCachedTokens":835,
+               "kvInvalidationReason":"prefix_reuse"}}""",
         )
         val metrics = session.nativeMetrics
         assertNotNull(metrics)
@@ -169,6 +172,12 @@ class DebugSessionTest {
         assertEquals(48L, metrics?.tokenizeMs)
         assertEquals(735, metrics?.promptTokens)
         assertEquals(4, metrics?.threads)
+        assertEquals(true, metrics?.kvValid)
+        assertEquals(true, metrics?.kvHit)
+        assertEquals(600, metrics?.kvReusedTokens)
+        assertEquals(135, metrics?.kvComputedPromptTokens)
+        assertEquals(835, metrics?.kvCachedTokens)
+        assertEquals("prefix_reuse", metrics?.kvInvalidationReason)
     }
 
     @Test

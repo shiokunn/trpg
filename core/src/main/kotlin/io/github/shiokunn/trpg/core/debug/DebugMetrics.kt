@@ -22,6 +22,12 @@ data class NativeMetrics(
     val budget: Int? = null,
     val threads: Int? = null,
     val nBatch: Int? = null,
+    val kvValid: Boolean? = null,
+    val kvHit: Boolean? = null,
+    val kvReusedTokens: Int? = null,
+    val kvComputedPromptTokens: Int? = null,
+    val kvCachedTokens: Int? = null,
+    val kvInvalidationReason: String? = null,
 )
 
 /** Values reported by the native layer. Requested and actual values are kept apart. */

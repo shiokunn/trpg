@@ -12,20 +12,33 @@ import kotlinx.serialization.SerializationException
 object GmResponseParser {
 
     fun parse(raw: String): AiParseResult<GmResponse> {
-        val candidate = AiJson.extractObject(raw)
-            ?: return AiParseResult.Failure(
-                listOf("JSONオブジェクトが見つかりません。JSONのみを出力してください。"),
+        val element = when (val extraction = AiJson.extractObject(raw)) {
+            is AiJsonExtraction.Found -> extraction.element
+            is AiJsonExtraction.NotFound -> return AiParseResult.Failure(
+                listOf(AiError(AiErrorKind.JSON_EXTRACTION, extraction.message)),
             )
+            is AiJsonExtraction.Truncated -> return AiParseResult.Failure(
+                listOf(AiError(AiErrorKind.JSON_TRUNCATED, extraction.message)),
+            )
+            is AiJsonExtraction.Malformed -> return AiParseResult.Failure(
+                listOf(AiError(AiErrorKind.JSON_SYNTAX, extraction.message)),
+            )
+        }
 
         val response = try {
-            AiJson.strict.decodeFromString(GmResponse.serializer(), candidate)
+            AiJson.strict.decodeFromJsonElement(GmResponse.serializer(), element)
         } catch (t: SerializationException) {
             return AiParseResult.Failure(
-                listOf("JSONスキーマが不正です: ${t.message ?: "解析に失敗しました"}"),
+                listOf(t.toAiError("JSONスキーマが不正です")),
             )
         } catch (t: IllegalArgumentException) {
             return AiParseResult.Failure(
-                listOf("JSONの値が不正です: ${t.message ?: "解析に失敗しました"}"),
+                listOf(
+                    AiError(
+                        AiErrorKind.JSON_SCHEMA,
+                        "JSONの値が不正です: ${t.message ?: "解析に失敗しました"}",
+                    ),
+                ),
             )
         }
 
@@ -33,7 +46,7 @@ object GmResponseParser {
         return if (errors.isEmpty()) {
             AiParseResult.Success(response)
         } else {
-            AiParseResult.Failure(errors)
+            AiParseResult.Failure(errors.map { AiError(AiErrorKind.CONTRACT, it) })
         }
     }
 

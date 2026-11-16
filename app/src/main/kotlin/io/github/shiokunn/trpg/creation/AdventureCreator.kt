@@ -1,6 +1,8 @@
 package io.github.shiokunn.trpg.creation
 
 import io.github.shiokunn.trpg.ai.engine.EngineStatus
+import io.github.shiokunn.trpg.ai.engine.GenerationFailureKind
+import io.github.shiokunn.trpg.ai.engine.GenerationFinishReason
 import io.github.shiokunn.trpg.ai.engine.GenerationOutcome
 import io.github.shiokunn.trpg.ai.engine.GenerationProgress
 import io.github.shiokunn.trpg.ai.engine.GenerationRequest
@@ -11,8 +13,11 @@ import io.github.shiokunn.trpg.core.ai.AiParseResult
 import io.github.shiokunn.trpg.core.ai.CharacterDraft
 import io.github.shiokunn.trpg.core.ai.CharacterDraftParser
 import io.github.shiokunn.trpg.core.ai.WorldDraft
+import io.github.shiokunn.trpg.core.ai.WorldDraftGrammar
 import io.github.shiokunn.trpg.core.ai.WorldDraftParser
 import io.github.shiokunn.trpg.core.ai.toCharacter
+import io.github.shiokunn.trpg.core.debug.DebugConfig
+import io.github.shiokunn.trpg.core.debug.RawOutputJournal
 import io.github.shiokunn.trpg.core.domain.Location
 import io.github.shiokunn.trpg.core.domain.ModelSettings
 import io.github.shiokunn.trpg.core.domain.Npc
@@ -22,6 +27,9 @@ import io.github.shiokunn.trpg.core.domain.World
 import io.github.shiokunn.trpg.data.repository.ModelRepository
 import io.github.shiokunn.trpg.data.repository.NewAdventure
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.File
 import java.util.UUID
 
 enum class CreationMode(val label: String, val description: String) {
@@ -44,6 +52,8 @@ sealed interface CreationResult<out T> {
     data class Failed(
         val message: String,
         val errors: List<String> = emptyList(),
+        /** Engine-level classification, so the UI can tell a grammar failure apart. */
+        val failureKind: GenerationFailureKind? = null,
     ) : CreationResult<Nothing>
 }
 
@@ -57,6 +67,8 @@ sealed interface CreationResult<out T> {
 class AdventureCreator(
     private val models: ModelRepository,
     private val engine: InferenceEngine,
+    /** Root for debug-only raw replies. `null` keeps the feature completely off. */
+    private val debugRawRoot: File? = null,
 ) {
 
     suspend fun generateWorld(
@@ -69,8 +81,15 @@ class AdventureCreator(
             PromptMessage("system", WORLD_SYSTEM),
             PromptMessage("user", worldRequest(input)),
         )
+        val journal = RawOutputJournal.begin(
+            root = debugRawRoot,
+            enabled = DebugConfig.isEnabled,
+            label = "world",
+        )
         return generateWithRepair(
             settings, messages, onProgress, WorldDraftParser::parse, WORLD_REPAIR_RULES,
+            grammar = WorldDraftGrammar.GBNF,
+            journal = journal,
         )
     }
 
@@ -104,28 +123,79 @@ class AdventureCreator(
         onProgress: (GenerationProgress) -> Unit,
         parser: (String) -> AiParseResult<T>,
         repairRules: String = "",
+        grammar: String? = null,
+        journal: RawOutputJournal? = null,
     ): CreationResult<T> {
-        val first = generate(settings, messages, onProgress)
-        val firstText = when (first) {
+        val first = generate(settings, messages, onProgress, grammar)
+        val firstSuccess = when (first) {
             is GenerationOutcome.Cancelled -> return CreationResult.Cancelled
-            is GenerationOutcome.Failure -> return CreationResult.Failed(first.message)
-            is GenerationOutcome.Success -> first.text
+            is GenerationOutcome.Failure -> return CreationResult.Failed(
+                first.message,
+                failureKind = first.kind,
+            )
+            is GenerationOutcome.Success -> first
+        }
+        val firstText = firstSuccess.text
+        journal?.let { record ->
+            withContext(Dispatchers.IO) {
+                record.writeInitial(
+                    text = firstText,
+                    finishReason = firstSuccess.finishReason.name,
+                    generatedTokens = firstSuccess.generatedTokens,
+                    grammarApplied = grammar != null,
+                )
+            }
+        }
+        val firstTruncated = firstSuccess.isTruncated()
+        val firstParsed = if (firstTruncated) null else parser(firstText)
+        when (firstParsed) {
+            is AiParseResult.Success -> return CreationResult.Success(firstParsed.value)
+            is AiParseResult.Failure, null -> Unit
         }
 
-        when (val parsed = parser(firstText)) {
-            is AiParseResult.Success -> return CreationResult.Success(parsed.value)
-            is AiParseResult.Failure -> {
-                val repair = messages + PromptMessage("assistant", firstText) +
-                    PromptMessage("user", repairInstruction(parsed.errors, repairRules))
-                val second = generate(settings, repair, onProgress)
-                return when (second) {
-                    is GenerationOutcome.Cancelled -> CreationResult.Cancelled
-                    is GenerationOutcome.Failure -> CreationResult.Failed(second.message)
-                    is GenerationOutcome.Success -> when (val retried = parser(second.text)) {
+        // Either the reply was truncated or it violated the JSON contract. Both
+        // are repaired once; a repair that is itself truncated is reported as a
+        // token-budget problem instead of being parsed as a complete answer.
+        val firstErrors = (firstParsed as? AiParseResult.Failure)?.errors
+            ?.map { it.message }
+            .orEmpty()
+        val errors = if (firstTruncated) {
+            firstErrors + truncationMessage(firstSuccess)
+        } else {
+            firstErrors
+        }
+        val repair = messages + PromptMessage("assistant", firstText) +
+            PromptMessage("user", repairInstruction(errors, repairRules))
+        val second = generate(settings, repair, onProgress, grammar)
+        return when (second) {
+            is GenerationOutcome.Cancelled -> CreationResult.Cancelled
+            is GenerationOutcome.Failure -> CreationResult.Failed(
+                second.message,
+                failureKind = second.kind,
+            )
+            is GenerationOutcome.Success -> {
+                journal?.let { record ->
+                    withContext(Dispatchers.IO) {
+                        record.writeRepair(
+                            text = second.text,
+                            finishReason = second.finishReason.name,
+                            generatedTokens = second.generatedTokens,
+                            grammarApplied = grammar != null,
+                        )
+                    }
+                }
+                if (second.isTruncated()) {
+                    CreationResult.Failed(
+                        "AIの応答がトークン上限で途中に切れました。最大生成トークンを増やすか、" +
+                            "コンテキストサイズを下げてください。",
+                        errors + truncationMessage(second),
+                    )
+                } else {
+                    when (val retried = parser(second.text)) {
                         is AiParseResult.Success -> CreationResult.Success(retried.value)
                         is AiParseResult.Failure -> CreationResult.Failed(
                             "AIの応答が規定のJSON契約を満たしませんでした。もう一度生成してください。",
-                            retried.errors,
+                            retried.errors.map { it.message },
                         )
                     }
                 }
@@ -133,15 +203,27 @@ class AdventureCreator(
         }
     }
 
+    private fun GenerationOutcome.Success.isTruncated(): Boolean =
+        finishReason == GenerationFinishReason.LENGTH ||
+            finishReason == GenerationFinishReason.CONTEXT
+
+    private fun truncationMessage(outcome: GenerationOutcome.Success): String {
+        val budget = if (outcome.budget > 0) "（予算 ${outcome.budget} トークン）" else ""
+        return "応答がトークン上限${budget}で途中に切れました。" +
+            "生成 ${outcome.generatedTokens} トークン、終了理由 ${outcome.finishReason.name.lowercase()}。"
+    }
+
     private suspend fun generate(
         settings: ModelSettings,
         messages: List<PromptMessage>,
         onProgress: (GenerationProgress) -> Unit,
+        grammar: String? = null,
     ): GenerationOutcome = try {
         engine.generate(
             GenerationRequest(
                 messages = messages,
                 params = SamplingParams.from(settings).copy(temperature = (settings.temperature + 0.1f).coerceAtMost(1.2f)),
+                grammar = grammar,
             ),
             onToken = {},
             onProgress = onProgress,

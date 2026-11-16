@@ -32,11 +32,17 @@ data class SamplingParams(
 /**
  * A generation request. When [prompt] is null the engine formats [messages] with the
  * model's own chat template (falling back to a plain ChatML-style layout).
+ *
+ * [grammar] is an optional GBNF grammar (llama.cpp syntax) applied while the tokens
+ * are sampled. It constrains the *syntax* of the output, not its meaning: the
+ * contract checks stay in the parser. When the grammar cannot be applied the
+ * generation fails instead of silently producing an unconstrained answer.
  */
 data class GenerationRequest(
     val messages: List<PromptMessage>,
     val prompt: String? = null,
     val params: SamplingParams = SamplingParams(),
+    val grammar: String? = null,
 )
 
 data class BackendInfo(
@@ -66,10 +72,54 @@ sealed interface EngineStatus {
     data class Failed(val message: String) : EngineStatus
 }
 
+/** Native prefix-cache accounting for one generation. */
+data class KvCacheStats(
+    val valid: Boolean = false,
+    val hit: Boolean = false,
+    val reusedTokens: Int = 0,
+    val computedPromptTokens: Int = 0,
+    val cachedTokens: Int = 0,
+    val invalidationReason: String = "",
+)
+
 sealed interface GenerationOutcome {
-    data class Success(val text: String) : GenerationOutcome
+    /**
+     * The generation produced text.
+     *
+     * [finishReason] tells the caller *why* the generation stopped. A
+     * [GenerationFinishReason.LENGTH] or [GenerationFinishReason.CONTEXT] result is
+     * truncated output: the text may be incomplete and must not be treated as a
+     * finished answer.
+     */
+    data class Success(
+        val text: String,
+        val finishReason: GenerationFinishReason = GenerationFinishReason.UNKNOWN,
+        val limitReached: Boolean = false,
+        val generatedTokens: Int = 0,
+        val promptTokens: Int = 0,
+        val budget: Int = 0,
+        val kvCache: KvCacheStats = KvCacheStats(),
+    ) : GenerationOutcome
+
     data object Cancelled : GenerationOutcome
-    data class Failure(val message: String) : GenerationOutcome
+
+    /** The engine itself failed; this is not a contract violation of the reply. */
+    data class Failure(
+        val message: String,
+        val kind: GenerationFailureKind = GenerationFailureKind.INFERENCE,
+    ) : GenerationOutcome
+}
+
+/**
+ * Why the engine failed. Kept separate from a contract violation so the UI can
+ * tell "the model could not run" from "the model answered with the wrong shape".
+ */
+enum class GenerationFailureKind {
+    /** The engine reported an error (memory, sampler, template, ...). */
+    INFERENCE,
+
+    /** A JSON grammar was requested but could not be applied. */
+    GRAMMAR,
 }
 
 /** Why a generation stopped. Mirrors the finish reason reported by llama.cpp. */

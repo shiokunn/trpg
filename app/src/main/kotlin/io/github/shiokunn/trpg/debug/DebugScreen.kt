@@ -112,7 +112,15 @@ private fun TimingCard(state: DebugViewState) {
     DebugCard("処理時間") {
         InfoRow("Template 構築", formatMs(metrics?.applyMs))
         InfoRow("Tokenize", formatMs(metrics?.tokenizeMs))
-        InfoRow("KV Cache 準備/クリア", formatMs(metrics?.clearMs))
+        InfoRow("KV Cache 準備（差分削除）", formatMs(metrics?.clearMs))
+        InfoRow("KV 再利用トークン", metrics?.kvReusedTokens?.toString() ?: "取得不可")
+        InfoRow("KV 再計算トークン", metrics?.kvComputedPromptTokens?.toString() ?: "取得不可")
+        InfoRow("KV 保持トークン", metrics?.kvCachedTokens?.toString() ?: "取得不可")
+        InfoRow(
+            "KV 再利用",
+            metrics?.kvHit?.let { if (it) "あり" else "なし" } ?: "取得不可",
+        )
+        InfoRow("KV 無効化理由", metrics?.kvInvalidationReason ?: "取得不可")
         InfoRow("Prompt Evaluation", formatMs(metrics?.promptMs))
         InfoRow("Decode", formatMs(metrics?.genMs))
         InfoRow("初回トークンまで (TTFT)", formatMs(metrics?.ttftMs))

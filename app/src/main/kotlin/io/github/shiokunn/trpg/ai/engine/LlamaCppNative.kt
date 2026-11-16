@@ -15,6 +15,15 @@ fun interface TokenCallback {
     fun onToken(token: String, generatedTokens: Int)
 }
 
+internal data class NativeKvCache(
+    val valid: Boolean = false,
+    val hit: Boolean = false,
+    val reusedTokens: Int = 0,
+    val computedPromptTokens: Int = 0,
+    val cachedTokens: Int = 0,
+    val invalidationReason: String = "",
+)
+
 internal data class NativeGeneration(
     val text: String,
     val cancelled: Boolean,
@@ -26,6 +35,8 @@ internal data class NativeGeneration(
     val budget: Int = -1,
     val finishReason: String = "unknown",
     val limitReached: Boolean? = null,
+    val errorKind: String = "",
+    val kvCache: NativeKvCache = NativeKvCache(),
 )
 
 internal data class NativeFormatResult(
@@ -106,6 +117,7 @@ internal object LlamaCppNative {
         callback: TokenCallback?,
         stops: Array<String>,
         addSpecial: Boolean,
+        grammar: String?,
     ): String?
 
     external fun nativeGenerateChatEx(
@@ -120,6 +132,7 @@ internal object LlamaCppNative {
         seed: Int,
         generationId: Long,
         callback: TokenCallback?,
+        grammar: String?,
     ): String?
 
     external fun nativeCancel()
@@ -184,6 +197,7 @@ internal object LlamaCppNative {
             ?: return NativeGeneration("", false, "推論結果を解析できませんでした")
         val error = obj.string("error")?.takeIf { it.isNotBlank() }
             ?: if (obj.boolean("ok") == false) "推論に失敗しました" else null
+        val kv = obj["kvCache"] as? JsonObject
         return NativeGeneration(
             text = obj.string("text") ?: "",
             cancelled = obj.boolean("cancelled") ?: false,
@@ -195,6 +209,15 @@ internal object LlamaCppNative {
             budget = obj.int("budget") ?: -1,
             finishReason = obj.string("finishReason") ?: "unknown",
             limitReached = obj.boolean("limitReached"),
+            errorKind = obj.string("errorKind") ?: "",
+            kvCache = NativeKvCache(
+                valid = kv?.boolean("valid") ?: false,
+                hit = kv?.boolean("hit") ?: false,
+                reusedTokens = kv?.int("reusedTokens") ?: 0,
+                computedPromptTokens = kv?.int("computedPromptTokens") ?: 0,
+                cachedTokens = kv?.int("cachedTokens") ?: 0,
+                invalidationReason = kv?.string("invalidationReason") ?: "",
+            ),
         )
     }
 

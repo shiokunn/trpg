@@ -208,6 +208,7 @@ class LlamaCppEngine(
                                         pieces.trySend(GeneratedPiece(piece, generated))
                                         recording?.onToken() // DEBUG MODE (temporary)
                                     },
+                                    grammar = request.grammar,
                                 )
                             } else {
                                 LlamaCppNative.nativeGenerateEx(
@@ -225,6 +226,7 @@ class LlamaCppEngine(
                                     },
                                     stops = emptyArray(),
                                     addSpecial = true,
+                                    grammar = request.grammar,
                                 )
                             }
                         } catch (t: Throwable) {
@@ -275,8 +277,30 @@ class LlamaCppEngine(
                         )
                         val outcome = when {
                             result.cancelled -> GenerationOutcome.Cancelled
-                            result.error != null -> GenerationOutcome.Failure(result.error)
-                            else -> GenerationOutcome.Success(result.text)
+                            result.error != null -> GenerationOutcome.Failure(
+                                result.error,
+                                if (result.errorKind == "grammar") {
+                                    GenerationFailureKind.GRAMMAR
+                                } else {
+                                    GenerationFailureKind.INFERENCE
+                                },
+                            )
+                            else -> GenerationOutcome.Success(
+                                text = result.text,
+                                finishReason = GenerationFinishReason.fromWire(result.finishReason),
+                                limitReached = result.limitReached == true,
+                                generatedTokens = result.generatedTokens.takeIf { it >= 0 } ?: 0,
+                                promptTokens = result.promptTokens.takeIf { it >= 0 } ?: 0,
+                                budget = result.budget.takeIf { it > 0 } ?: 0,
+                                kvCache = KvCacheStats(
+                                    valid = result.kvCache.valid,
+                                    hit = result.kvCache.hit,
+                                    reusedTokens = result.kvCache.reusedTokens,
+                                    computedPromptTokens = result.kvCache.computedPromptTokens,
+                                    cachedTokens = result.kvCache.cachedTokens,
+                                    invalidationReason = result.kvCache.invalidationReason,
+                                ),
+                            )
                         }
                         recording?.finish(outcome)
                         outcome

@@ -105,14 +105,14 @@ class DraftParsersTest {
 
         val blankScenario = validWorld.replaceFirst("\"title\": \"消えた灯台守\"", "\"title\": \" \"")
         val errors = (WorldDraftParser.parse(blankScenario) as AiParseResult.Failure).errors
-        assertTrue(errors.any { it.contains("scenario.title") })
+        assertTrue(errors.any { it.message.contains("scenario.title") })
     }
 
     @Test
     fun worldRejectsInvalidCombatHp() {
         val raw = validWorld.replaceFirst("\"hp\": 8", "\"hp\": 0")
         val errors = (WorldDraftParser.parse(raw) as AiParseResult.Failure).errors
-        assertTrue(errors.any { it.contains("hp") })
+        assertTrue(errors.any { it.message.contains("hp") })
     }
 
     @Test
@@ -122,7 +122,7 @@ class DraftParsersTest {
             "\"objectives\": []",
         )
         val errors = (WorldDraftParser.parse(raw) as AiParseResult.Failure).errors
-        assertTrue(errors.any { it.contains("objectives") })
+        assertTrue(errors.any { it.message.contains("objectives") })
     }
 
     @Test
@@ -255,7 +255,7 @@ class DraftParsersTest {
     fun characterRejectsZeroQuantityItem() {
         val raw = validCharacter.replaceFirst("\"quantity\": 1", "\"quantity\": 0")
         val errors = (CharacterDraftParser.parse(raw) as AiParseResult.Failure).errors
-        assertTrue(errors.any { it.contains("quantity") })
+        assertTrue(errors.any { it.message.contains("quantity") })
     }
 
     @Test

@@ -248,7 +248,7 @@ class GmTurnService(
 
     private fun evaluate(raw: String, snapshot: GameSnapshot, bundle: SessionBundle): Attempt {
         val response = when (val parsed = GmResponseParser.parse(raw)) {
-            is AiParseResult.Failure -> return Attempt.Rejected(parsed.errors)
+            is AiParseResult.Failure -> return Attempt.Rejected(parsed.errors.map { it.message })
             is AiParseResult.Success -> parsed.value
         }
 
