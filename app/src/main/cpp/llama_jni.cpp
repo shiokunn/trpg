@@ -145,8 +145,13 @@ std::string json_escape(const std::string & value) {
     return out;
 }
 
-std::string error_json(const std::string & message) {
-    return "{\"ok\":false,\"error\":\"" + json_escape(message) + "\"}";
+std::string error_json(const std::string & message, const std::string & kind = std::string()) {
+    std::string out = "{\"ok\":false,\"error\":\"" + json_escape(message) + "\"";
+    if (!kind.empty()) {
+        out += ",\"errorKind\":\"" + json_escape(kind) + "\"";
+    }
+    out += "}";
+    return out;
 }
 
 std::string chat_template_status() {
@@ -332,34 +337,43 @@ std::string model_info_json() {
     return out.str();
 }
 
-std::vector<int> read_cpu_list(const std::string & path) {
-    std::ifstream input(path);
-    if (!input) {
-        return {};
-    }
-    std::string content;
-    std::getline(input, content);
+std::vector<int> parse_cpu_list(const std::string & content) {
     std::vector<int> cpus;
     std::size_t pos = 0;
     while (pos < content.size()) {
-        while (pos < content.size() && (content[pos] == ',' || content[pos] == ' ')) {
+        while (pos < content.size() &&
+               (content[pos] == ',' || content[pos] == ' ' || content[pos] == '\t')) {
             ++pos;
         }
         if (pos >= content.size()) {
             break;
         }
         int start = 0;
+        bool has_digit = false;
         while (pos < content.size() && content[pos] >= '0' && content[pos] <= '9') {
             start = start * 10 + (content[pos] - '0');
+            has_digit = true;
             ++pos;
+        }
+        if (!has_digit) {
+            // Skip unexpected characters instead of looping forever on malformed input.
+            while (pos < content.size() && content[pos] != ',') {
+                ++pos;
+            }
+            continue;
         }
         int end = start;
         if (pos < content.size() && content[pos] == '-') {
             ++pos;
             end = 0;
+            bool has_end = false;
             while (pos < content.size() && content[pos] >= '0' && content[pos] <= '9') {
                 end = end * 10 + (content[pos] - '0');
+                has_end = true;
                 ++pos;
+            }
+            if (!has_end) {
+                end = start;
             }
         }
         for (int cpu = start; cpu <= end; ++cpu) {
@@ -370,6 +384,35 @@ std::vector<int> read_cpu_list(const std::string & path) {
         }
     }
     return cpus;
+}
+
+std::vector<int> read_cpu_list(const std::string & path) {
+    std::ifstream input(path);
+    if (!input) {
+        return {};
+    }
+    std::string content;
+    std::getline(input, content);
+    return parse_cpu_list(content);
+}
+
+// Android restricts the process with a cpuset. When the app is in the background
+// this is often only cpu0-2, even though the device has more online CPUs. The
+// threadpool must never select a CPU outside this set: strict affinity would fail
+// and the context/threadpool thread counts would disagree.
+std::vector<int> read_allowed_cpu_list() {
+    std::ifstream input("/proc/self/status");
+    if (!input) {
+        return {};
+    }
+    static const std::string prefix = "Cpus_allowed_list:";
+    std::string line;
+    while (std::getline(input, line)) {
+        if (line.compare(0, prefix.size(), prefix) == 0) {
+            return parse_cpu_list(line.substr(prefix.size()));
+        }
+    }
+    return {};
 }
 
 int read_cpu_max_freq(int cpu) {
@@ -398,6 +441,18 @@ bool build_threadpool_params(
             }
         }
     }
+
+    const std::vector<int> allowed_cpus = read_allowed_cpu_list();
+    if (!allowed_cpus.empty()) {
+        std::vector<int> filtered;
+        for (int cpu : cpus) {
+            if (std::find(allowed_cpus.begin(), allowed_cpus.end(), cpu) != allowed_cpus.end()) {
+                filtered.push_back(cpu);
+            }
+        }
+        cpus = filtered.empty() ? allowed_cpus : filtered;
+    }
+
     if (cpus.empty()) {
         cpus.push_back(0);
     }
@@ -508,6 +563,15 @@ bool build_threadpool_params(
                 << " cpus=";
     bool first = true;
     for (int cpu : selected) {
+        if (!first) {
+            description << ",";
+        }
+        first = false;
+        description << cpu;
+    }
+    description << " allowed=";
+    first = true;
+    for (int cpu : allowed_cpus) {
         if (!first) {
             description << ",";
         }
@@ -880,7 +944,7 @@ std::string run_generation_locked(
                 << "）。コンテキストサイズを増やすか、記憶や履歴を減らしてください";
         LOGI("[TokenCounter] finish generation=%llu generated=0 maxTokens=%d budget=0 finishReason=error limitReached=0",
              static_cast<unsigned long long>(generation_id), max_tokens);
-        return error_json(message.str());
+        return error_json(message.str(), "context");
     }
 
     int32_t budget = max_tokens > 0 ? max_tokens : 512;
@@ -1068,6 +1132,7 @@ std::string run_generation_locked(
         llama_sampler * sampler = llama_sampler_chain_init(sparams);
         if (sampler == nullptr) {
             failure = "サンプラーの初期化に失敗しました";
+            error_kind = "memory";
         } else {
             const int32_t n_vocab = llama_vocab_n_tokens(vocab);
 
@@ -1279,6 +1344,13 @@ std::string run_generation_locked(
          generated_tokens, max_tokens, budget, finish_reason,
          limit_unknown ? -1 : (limit_reached ? 1 : 0));
 
+    if (error_kind[0] == '\0' && !failure.empty()) {
+        if (failure.find("メモリ") != std::string::npos ||
+            failure.find("alloc") != std::string::npos) {
+            error_kind = "memory";
+        }
+    }
+
     std::ostringstream out;
     out << "{\"ok\":" << (failure.empty() ? "true" : "false");
     out << ",\"cancelled\":" << (cancelled ? "true" : "false");
@@ -1398,7 +1470,7 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeLoadModel(
 
     const std::string model_path = jstring_to_string(env, path);
     if (model_path.empty()) {
-        return new_string_utf8(env, error_json("モデルパスが空です"));
+        return new_string_utf8(env, error_json("モデルパスが空です", "invalid_path"));
     }
 
     llama_model_params model_params = llama_model_default_params();
@@ -1409,32 +1481,49 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeLoadModel(
     llama_model * model = llama_model_load_from_file(model_path.c_str(), model_params);
     if (model == nullptr) {
         LOGE("Failed to load model: %s", model_path.c_str());
-        return new_string_utf8(env, error_json("GGUFモデルの読み込みに失敗しました。ファイル形式と空きメモリを確認してください"));
+        return new_string_utf8(env, error_json(
+            "GGUFモデルの読み込みに失敗しました。ファイル形式と空きメモリを確認してください",
+            "model_load"));
     }
 
     if (llama_model_has_encoder(model) && !llama_model_has_decoder(model)) {
         llama_model_free(model);
-        return new_string_utf8(env, error_json("エンコーダ専用モデルには対応していません"));
+        return new_string_utf8(env, error_json("エンコーダ専用モデルには対応していません", "encoder_only"));
     }
 
-    // Default matches ModelSettings.DEFAULT_N_CTX (32768) so the UI, the saved
+    // Default matches ModelSettings.DEFAULT_N_CTX (8192) so the UI, the saved
     // settings and the actual llama.cpp context never disagree.
-    const int32_t ctx_size = n_ctx > 0 ? n_ctx : 32768;
+    const int32_t ctx_size = n_ctx > 0 ? n_ctx : 8192;
     const int32_t batch_size = std::min<int32_t>(ctx_size, 1024);
     const int32_t thread_count = n_threads > 0 ? n_threads : 4;
+
+    // The cpuset may allow fewer cores than requested (for example while the app
+    // is in the background). Resolve the real threadpool size before creating the
+    // context: llama.cpp's cplan requires the context thread count to match the
+    // attached pool, otherwise decode can fail with "n_threads > pool size".
+    int32_t actual_threads = thread_count;
+    {
+        ggml_threadpool_params selected_params;
+        std::string selected_mask;
+        if (build_threadpool_params(thread_count, selected_params, selected_mask)) {
+            actual_threads = std::max(1, selected_params.n_threads);
+        }
+    }
 
     llama_context_params ctx_params = llama_context_default_params();
     ctx_params.n_ctx = static_cast<uint32_t>(ctx_size);
     ctx_params.n_batch = static_cast<uint32_t>(batch_size);
     ctx_params.n_ubatch = static_cast<uint32_t>(std::min<int32_t>(batch_size, 512));
-    ctx_params.n_threads = thread_count;
-    ctx_params.n_threads_batch = thread_count;
+    ctx_params.n_threads = actual_threads;
+    ctx_params.n_threads_batch = actual_threads;
 
     llama_context * ctx = llama_init_from_model(model, ctx_params);
     if (ctx == nullptr) {
         llama_model_free(model);
-        LOGE("Failed to create llama context (n_ctx=%d)", ctx_size);
-        return new_string_utf8(env, error_json("推論コンテキストの作成に失敗しました。コンテキストサイズを下げてください"));
+        LOGE("Failed to create llama context (n_ctx=%d threads=%d)", ctx_size, actual_threads);
+        return new_string_utf8(env, error_json(
+            "推論コンテキストの作成に失敗しました。コンテキストサイズを下げてください",
+            "context_alloc"));
     }
 
     llama_set_abort_callback(ctx, abort_callback, nullptr);
@@ -1456,7 +1545,7 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeLoadModel(
                     << "|size=" << llama_model_size(model)
                     << "|ctx=" << ctx_size
                     << "|batch=" << batch_size
-                    << "|threads=" << thread_count
+                    << "|threads=" << actual_threads
                     << "|gpu=" << n_gpu_layers;
         g_model_cache_fingerprint = fingerprint.str();
     }
@@ -1477,8 +1566,8 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeLoadModel(
         g_trpg_debug.n_ubatch = static_cast<int>(llama_n_ubatch(ctx));
         g_trpg_debug.n_seq_max = static_cast<int>(llama_n_seq_max(ctx));
         g_trpg_debug.n_threads_requested = thread_count;
-        g_trpg_debug.n_threads = thread_count;
-        g_trpg_debug.n_threads_batch = thread_count;
+        g_trpg_debug.n_threads = actual_threads;
+        g_trpg_debug.n_threads_batch = actual_threads;
         g_trpg_debug.gpu_layers = n_gpu_layers;
         g_trpg_debug.flash_attn = llama_flash_attn_type_name(ctx_params.flash_attn_type);
         g_trpg_debug.type_k = ggml_type_name(ctx_params.type_k);
@@ -1499,8 +1588,9 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeLoadModel(
     }
 
     const auto pool_start = std::chrono::steady_clock::now();
-    const bool threadpool_ok = create_threadpool_locked(ctx, thread_count);
+    const bool threadpool_ok = create_threadpool_locked(ctx, actual_threads);
     const auto pool_end = std::chrono::steady_clock::now();
+    LOGI("threads requested=%d actual=%d", thread_count, actual_threads);
 
     std::string pool_desc;
     {
@@ -1527,7 +1617,9 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeLoadModel(
     llama_batch_ext * batch = llama_batch_ext_init(ctx);
     if (batch == nullptr) {
         free_model_locked();
-        return new_string_utf8(env, error_json("バッチの初期化に失敗しました"));
+        return new_string_utf8(env, error_json(
+            "推論バッチの初期化に失敗しました。空きメモリを増やし、コンテキストサイズを下げてください",
+            "batch_alloc"));
     }
 
     g_batch = batch;

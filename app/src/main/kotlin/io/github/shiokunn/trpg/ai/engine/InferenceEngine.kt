@@ -115,11 +115,17 @@ sealed interface GenerationOutcome {
  * tell "the model could not run" from "the model answered with the wrong shape".
  */
 enum class GenerationFailureKind {
-    /** The engine reported an error (memory, sampler, template, ...). */
+    /** The engine reported a non-memory error (sampler, template, decode, ...). */
     INFERENCE,
 
     /** A JSON grammar was requested but could not be applied. */
     GRAMMAR,
+
+    /** Native memory allocation or the prompt/KV budget was exhausted. */
+    MEMORY,
+
+    /** The model stopped producing tokens and the watchdog cancelled it. */
+    TIMEOUT,
 }
 
 /** Why a generation stopped. Mirrors the finish reason reported by llama.cpp. */

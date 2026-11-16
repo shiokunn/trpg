@@ -47,4 +47,18 @@ class LlamaCppNativeTest {
         assertFalse(result.kvCache.hit)
         assertEquals(0, result.kvCache.reusedTokens)
     }
+
+    @Test
+    fun parsesMachineReadableLoadErrorKind() {
+        val raw = """{"ok":false,"error":"コンテキスト作成失敗","errorKind":"context_alloc"}"""
+
+        assertEquals("コンテキスト作成失敗", LlamaCppNative.parseError(raw))
+        assertEquals("context_alloc", LlamaCppNative.parseErrorKind(raw))
+    }
+
+    @Test
+    fun missingErrorKindIsEmpty() {
+        assertEquals("", LlamaCppNative.parseErrorKind("""{"ok":false,"error":"x"}"""))
+        assertEquals("", LlamaCppNative.parseErrorKind(null))
+    }
 }

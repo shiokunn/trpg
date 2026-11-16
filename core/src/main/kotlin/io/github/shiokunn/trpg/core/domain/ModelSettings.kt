@@ -28,7 +28,9 @@ data class ModelSettings(
     )
 
     companion object {
-        const val DEFAULT_N_CTX = 32768
+        // A portable default for phones: large-context KV caches are the main
+        // source of zram/swap pressure on 8-12GB devices. Users can raise it.
+        const val DEFAULT_N_CTX = 8192
         const val MIN_N_CTX = 512
         const val MAX_N_CTX = 32768
         const val DEFAULT_TEMPERATURE = 0.75f

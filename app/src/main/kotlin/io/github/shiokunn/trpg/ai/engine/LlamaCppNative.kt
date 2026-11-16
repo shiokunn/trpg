@@ -228,6 +228,14 @@ internal object LlamaCppNative {
         }.getOrNull()
     }
 
+    /** Machine-readable load error kind, e.g. `context_alloc` or `model_load`. */
+    fun parseErrorKind(raw: String?): String {
+        if (raw.isNullOrBlank()) return ""
+        return runCatching {
+            json.parseToJsonElement(raw).jsonObject.string("errorKind") ?: ""
+        }.getOrDefault("")
+    }
+
     fun parseBackendInfo(raw: String?): BackendInfo {
         if (raw.isNullOrBlank()) {
             return BackendInfo(system = "ネイティブエンジンから情報を取得できませんでした", available = false)

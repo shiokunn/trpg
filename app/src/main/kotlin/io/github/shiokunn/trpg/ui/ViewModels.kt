@@ -417,6 +417,10 @@ class NewAdventureViewModel(private val container: AppContainer) : ViewModel() {
         val classified = when (failureKind) {
             GenerationFailureKind.GRAMMAR ->
                 listOf("分類: JSON文法エラー（文法を適用できませんでした）") + details
+            GenerationFailureKind.MEMORY ->
+                listOf("分類: メモリ不足（コンテキストサイズまたはモデルサイズを下げてください）") + details
+            GenerationFailureKind.TIMEOUT ->
+                listOf("分類: 推論タイムアウト（5分間トークンが生成されませんでした）") + details
             GenerationFailureKind.INFERENCE -> listOf("分類: 推論エラー") + details
             null -> details
         }

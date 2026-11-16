@@ -76,6 +76,8 @@ data class MemorySample(
     val atMs: Long,
     val vmRssKb: Long? = null,
     val vmSwapKb: Long? = null,
+    val memAvailableKb: Long? = null,
+    val swapFreeKb: Long? = null,
 )
 
 @Serializable

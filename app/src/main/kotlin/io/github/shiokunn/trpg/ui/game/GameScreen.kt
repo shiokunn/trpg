@@ -34,6 +34,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -41,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -137,6 +139,15 @@ private fun GameContent(
     val hasNarrative = chat.any { it.role == ChatRole.GM }
     val recent = chat.takeLast(6)
     val busy = turn.running
+    val view = LocalView.current
+
+    // Android moves a background app to a much smaller cpuset (often cpu0-2),
+    // which makes generation extremely slow. Keep the screen on while the model
+    // is working so the user does not accidentally trigger that state.
+    DisposableEffect(busy) {
+        view.keepScreenOn = busy
+        onDispose { view.keepScreenOn = false }
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -474,6 +485,12 @@ private fun StreamingCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "生成中は画面を消さないでください。バックグラウンドでは推論が大幅に遅くなります。",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             if (streamedText.isNotBlank()) {
                 Spacer(Modifier.height(12.dp))
                 NarrativeText(streamedText)

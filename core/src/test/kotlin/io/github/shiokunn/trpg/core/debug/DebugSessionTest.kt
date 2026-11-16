@@ -198,9 +198,20 @@ class DebugSessionTest {
     @Test
     fun memorySamplesAreCollected() {
         val session = session(FakeClock())
-        session.addMemorySample(MemorySample(atMs = 1, vmRssKb = 100, vmSwapKb = 5))
+        session.addMemorySample(
+            MemorySample(
+                atMs = 1,
+                vmRssKb = 100,
+                vmSwapKb = 5,
+                memAvailableKb = 3_000_000,
+                swapFreeKb = 500_000,
+            ),
+        )
         session.addMemorySample(MemorySample(atMs = 2, vmRssKb = 120, vmSwapKb = 6))
-        assertEquals(2, session.snapshot().memory.size)
+        val samples = session.snapshot().memory
+        assertEquals(2, samples.size)
+        assertEquals(3_000_000L, samples.first().memAvailableKb)
+        assertEquals(500_000L, samples.first().swapFreeKb)
     }
 
     @Test

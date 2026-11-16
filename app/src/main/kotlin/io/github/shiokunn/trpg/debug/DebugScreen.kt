@@ -203,9 +203,13 @@ private fun MemoryCard(samples: List<MemorySample>) {
     DebugCard("メモリ") {
         InfoRow("VmRSS（最新）", formatKb(latest?.vmRssKb))
         InfoRow("VmSwap（最新）", formatKb(latest?.vmSwapKb))
+        InfoRow("MemAvailable（最新）", formatKb(latest?.memAvailableKb))
+        InfoRow("SwapFree（最新）", formatKb(latest?.swapFreeKb))
         InfoRow("取得時刻（最新）", latest?.atMs?.let(::formatTime) ?: "取得不可")
         InfoRow("VmRSS（開始時）", formatKb(first?.vmRssKb))
         InfoRow("VmSwap（開始時）", formatKb(first?.vmSwapKb))
+        InfoRow("MemAvailable（開始時）", formatKb(first?.memAvailableKb))
+        InfoRow("SwapFree（開始時）", formatKb(first?.swapFreeKb))
         InfoRow("サンプル数", samples.size.toString())
     }
 }
