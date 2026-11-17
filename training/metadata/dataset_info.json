@@ -1,0 +1,208 @@
+{
+  "dataset_name": "trpg-lfm3-adapter",
+  "created_at": "2026-11-17T07:40:51+00:00",
+  "status": "PARTIAL — 検証済みだが目標件数に未到達。スモークテスト Verified データとしては使えるが、目標の9,000件（train 8,000件）に対する学習データとしては不十分。",
+  "generation_model": {
+    "name": "DeepSeek V4.1 Flash Free",
+    "model_id": "opencode/deepseek-v4.1-flash-free",
+    "service": "OpenCode (this agent session)",
+    "note": "全件をこのエージェントセッションで生成。一括生成用のDeepSeek APIキーは環境に存在しない。"
+  },
+  "format": {
+    "kind": "chat messages (JSONL, 1 sample per line)",
+    "roles": [
+      "system",
+      "user",
+      "assistant"
+    ],
+    "assistant_content": "JSON object as a compact string",
+    "chat_template": "学習側は未確定。third_party/llama.cpp/models/templates/LFM3.jinja は推論用に実在し system を保持するが、学習トークナイザと等価とは限らない。同テンプレートは assistant 直前に <think></think> を挿入するため、loss マスキングと生成開始位置の確認が必要。",
+    "system_role_note": "アプリはsystemにGMルールと状態セクションを入れるため、user/assistantの2roleだけにしない"
+  },
+  "counts": {
+    "by_category": {
+      "trpg_gm": 191,
+      "world_json": 15,
+      "extraction": 68
+    },
+    "by_task": {
+      "character_draft": 13,
+      "gm_turn": 191,
+      "items": 14,
+      "locations": 4,
+      "memories": 9,
+      "npcs": 6,
+      "quests": 7,
+      "state_changes": 15,
+      "world_json": 15
+    },
+    "processed_files": {
+      "trpg_gm": 191,
+      "world_json": 15,
+      "extraction": 68
+    },
+    "splits": {
+      "train": 246,
+      "validation": 14,
+      "test": 14
+    },
+    "by_split_category": {
+      "train": {
+        "trpg_gm": 173,
+        "world_json": 13,
+        "extraction": 60
+      },
+      "validation": {
+        "trpg_gm": 9,
+        "world_json": 1,
+        "extraction": 4
+      },
+      "test": {
+        "trpg_gm": 9,
+        "world_json": 1,
+        "extraction": 4
+      }
+    },
+    "length_chars": {
+      "max_per_sample": 4948,
+      "avg_per_sample": 3345,
+      "note": "文字数。日本語は概ね1文字1トークンとして見積もる（LFM3の実トークナイザは未確認）。"
+    },
+    "accepted": 274,
+    "rejected": 0,
+    "held_back_as_near_duplicate": 0,
+    "warnings": 0
+  },
+  "targets": {
+    "trpg_gm": 5000,
+    "world_json": 2000,
+    "extraction": 2000,
+    "train_min": 8000,
+    "validation": "450-500",
+    "test": "450-500",
+    "remaining_to_generate": {
+      "trpg_gm": 4809,
+      "world_json": 1985,
+      "extraction": 1932
+    }
+  },
+  "training_steps": {
+    "per_device_train_batch_size": 1,
+    "gradient_accumulation_steps": 16,
+    "num_train_epochs": 1,
+    "target_train_steps": 500,
+    "effective_batch_size": 16,
+    "formula": "ceil(train_n / (batch * grad_accum)) * epochs",
+    "estimated_steps_with_current_train": 16,
+    "estimated_steps_at_target": 500,
+    "note": "実際の学習スクリプトはリポジトリ内に無いため、指示された想定設定で計算した。"
+  },
+  "validation": {
+    "json_syntax": {
+      "checked": 274,
+      "failed": 0
+    },
+    "schema_and_contract": {
+      "checked": 274,
+      "passed": 274,
+      "failed": 0,
+      "rules": "training/tools/schema_lib.py mirrors GmResponseParser / WorldDraftParser / CharacterDraftParser / StateChangeValidator",
+      "limits_note": "アプリが受理するかはKotlinパーサが最終判定。ここでの合格は構文・契約の合格であり、文章の品質評価ではない。"
+    },
+    "duplicates": {
+      "exact": 0,
+      "near": 0,
+      "threshold_shingle_jaccard": 0.85,
+      "held_back": 0
+    }
+  },
+  "generation_conditions": {
+    "scenario_diversity": "1シナリオグループ=1世界観。グループ単位でsplitし、同一シナリオを跨がせない。",
+    "coverage": "探索/戦闘/会話/交渉/クエスト/謎/アイテム/失敗/予想外/記憶参照/選択肢提示/状態変更/情報不足",
+    "id_policy": "stateChanges と memories.relatedIds はcontextに実在するIDのみ。新規ITEM_ADDのitemにidは付けない。",
+    "check_policy": "choice.check はアプリが判定する場合のみ。difficultyは4/6/8/10/12/14。",
+    "no_dice_contradiction": "判定結果はユーザーメッセージの【アプリが確定した判定結果】だけを根拠にする。"
+  },
+  "raw_sources": [
+    "raw/extraction/extraction_01.jsonl",
+    "raw/extraction/extraction_02.jsonl",
+    "raw/extraction/extraction_03.jsonl",
+    "raw/extraction/extraction_04.jsonl",
+    "raw/extraction/extraction_05.jsonl",
+    "raw/extraction/extraction_06.jsonl",
+    "raw/trpg_gm/gm_a_01.jsonl",
+    "raw/trpg_gm/gm_a_02.jsonl",
+    "raw/trpg_gm/gm_a_03.jsonl",
+    "raw/trpg_gm/gm_b_01.jsonl",
+    "raw/trpg_gm/gm_b_02.jsonl",
+    "raw/trpg_gm/gm_b_03.jsonl",
+    "raw/trpg_gm/gm_c_01.jsonl",
+    "raw/trpg_gm/gm_c_02.jsonl",
+    "raw/trpg_gm/gm_c_03.jsonl",
+    "raw/trpg_gm/gm_city.jsonl",
+    "raw/trpg_gm/gm_f_01.jsonl",
+    "raw/trpg_gm/gm_forest.jsonl",
+    "raw/trpg_gm/gm_g_01.jsonl",
+    "raw/trpg_gm/gm_h_01.jsonl",
+    "raw/trpg_gm/gm_harbor.jsonl",
+    "raw/trpg_gm/gm_i_01.jsonl",
+    "raw/trpg_gm/gm_j_01.jsonl",
+    "raw/trpg_gm/gm_k_01.jsonl",
+    "raw/trpg_gm/gm_l_01.jsonl",
+    "raw/trpg_gm/gm_m_01.jsonl",
+    "raw/trpg_gm/gm_marsh.jsonl",
+    "raw/trpg_gm/gm_n_01.jsonl",
+    "raw/trpg_gm/gm_o_01.jsonl",
+    "raw/trpg_gm/gm_p_01.jsonl",
+    "raw/trpg_gm/gm_q_01.jsonl",
+    "raw/trpg_gm/gm_ruins.jsonl",
+    "raw/world_json/world_01.jsonl",
+    "raw/world_json/world_02.jsonl",
+    "raw/world_json/world_03.jsonl",
+    "raw/world_json/world_04.jsonl",
+    "raw/world_json/world_05.jsonl"
+  ],
+  "verification_commands": [
+    "python3 training/tools/build_dataset.py --check",
+    "python3 training/tools/build_dataset.py",
+    "python3 training/tools/verify_dataset.py",
+    "python3 training/tools/build_sft_outputs.py",
+    "python3 training/tools/verify_sft_outputs.py",
+    "python3 training/tools/fix_raw_consistency.py --dry-run"
+  ],
+  "not_ready_for_training": [
+    "目標9,000件に対して全274件（約3.0%）。train 246件では500ステップに届かない。",
+    "学習トークナイザのchat_templateが未確定。推論用LFM3.jinjaの<think></think>挿入とlossマスキングの整合を確認する必要がある。",
+    "失敗・例外入力・情報不足の網羅は一部のみ。専門担当の抽出レビューで22件の修正（捏造・推測・秘密の誤扱い・type値の正規化）を実施済みだが、全件の人手レビューは未実施。",
+    "本番学習・Kaggle Notebookの変更は指示により行っていない。"
+  ],
+  "rejected_samples": [],
+  "near_duplicate_pairs": [],
+  "notes": [
+    "PARTIAL: 目標件数には到達していないが、全件が検証済みでスモークテスト用データとしては使用可能。",
+    "推論用の third_party/llama.cpp/models/templates/LFM3.jinja は存在する。system は <|im_start|>system として保持される一方、assistant 直前に <think></think> が入る。学習側トークナイザが同一とは限らないため、apply_chat_template() の実物確認が必要。",
+    "専門チーム検査: S02 全274件スキーマ適合・エラー0、S04 抽出68件を全文検査し不合格18件を修正、S06 形式検査で必須修正なし。S03 は120件を抽检し簡体字3種と判定算術1件を修正済み（残り86行は未検査）。",
+    "extraction の system プロンプトはアプリに実装がない補助タスク用。アプリの推論プロンプトと同一ではない。",
+    "world_json の combat.hp はパーサが1〜999、アプリのプロンプトが1〜30を指示しており不一致。データは1〜30に寄せた。",
+    "統計は raw の検証結果であり、文章の面白さ・一貫性は機械検証できない。人手レビューが別途必要。"
+  ],
+  "final_sft_outputs": {
+    "sft_synthetic_json.jsonl": {
+      "rows": 206,
+      "bytes": 1762485,
+      "categories": [
+        "trpg_gm",
+        "world_json"
+      ]
+    },
+    "sft_synthetic_extraction.jsonl": {
+      "rows": 68,
+      "bytes": 136570,
+      "categories": [
+        "extraction"
+      ]
+    },
+    "total_rows": 274,
+    "note": "合格したrawのみを集約。verify_sft_outputs.py で独立検証する。"
+  }
+}
