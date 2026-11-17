@@ -12,6 +12,7 @@ are never copied into the outputs.
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import sys
@@ -29,11 +30,30 @@ OUT_MAIN = ROOT / "sft_synthetic_json.jsonl"
 OUT_EXTRACTION = ROOT / "sft_synthetic_extraction.jsonl"
 
 
-def accepted_records() -> tuple[list[dict], dict]:
+def iter_raw_from(root: Path | None):
+    """bd.iter_raw() equivalent for an explicit root (default keeps old behaviour)."""
+    if root is None:
+        yield from bd.iter_raw()
+        return
+    base = Path(root)
+    for path in sorted(base.rglob("*.jsonl")):
+        with path.open(encoding="utf-8") as fh:
+            for lineno, line in enumerate(fh, 1):
+                if not line.strip():
+                    continue
+                try:
+                    record = json.loads(line)
+                except json.JSONDecodeError as exc:
+                    yield None, (path.name, lineno), f"JSON構文エラー: {exc}"
+                else:
+                    yield record, (path.name, lineno), None
+
+
+def accepted_records(root: Path | None = None) -> tuple[list[dict], dict]:
     records: list[dict] = []
     rejected: list[dict] = []
     seen_ids: set[str] = set()
-    for record, source, parse_error in bd.iter_raw():
+    for record, source, parse_error in iter_raw_from(root):
         if parse_error:
             rejected.append({"source": source, "error": parse_error})
             continue
@@ -98,14 +118,51 @@ def accepted_records() -> tuple[list[dict], dict]:
     return accepted, stats
 
 
+def load_accepted_ids(path: Path | None) -> set[str] | None:
+    if path is None:
+        return None
+    ids: set[str] = set()
+    for lineno, line in enumerate(path.open(encoding="utf-8"), 1):
+        if not line.strip():
+            continue
+        try:
+            obj = json.loads(line)
+        except json.JSONDecodeError:
+            rid = line.strip()
+        else:
+            rid = obj.get("id", "") if isinstance(obj, dict) else ""
+        if rid:
+            ids.add(rid)
+        else:
+            print(f"IDを読み取れない行をスキップ: {path.name}:{lineno}", file=sys.stderr)
+    return ids
+
+
 def main() -> int:
-    accepted, stats = accepted_records()
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--root", type=Path, default=None,
+                    help="raw JSONL のルート。省略時は training/raw（後方互換）")
+    ap.add_argument("--accepted-ids", type=Path, default=None,
+                    help="PASS ID のみを通すファイル（1行1ID または JSONL の id フィールド）")
+    ap.add_argument("--out-dir", type=Path, default=None,
+                    help="隔離出力先。省略時は既存の正式SFTファイルへ出力（後方互換）")
+    ap.add_argument("--force", action="store_true", help="既存出力ファイルの上書きを明示的に許可")
+    args = ap.parse_args()
+
+    accepted_ids = load_accepted_ids(args.accepted_ids)
+    accepted, stats = accepted_records(args.root)
+    if accepted_ids is not None:
+        accepted = [r for r in accepted if r["id"] in accepted_ids]
+        stats["filtered_by_accepted_ids"] = len(accepted)
+        stats["accepted_ids_not_found"] = sorted(accepted_ids - {r["id"] for r in accepted})
+
     main_rows: list[dict] = []
     extraction_rows: list[dict] = []
     for record in accepted:
         row = {
             "messages": bd.to_messages(record),
             "metadata": {
+                "id": record["id"],
                 "task": record["task"],
                 "source": "opencode-agent",
                 "teacher_model": "deepseek-v4.1-flash-free",
@@ -117,7 +174,17 @@ def main() -> int:
         else:
             main_rows.append(row)
 
-    for path, rows in ((OUT_MAIN, main_rows), (OUT_EXTRACTION, extraction_rows)):
+    if args.out_dir is None:
+        out_main, out_extr = OUT_MAIN, OUT_EXTRACTION
+    else:
+        args.out_dir.mkdir(parents=True, exist_ok=True)
+        out_main = args.out_dir / OUT_MAIN.name
+        out_extr = args.out_dir / OUT_EXTRACTION.name
+        if not args.force and (out_main.exists() or out_extr.exists()):
+            print("隔離出力先に既存ファイルがあります。--force を指定してください。", file=sys.stderr)
+            return 2
+
+    for path, rows in ((out_main, main_rows), (out_extr, extraction_rows)):
         tmp = path.with_suffix(".jsonl.tmp")
         with tmp.open("w", encoding="utf-8") as fh:
             for row in rows:
@@ -126,36 +193,39 @@ def main() -> int:
 
     report = {
         "output_files": {
-            OUT_MAIN.name: len(main_rows),
-            OUT_EXTRACTION.name: len(extraction_rows),
+            out_main.name: len(main_rows),
+            out_extr.name: len(extraction_rows),
         },
+        "output_dir": str(args.out_dir) if args.out_dir else str(ROOT),
         "total_written": len(main_rows) + len(extraction_rows),
         "raw_records": stats["raw_records"],
         "rejected": len(stats["rejected"]),
         "exact_duplicates": len(stats["exact_duplicates"]),
         "near_duplicates": len(stats["near_duplicates"]),
         "accepted": stats["accepted"],
+        "filtered_by_accepted_ids": stats.get("filtered_by_accepted_ids"),
+        "accepted_ids_not_found": stats.get("accepted_ids_not_found"),
     }
-    meta_path = ROOT / "metadata" / "dataset_info.json"
-    if meta_path.exists():
-        meta = json.loads(meta_path.read_text(encoding="utf-8"))
-        meta["final_sft_outputs"] = {
-            "sft_synthetic_json.jsonl": {
-                "rows": len(main_rows),
-                "bytes": OUT_MAIN.stat().st_size,
-                "categories": ["trpg_gm", "world_json"],
-            },
-            "sft_synthetic_extraction.jsonl": {
-                "rows": len(extraction_rows),
-                "bytes": OUT_EXTRACTION.stat().st_size,
-                "categories": ["extraction"],
-            },
-            "total_rows": len(main_rows) + len(extraction_rows),
-            "note": "合格したrawのみを集約。verify_sft_outputs.py で独立検証する。",
-        }
-        meta_path.write_text(
-            json.dumps(meta, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-        )
+    # 隔離出力時は既存 metadata を一切変更しない
+    if args.out_dir is None:
+        meta_path = ROOT / "metadata" / "dataset_info.json"
+        if meta_path.exists():
+            meta = json.loads(meta_path.read_text(encoding="utf-8"))
+            meta["final_sft_outputs"] = {
+                "sft_synthetic_json.jsonl": {
+                    "rows": len(main_rows), "bytes": out_main.stat().st_size,
+                    "categories": ["trpg_gm", "world_json"],
+                },
+                "sft_synthetic_extraction.jsonl": {
+                    "rows": len(extraction_rows), "bytes": out_extr.stat().st_size,
+                    "categories": ["extraction"],
+                },
+                "total_rows": len(main_rows) + len(extraction_rows),
+                "note": "合格したrawのみを集約。verify_sft_outputs.py で独立検証する。",
+            }
+            meta_path.write_text(
+                json.dumps(meta, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+            )
 
     print(json.dumps(report, ensure_ascii=False, indent=2))
     if stats["rejected"]:

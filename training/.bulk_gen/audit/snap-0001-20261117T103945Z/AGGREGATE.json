@@ -1,0 +1,70 @@
+{
+  "snapshot_id": "snap-0001-20261117T103945Z",
+  "created_at": "2026-11-17T10:39:45+00:00",
+  "audited_at": "2026-11-17T10:39:59+00:00",
+  "source_manifest": {
+    "total_records": 4,
+    "by_category": {
+      "trpg_gm": 4,
+      "world_json": 0,
+      "extraction": 0
+    },
+    "files": 1
+  },
+  "audit": {
+    "scored": 4,
+    "coverage_pct": 100.0,
+    "verdict_counts": {
+      "pass": 4
+    },
+    "review_queue": 0,
+    "average_score": 98.0,
+    "threshold": 70,
+    "verifier_version": "qa-1.0.0"
+  },
+  "red_flag_counts": {},
+  "finding_counts": {},
+  "score_distribution": {
+    "86-100": 4
+  },
+  "by_category": {
+    "trpg_gm": {
+      "count": 4,
+      "average_score": 98.0,
+      "verdict_counts": {
+        "pass": 4
+      },
+      "red_flags": 0,
+      "findings": 0
+    }
+  },
+  "by_task": {
+    "gm_turn": {
+      "count": 4,
+      "average_score": 98.0,
+      "verdict_counts": {
+        "pass": 4
+      },
+      "red_flags": 0,
+      "findings": 0
+    }
+  },
+  "top_issues": [],
+  "run": {
+    "command": [
+      "/data/data/com.termux/files/usr/bin/python3",
+      "/data/data/com.termux/files/home/trpg/training/tools/quality_system.py",
+      "score",
+      "--root",
+      "/data/data/com.termux/files/home/trpg/training/.bulk_gen/snapshots/snap-0001-20261117T103945Z/raw",
+      "--out-dir",
+      "/data/data/com.termux/files/home/trpg/training/.bulk_gen/audit/snap-0001-20261117T103945Z"
+    ],
+    "returncode": 0,
+    "audited_at": "2026-11-17T10:39:59+00:00"
+  },
+  "notes": [
+    "監査入力はスナップショットの raw のみ。inbox の書き込み中ファイルは読んでいない。",
+    "品質点はヒューリスティック推定であり人手レビューの代替ではない。"
+  ]
+}

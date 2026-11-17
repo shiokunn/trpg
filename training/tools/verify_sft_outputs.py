@@ -10,6 +10,7 @@ Usage: python3 training/tools/verify_sft_outputs.py
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import sys
@@ -23,9 +24,17 @@ FILES = [
 
 
 def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--root", type=Path, default=None,
+                    help="検証するSFTファイルの親ディレクトリ（省略時は training/）")
+    args = ap.parse_args()
+    files = FILES if args.root is None else [
+        args.root / "sft_synthetic_json.jsonl",
+        args.root / "sft_synthetic_extraction.jsonl",
+    ]
     errors: list[str] = []
     summary = {}
-    for path in FILES:
+    for path in files:
         if not path.exists():
             errors.append(f"{path.name}: ファイルが存在しない")
             continue

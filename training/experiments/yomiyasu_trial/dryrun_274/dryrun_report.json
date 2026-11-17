@@ -1,26 +1,23 @@
 {
   "mode": "dry-run on copies only (no writes to training/raw or final JSONL)",
   "records": 274,
-  "records_with_proposed_changes": 15,
+  "records_with_proposed_changes": 12,
   "changed_ids": [
-    "gm-f-0001",
-    "gm-f-0002",
-    "gm-f-0003",
-    "gm-f-0006",
-    "gm-0001",
-    "gm-0003",
-    "gm-g-0001",
-    "world-0007",
-    "world-0008",
-    "world-0009",
-    "world-0011",
     "ex-0021",
     "ex-0022",
     "ex-0024",
-    "ex-0025"
+    "ex-0025",
+    "gm-0001",
+    "gm-0003",
+    "gm-f-0001",
+    "gm-f-0002",
+    "gm-f-0006",
+    "world-0007",
+    "world-0008",
+    "world-0011"
   ],
-  "records_unchanged": 259,
+  "records_unchanged": 262,
   "schema_invalid_before": [],
   "schema_invalid_after": [],
-  "note": "推敲提案は承認済み20件の試験結果のみ。他254件は変更なし（no-op）。よって本ドライランはパイプライン検証であり、274件全体の文章改善を検証したものではない。"
+  "note": "REVIEW_15適用後: 採用12件のみ差分。残り262件はno-op。274件全体の推敲検証ではない。"
 }

@@ -1,15 +1,11 @@
 {
-  "schema_after_bad": [],
-  "protected_token_issues": [],
-  "changed_records": 15,
+  "records": 20,
+  "changed_records": 12,
   "changed_fields": {
     "gm-f-0001": [
       ".output.narrative"
     ],
     "gm-f-0002": [
-      ".output.narrative"
-    ],
-    "gm-f-0003": [
       ".output.narrative"
     ],
     "gm-f-0006": [
@@ -21,16 +17,10 @@
     "gm-0003": [
       ".output.narrative"
     ],
-    "gm-g-0001": [
-      ".output.narrative"
-    ],
     "world-0007": [
       ".output.setting"
     ],
     "world-0008": [
-      ".output.setting"
-    ],
-    "world-0009": [
       ".output.setting"
     ],
     "world-0011": [
@@ -49,5 +39,8 @@
       ".request"
     ]
   },
-  "total_records": 20
+  "schema_invalid_before": [],
+  "schema_invalid_after": [],
+  "protected_compare": "see compare_12.json",
+  "decision": "REVIEW_15 applied: 12 adopted, #03/#13/#10 reverted to source"
 }
