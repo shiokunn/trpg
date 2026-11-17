@@ -43,9 +43,12 @@ def main() -> int:
                     errors.append(f"{path.name}:{lineno}: JSON構文エラー {exc}")
                     continue
                 rows += 1
-                if set(obj.keys()) != {"messages"}:
-                    errors.append(f"{path.name}:{lineno}: トップキーが messages ではない")
+                if set(obj.keys()) != {"messages", "metadata"}:
+                    errors.append(f"{path.name}:{lineno}: トップキーが messages/metadata ではない")
                     continue
+                meta = obj["metadata"]
+                if not isinstance(meta, dict) or not isinstance(meta.get("task"), str):
+                    errors.append(f"{path.name}:{lineno}: metadata.task が不正")
                 msgs = obj["messages"]
                 if not isinstance(msgs, list) or len(msgs) < 2:
                     errors.append(f"{path.name}:{lineno}: messages が短すぎる")

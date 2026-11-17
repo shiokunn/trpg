@@ -189,7 +189,7 @@
   "final_sft_outputs": {
     "sft_synthetic_json.jsonl": {
       "rows": 206,
-      "bytes": 1762485,
+      "bytes": 1790340,
       "categories": [
         "trpg_gm",
         "world_json"
@@ -197,7 +197,7 @@
     },
     "sft_synthetic_extraction.jsonl": {
       "rows": 68,
-      "bytes": 136570,
+      "bytes": 145908,
       "categories": [
         "extraction"
       ]

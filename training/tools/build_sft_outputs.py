@@ -103,7 +103,15 @@ def main() -> int:
     main_rows: list[dict] = []
     extraction_rows: list[dict] = []
     for record in accepted:
-        row = {"messages": bd.to_messages(record)}
+        row = {
+            "messages": bd.to_messages(record),
+            "metadata": {
+                "task": record["task"],
+                "source": "opencode-agent",
+                "teacher_model": "deepseek-v4.1-flash-free",
+                "license_review": "pending",
+            },
+        }
         if record["category"] == "extraction":
             extraction_rows.append(row)
         else:
