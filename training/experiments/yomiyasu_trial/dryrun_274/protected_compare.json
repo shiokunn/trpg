@@ -1,0 +1,22 @@
+{
+  "records": 274,
+  "changed_allowed_fields": [
+    "gm-f-0001:output.narrative",
+    "gm-f-0002:output.narrative",
+    "gm-f-0003:output.narrative",
+    "gm-f-0006:output.narrative",
+    "gm-0001:output.narrative",
+    "gm-0003:output.narrative",
+    "gm-g-0001:output.narrative",
+    "world-0007:output.setting",
+    "world-0008:output.setting",
+    "world-0009:output.setting",
+    "world-0011:output.setting",
+    "ex-0021:request",
+    "ex-0022:request",
+    "ex-0024:request",
+    "ex-0025:request"
+  ],
+  "errors": [],
+  "error_count": 0
+}
