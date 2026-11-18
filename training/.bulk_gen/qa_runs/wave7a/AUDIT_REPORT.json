@@ -1,0 +1,284 @@
+{
+  "run_dir": "/data/data/com.termux/files/home/trpg/training/.bulk_gen/qa_runs/wave7a",
+  "source_snapshot": "snap-0009-20261117T121222Z",
+  "generated_at": "2026-11-17T12:34:48+00:00",
+  "counts": {
+    "PASS": 48,
+    "REVIEW": 19,
+    "FAIL": 0
+  },
+  "total": 67,
+  "pass_rate_pct": 71.6,
+  "non_pass_count": 19,
+  "problematic_ids": [
+    {
+      "audit_id": "gm-a-0008",
+      "original_id": "bgm14-0020",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "gm-a-0012",
+      "original_id": "bgm14-0030",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0009",
+      "original_id": "bwd08-0009",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0010",
+      "original_id": "bwd08-0010",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0011",
+      "original_id": "bwd08-0011",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0012",
+      "original_id": "bwd08-0012",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0013",
+      "original_id": "bwd08-0013",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0014",
+      "original_id": "bwd08-0014",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0015",
+      "original_id": "bwd08-0015",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0016",
+      "original_id": "bwd08-0016",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0017",
+      "original_id": "bwd08-0017",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0018",
+      "original_id": "bwd08-0018",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0019",
+      "original_id": "bwd08-0019",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0020",
+      "original_id": "bwd08-0020",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0021",
+      "original_id": "bwd08-0021",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0022",
+      "original_id": "bwd08-0022",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0023",
+      "original_id": "bwd08-0023",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0024",
+      "original_id": "bwd08-0024",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0025",
+      "original_id": "bwd08-0025",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    }
+  ],
+  "reason_counts": {
+    "unjudged_or_missing_semantic": 17,
+    "fallback": 2
+  },
+  "id_format_all_valid": true,
+  "duplicate_input_ids": [],
+  "invalid_id_prefix": [],
+  "manifest_duplicate_ids": [],
+  "verify_sft_errors": 0,
+  "verify_sft_error_samples": [],
+  "verify_sft_files": {
+    "sft_synthetic_json.jsonl": {
+      "rows": 48,
+      "unique": 48,
+      "role_shapes": {
+        "system;user;assistant": 22,
+        "system;user;assistant;user;assistant": 13,
+        "system;user;assistant;user;assistant;user;assistant": 13
+      },
+      "bytes": 340213
+    },
+    "sft_synthetic_extraction.jsonl": {
+      "rows": 0,
+      "unique": 0,
+      "role_shapes": {},
+      "bytes": 0
+    }
+  },
+  "isolated_sft": {
+    "pass_ids": 48,
+    "rows_written": 48,
+    "by_file": {
+      "sft_synthetic_json.jsonl": 48,
+      "sft_synthetic_extraction.jsonl": 0
+    },
+    "written_ids_all_in_pass": true,
+    "pass_ids_not_found_in_raw": [],
+    "non_pass_records_excluded": 19,
+    "official_files_touched": false
+  },
+  "conclusion": "PASS品のみ隔離SFTに含まれ、形式検証エラー0。正式データへの統合は全Wave監査完了後。"
+}

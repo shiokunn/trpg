@@ -1,0 +1,3 @@
+{"id": "ex-0024", "cause": "llm_only:fabrication", "python_categories": [], "llm_categories": ["fabrication"], "python_verdict": "pass", "final_verdict": "fail"}
+{"id": "ex-0030", "cause": "llm_only:fabrication", "python_categories": [], "llm_categories": ["fabrication"], "python_verdict": "pass", "final_verdict": "fail"}
+{"id": "ex-0046", "cause": "llm_only:fabrication", "python_categories": [], "llm_categories": ["fabrication"], "python_verdict": "pass", "final_verdict": "fail"}

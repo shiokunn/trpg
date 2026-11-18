@@ -1,0 +1,12 @@
+{
+  "pass_ids": 35,
+  "rows_written": 35,
+  "by_file": {
+    "sft_synthetic_json.jsonl": 35,
+    "sft_synthetic_extraction.jsonl": 0
+  },
+  "written_ids_all_in_pass": true,
+  "pass_ids_not_found_in_raw": [],
+  "non_pass_records_excluded": 1,
+  "official_files_touched": false
+}

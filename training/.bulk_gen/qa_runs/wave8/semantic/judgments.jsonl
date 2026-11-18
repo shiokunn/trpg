@@ -1,0 +1,1749 @@
+{"id":"ex-0001","labels":[]}
+{"id":"ex-0002","labels":[]}
+{"id":"ex-0003","labels":[]}
+{"id":"ex-0004","labels":[]}
+{"id":"ex-0005","labels":[]}
+{"id":"ex-0006","labels":[]}
+{"id":"ex-0007","labels":[]}
+{"id":"ex-0008","labels":[]}
+{"id":"ex-0009","labels":[]}
+{"id":"ex-0010","labels":[]}
+{"id":"ex-0011","labels":[]}
+{"id":"ex-0012","labels":[]}
+{"id":"ex-0013","labels":[]}
+{"id":"ex-0014","labels":[]}
+{"id":"ex-0015","labels":[]}
+{"id":"ex-0016","labels":[]}
+{"id":"ex-0017","labels":[]}
+{"id":"ex-0018","labels":[]}
+{"id":"ex-0019","labels":[]}
+{"id":"ex-0020","labels":[]}
+{"id":"ex-0021","labels":[]}
+{"id":"ex-0022","labels":[{"category":"review","confidence":0.6,"evidence":"npcMemoriesの『一つに毒が入っていたことを後で認めた』は原文『毒が入っていたと後で判明した』に無い料理人の自認・供述。判明(発見)を認めた(自認)へすり替えた捏造の可能性"}]}
+{"id":"ex-0023","labels":[]}
+{"id":"ex-0024","labels":[]}
+{"id":"ex-0025","labels":[]}
+{"id":"ex-0026","labels":[]}
+{"id":"ex-0027","labels":[]}
+{"id":"ex-0028","labels":[]}
+{"id":"ex-0029","labels":[]}
+{"id":"ex-0030","labels":[]}
+{"id":"ex-0031","labels":[]}
+{"id":"ex-0032","labels":[]}
+{"id":"ex-0033","labels":[]}
+{"id":"ex-0034","labels":[]}
+{"id":"ex-0035","labels":[]}
+{"id":"ex-0036","labels":[]}
+{"id":"ex-0037","labels":[]}
+{"id":"ex-0038","labels":[]}
+{"id":"ex-0039","labels":[]}
+{"id":"ex-0040","labels":[]}
+{"id":"ex-0041","labels":[]}
+{"id":"ex-0042","labels":[]}
+{"id":"ex-0043","labels":[]}
+{"id":"ex-0044","labels":[]}
+{"id":"ex-0045","labels":[]}
+{"id":"ex-0046","labels":[]}
+{"id":"ex-0047","labels":[]}
+{"id":"ex-0048","labels":[]}
+{"id":"ex-0049","labels":[]}
+{"id":"ex-0050","labels":[]}
+{"id":"ex-0051","labels":[]}
+{"id":"ex-0052","labels":[]}
+{"id":"ex-0053","labels":[]}
+{"id":"ex-0054","labels":[]}
+{"id":"ex-0055","labels":[]}
+{"id":"ex-0056","labels":[]}
+{"id":"ex-0057","labels":[]}
+{"id":"ex-0058","labels":[]}
+{"id":"ex-0059","labels":[]}
+{"id":"ex-0532","labels":[]}
+{"id":"ex-0533","labels":[]}
+{"id":"ex-0534","labels":[]}
+{"id":"ex-0535","labels":[]}
+{"id":"ex-0536","labels":[]}
+{"id":"ex-0537","labels":[]}
+{"id":"ex-0538","labels":[]}
+{"id":"ex-0539","labels":[]}
+{"id":"ex-0540","labels":[]}
+{"id":"ex-0541","labels":[]}
+{"id":"ex-0542","labels":[]}
+{"id":"ex-0543","labels":[]}
+{"id":"ex-0544","labels":[]}
+{"id":"ex-0545","labels":[]}
+{"id":"ex-0546","labels":[]}
+{"id":"ex-0547","labels":[]}
+{"id":"ex-0548","labels":[]}
+{"id":"ex-0549","labels":[]}
+{"id":"ex-0550","labels":[]}
+{"id":"ex-0551","labels":[]}
+{"id":"ex-0552","labels":[]}
+{"id":"ex-0553","labels":[]}
+{"id":"ex-0554","labels":[]}
+{"id":"ex-0555","labels":[]}
+{"id":"ex-0556","labels":[]}
+{"id":"ex-0557","labels":[]}
+{"id":"ex-0558","labels":[]}
+{"id":"ex-0559","labels":[]}
+{"id":"ex-0560","labels":[]}
+{"id":"ex-0561","labels":[]}
+{"id":"ex-0562","labels":[]}
+{"id":"ex-0563","labels":[]}
+{"id":"ex-0564","labels":[]}
+{"id":"ex-0565","labels":[]}
+{"id":"ex-0566","labels":[]}
+{"id":"ex-0567","labels":[]}
+{"id":"ex-0568","labels":[]}
+{"id":"ex-0569","labels":[]}
+{"id":"ex-0570","labels":[]}
+{"id":"ex-0571","labels":[]}
+{"id":"ex-0572","labels":[]}
+{"id":"ex-0573","labels":[]}
+{"id":"ex-0574","labels":[]}
+{"id":"ex-0575","labels":[]}
+{"id":"ex-0576","labels":[]}
+{"id":"ex-0577","labels":[]}
+{"id":"ex-0578","labels":[]}
+{"id":"ex-0579","labels":[]}
+{"id":"ex-0580","labels":[]}
+{"id":"ex-0581","labels":[]}
+{"id":"ex-0582","labels":[]}
+{"id":"ex-0583","labels":[]}
+{"id":"ex-0584","labels":[]}
+{"id":"ex-0585","labels":[]}
+{"id":"ex-0586","labels":[]}
+{"id":"ex-0587","labels":[]}
+{"id":"ex-0588","labels":[]}
+{"id":"ex-0589","labels":[]}
+{"id":"ex-0590","labels":[]}
+{"id": "ex-0591", "labels": [{"category": "fabrication", "confidence": 0.7, "evidence": "npcMemories(n1)『その札は昔、湯穴への目印として使われていた』は原文になく、原文は『どちらも山の湯穴へ通じる道を指していた』のみで過去の用途・使用事実は記載されていない"}]}
+{"id": "ex-0592", "labels": [{"category": "review", "confidence": 0.6, "evidence": "LOCATION_CHANGEのreason『遺跡の入口から地下墓所へ降りた』は原文『ザンは地下墓所へ降りた』に無い出発地（遺跡の入口）の付加。推測か捏造か曖昧"}]}
+{"id": "ex-0593", "labels": [{"category": "review", "confidence": 0.55, "evidence": "npcMemories(n2)にisSecret=trueを付与し『気にしない』という態度も追加。原文は『ミオは距離を置こうとした。互いに言葉を交わさなかった』のみで秘密や当の感覚の記述なし"}]}
+{"id": "ex-0594", "labels": []}
+{"id": "ex-0595", "labels": [{"category": "review", "confidence": 0.6, "evidence": "npcMemories(n1)『祖父からその話を聞いたが、自分は見ていない』は原文になく、伝聞元（祖父）と本人の未見という事実が新たに付加されている"}]}
+{"id": "ex-0596", "labels": [{"category": "review", "confidence": 0.65, "evidence": "LOCATION_CHANGEのreason『地下広場から地下水脈へ降りた』とNPC_RELATION_DELTAのreason『親方と意見が割れた』は原文になく、出発地と信頼低下の原因が捏造されている可能性（妥当な推測かどうか曖昧）"}]}
+{"id": "ex-0597", "labels": [{"category": "review", "confidence": 0.6, "evidence": "QUEST_OBJECTIVE_PROGRESSのreason『執事から話を聞いた』は原文『エルは大広間で城主を救う目標を一つ進めた』に無い成因の付加"}]}
+{"id": "ex-0598", "labels": []}
+{"id": "ex-0599", "labels": []}
+{"id": "ex-0600", "labels": []}
+{"id": "ex-0601", "labels": []}
+{"id": "ex-0602", "labels": []}
+{"id": "ex-0603", "labels": []}
+{"id": "ex-0604", "labels": []}
+{"id": "ex-0605", "labels": []}
+{"id": "ex-0606", "labels": []}
+{"id": "ex-0607", "labels": []}
+{"id": "ex-0608", "labels": []}
+{"id": "ex-0609", "labels": []}
+{"id": "ex-0610", "labels": []}
+{"id": "ex-0611", "labels": []}
+{"id": "ex-0612", "labels": []}
+{"id": "ex-0613", "labels": []}
+{"id": "ex-0614", "labels": []}
+{"id": "ex-0615", "labels": []}
+{"id": "ex-0616", "labels": []}
+{"id": "ex-0617", "labels": []}
+{"id": "ex-0618", "labels": []}
+{"id": "ex-0619", "labels": []}
+{"id": "ex-0620", "labels": []}
+{"id": "ex-0621", "labels": []}
+{"id": "ex-0622", "labels": []}
+{"id": "ex-0623", "labels": []}
+{"id": "ex-0624", "labels": []}
+{"id": "ex-0625", "labels": []}
+{"id": "ex-0626", "labels": []}
+{"id": "ex-0627", "labels": []}
+{"id": "ex-0628", "labels": []}
+{"id": "ex-0629", "labels": []}
+{"id": "ex-0630", "labels": []}
+{"id": "ex-0631", "labels": []}
+{"id": "ex-0632", "labels": []}
+{"id": "ex-0633", "labels": []}
+{"id": "ex-0634", "labels": []}
+{"id": "ex-0635", "labels": []}
+{"id": "ex-0636", "labels": []}
+{"id": "ex-0637", "labels": []}
+{"id": "ex-0638", "labels": []}
+{"id": "ex-0639", "labels": []}
+{"id": "ex-0640", "labels": []}
+{"id": "ex-0641", "labels": []}
+{"id": "ex-0642", "labels": []}
+{"id": "ex-0643", "labels": []}
+{"id": "ex-0644", "labels": []}
+{"id": "ex-0645", "labels": []}
+{"id": "ex-0646", "labels": []}
+{"id": "ex-0647", "labels": []}
+{"id": "ex-0648", "labels": []}
+{"id": "ex-0649", "labels": []}
+{"id":"ex-0650","labels":[]}
+{"id":"ex-0651","labels":[]}
+{"id":"ex-0652","labels":[]}
+{"id":"ex-0653","labels":[{"category":"review","confidence":0.6,"evidence":"description『岩礁の上に立ち、沖からも見える白い灯台』の『沖からも見える』は原文『地図には、岩礁の上に立つ白い灯台が記されている』に無い属性。灯台として妥当な推定か事実付加か曖昧"}]}
+{"id":"ex-0654","labels":[]}
+{"id":"ex-0655","labels":[]}
+{"id":"ex-0656","labels":[]}
+{"id":"ex-0657","labels":[]}
+{"id":"ex-0658","labels":[]}
+{"id":"ex-0659","labels":[]}
+{"id":"ex-0660","labels":[]}
+{"id":"ex-0661","labels":[]}
+{"id":"ex-0662","labels":[]}
+{"id":"ex-0663","labels":[]}
+{"id":"ex-0664","labels":[]}
+{"id":"ex-0665","labels":[]}
+{"id":"ex-0666","labels":[{"category":"review","confidence":0.6,"evidence":"connections『南の難所への道』/『北の関門への道』——原文は『北の関門と南の難所が記されている』のみで、両者を結ぶ道は明示されていない（妥当な推測かどうか曖昧）"}]}
+{"id":"ex-0667","labels":[]}
+{"id":"ex-0668","labels":[]}
+{"id":"ex-0669","labels":[]}
+{"id":"ex-0670","labels":[]}
+{"id":"ex-0671","labels":[]}
+{"id":"ex-0672","labels":[]}
+{"id":"ex-0673","labels":[]}
+{"id":"ex-0674","labels":[]}
+{"id":"ex-0675","labels":[]}
+{"id":"ex-0676","labels":[]}
+{"id":"ex-0677","labels":[]}
+{"id":"ex-0678","labels":[]}
+{"id":"ex-0679","labels":[]}
+{"id":"ex-0680","labels":[]}
+{"id":"ex-0681","labels":[]}
+{"id":"ex-0682","labels":[]}
+{"id":"ex-0683","labels":[]}
+{"id":"ex-0684","labels":[]}
+{"id":"ex-0685","labels":[]}
+{"id":"ex-0686","labels":[]}
+{"id":"ex-0687","labels":[]}
+{"id":"ex-0688","labels":[]}
+{"id":"ex-0689","labels":[]}
+{"id":"ex-0690","labels":[]}
+{"id":"ex-0691","labels":[]}
+{"id":"ex-0692","labels":[]}
+{"id":"ex-0693","labels":[]}
+{"id":"ex-0694","labels":[]}
+{"id":"ex-0695","labels":[]}
+{"id":"ex-0696","labels":[]}
+{"id":"ex-0697","labels":[]}
+{"id":"ex-0698","labels":[]}
+{"id":"ex-0699","labels":[]}
+{"id":"ex-0700","labels":[]}
+{"id":"ex-0701","labels":[]}
+{"id":"ex-0702","labels":[]}
+{"id":"ex-0703","labels":[]}
+{"id":"ex-0704","labels":[]}
+{"id":"ex-0705","labels":[]}
+{"id":"ex-0706","labels":[{"category":"review","confidence":0.6,"evidence":"COMBAT_END の reason『影泥棒を追い払った』は原文『影泥棒との戦いを終えた』に無い結果（追い払った）の付加。戦闘終了に至る経緯・結果は原文に明示なし"}]}
+{"id":"ex-0707","labels":[{"category":"review","confidence":0.5,"evidence":"XP_DELTA の reason『からくりを組み直した』は原文『螺子を一つ拾い、古い歯車を一つ外し、経験値3を得た』に無い成因の付加"}]}
+{"id":"ex-0708","labels":[{"category":"fabrication","confidence":0.7,"evidence":"ITEM_REMOVE の reason『糊は使わず布の切れ端で補修した』の『布の切れ端で』は原文になく、原文は『糊は使わず、代わりに影絵の革(i1)を一枚補修』のみ"}]}
+{"id":"ex-0709","labels":[]}
+{"id":"ex-0710","labels":[]}
+{"id":"ex-0711","labels":[]}
+{"id":"ex-0712","labels":[]}
+{"id":"ex-0713","labels":[]}
+{"id":"ex-0714","labels":[]}
+{"id":"ex-0715","labels":[]}
+{"id":"ex-0716","labels":[]}
+{"id":"ex-0717","labels":[]}
+{"id":"ex-0718","labels":[]}
+{"id":"ex-0719","labels":[{"category":"fabrication","confidence":0.8,"evidence":"npcMemories(n1)に『香司が沈香を手放したがらない』を追加。原文はミツキが沈香の欠片を強く欲しがったとのみで、香司(キョウ)が手放したがらないという記述はない"}]}
+{"id":"ex-0720","labels":[{"category":"fabrication","confidence":0.8,"evidence":"WORLD記憶『香に記憶が宿るという言い伝えがある』を追加。原文は古い香の配合が眠りの香に似ていることと学徒に内緒で残すことのみで、言い伝えの記述はない"}]}
+{"id":"ex-0721","labels":[]}
+{"id":"ex-0722","labels":[{"category":"fabrication","confidence":0.8,"evidence":"NPC_RELATION『ハクはスズを信頼している』とnpcMemories(n2)『先輩のハクについて回きたい』を追加。原文は二人が同じ歯車の欠片を探しているという発見のみで、信頼や追随の意図は記述されていない"}]}
+{"id":"ex-0723","labels":[{"category":"fabrication","confidence":0.8,"evidence":"WORLD記憶『町では音で季節を知らせる習慣がある』を追加。原文は音の広場の祭りに向けた弦の調整と調律の依頼の進捗のみで、習慣の記述はない"}]}
+{"id":"ex-0724","labels":[{"category":"review","confidence":0.6,"evidence":"npcMemories(n1)に『クオンだけに理由を話した』を追加。原文はクオンが理由を知っていて客に話さないとしたのみで、ネムがクオンだけに打ち明けたという事実は書かれておらず、推測による付加か捏造か曖昧"}]}
+{"id":"ex-0725","labels":[{"category":"review","confidence":0.6,"evidence":"npcMemories(n1)に『ハチの色選びに批判的』を追加。原文はナズナが糸の色を巡って距離を置いたとのみで、批判的な態度までは特定できず、解釈による付加か事実改変か曖昧"}]}
+{"id":"ex-0726","labels":[{"category":"fabrication","confidence":0.8,"evidence":"DISCOVERY記憶『紙の刻印が古い香の印と似ている』を追加。原文は見覚えのない刻印の紙が混じり理由を確かめていないとのみで、刻印が古い香の印に似ているという記述はない"}]}
+{"id":"ex-0727","labels":[{"category":"fabrication","confidence":0.8,"evidence":"NPC_RELATION『一座の語りをオトに任せている』を追加。原文はオトが新しい台本を持ち込み一座の空気が変わったとのみで、語りを任せているという記述はない"}]}
+{"id":"ex-0728","labels":[{"category":"review","confidence":0.6,"evidence":"FORESHADOWING『灯が消える夜が近づいている』を追加。原文は灯が消える夜に古い約束が思い出されるという習わしのみで、その夜が近づいているという記述はなく、推測による付加か捏造か曖昧"}]}
+{"id":"ex-0729","labels":[]}
+{"id":"ex-0730","labels":[{"category":"review","confidence":0.5,"evidence":"NPC_RELATION『二人の成長を頼もしく思う』は、原文『嬉しく記録した』の感情を『頼もしく』かつ『成長』へ言い換えており、微妙な意味変化か等価な言い換えか曖昧"},{"category":"fabrication","confidence":0.75,"evidence":"npcMemories(n1)に『ヒバリの音を真似たい』を追加。原文はカナデとヒバリが音を合わせて練習したとのみで、カナデがヒバリの音を真似たいという意図は記述されていない"}]}
+{"id":"ex-0731","labels":[]}
+{"id":"ex-0732","labels":[]}
+{"id":"ex-0733","labels":[]}
+{"id":"ex-0734","labels":[{"category":"fabrication","confidence":0.75,"evidence":"npcMemories(n1)に『ハクに認められたい』を追加。原文はネジがこっそり道具を磨いてくれたという発見のみで、ハクに認められたいという動機は記述されていない"}]}
+{"id":"ex-0735","labels":[]}
+{"id":"ex-0736","labels":[]}
+{"id":"ex-0737","labels":[]}
+{"id":"ex-0738","labels":[]}
+{"id":"ex-0739","labels":[]}
+{"id":"ex-0740","labels":[]}
+{"id":"ex-0741","labels":[]}
+{"id":"ex-0742","labels":[]}
+{"id":"ex-0743","labels":[]}
+{"id":"ex-0744","labels":[]}
+{"id":"ex-0745","labels":[]}
+{"id":"ex-0746","labels":[]}
+{"id":"ex-0747","labels":[]}
+{"id":"ex-0748","labels":[]}
+{"id":"ex-0749","labels":[]}
+{"id":"ex-0750","labels":[]}
+{"id":"ex-0751","labels":[]}
+{"id":"ex-0752","labels":[]}
+{"id":"ex-0753","labels":[]}
+{"id":"ex-0754","labels":[]}
+{"id":"ex-0755","labels":[]}
+{"id":"ex-0756","labels":[]}
+{"id":"ex-0757","labels":[]}
+{"id":"ex-0758","labels":[]}
+{"id":"gm-a-0001","labels":[]}
+{"id":"gm-a-0002","labels":[]}
+{"id":"gm-a-0003","labels":[]}
+{"id":"gm-a-0004","labels":[{"category":"review","confidence":0.6,"evidence":"原文『採集ナイフで足元の道を切り拓く』に対し、生成はつるの観察と標本瓶の描写のみで、ナイフで道を切り拓く動作が描写されておらず、手段の欠落か事実改変か曖昧"}]}
+{"id":"gm-a-0005","labels":[]}
+{"id":"gm-a-0006","labels":[{"category":"contradiction","confidence":0.7,"evidence":"原文『延焼した弟子の袖を叩き消す』に対し、生成は『火は根岸の袖に移り、千草は咄嗟に手を伸ばす』『弟子を先に救うか』で、袖の火を叩き消した描写がなく選択として未完了のまま終わっている"}]}
+{"id":"gm-a-0007","labels":[{"category":"review","confidence":0.5,"evidence":"原文『通路の庭』を生成は『水路の庭』と場所名を変更し、また『柊組合長への面会を申し入れる』の申し入れ描写がなく『柊組合長は議事堂に姿を見せない』『交渉を試みるか』となっており、表記ゆれか事実改変か曖昧"}]}
+{"id":"gm-a-0008","labels":[]}
+{"id":"gm-a-0009","labels":[{"category":"contradiction","confidence":0.7,"evidence":"原文『柊から公式な承認を受ける』に対し、生成は柊が頭を下げて認めた後に『組合の印が要る』『公式な承認を取りに行くか』とし、公式な承認が未取得のまま終わっている"}]}
+{"id":"gm-a-0010","labels":[]}
+{"id":"gm-a-0011","labels":[]}
+{"id":"gm-a-0012","labels":[{"category":"review","confidence":0.55,"evidence":"溶接で線路を開通させ（生成では「スパナが最後のボルトを締め」と手段が異なる）"}]}
+{"id":"gm-a-0013","labels":[]}
+{"id":"gm-a-0014","labels":[]}
+{"id":"gm-a-0015","labels":[]}
+{"id":"gm-a-0016","labels":[]}
+{"id":"gm-a-0017","labels":[]}
+{"id":"gm-a-0018","labels":[]}
+{"id":"gm-a-0019","labels":[]}
+{"id":"gm-a-0020","labels":[]}
+{"id":"gm-a-0021","labels":[]}
+{"id":"gm-a-0022","labels":[]}
+{"id":"gm-a-0023","labels":[]}
+{"id":"gm-a-0024","labels":[]}
+{"id":"gm-a-0025","labels":[]}
+{"id":"gm-a-0026","labels":[]}
+{"id":"gm-a-0027","labels":[]}
+{"id":"gm-a-0028","labels":[]}
+{"id":"gm-a-0029","labels":[]}
+{"id":"gm-a-0030","labels":[]}
+{"id":"gm-a-0031","labels":[]}
+{"id":"gm-a-0032","labels":[]}
+{"id":"gm-a-0033","labels":[]}
+{"id":"gm-a-0034","labels":[]}
+{"id":"gm-a-0035","labels":[]}
+{"id":"gm-a-0036","labels":[]}
+{"id":"gm-a-0037","labels":[]}
+{"id":"gm-a-0038","labels":[]}
+{"id":"gm-a-0039","labels":[]}
+{"id":"gm-a-0040","labels":[]}
+{"id":"gm-a-0041","labels":[]}
+{"id":"gm-a-0042","labels":[]}
+{"id":"gm-a-0043","labels":[]}
+{"id":"gm-a-0044","labels":[]}
+{"id":"gm-a-0045","labels":[]}
+{"id":"gm-a-0046","labels":[]}
+{"id":"gm-a-0047","labels":[]}
+{"id":"gm-a-0048","labels":[]}
+{"id":"gm-a-0049","labels":[]}
+{"id":"gm-a-0050","labels":[]}
+{"id":"gm-a-0051","labels":[]}
+{"id":"gm-a-0052","labels":[]}
+{"id":"gm-a-0053","labels":[]}
+{"id":"gm-a-0054","labels":[]}
+{"id":"gm-a-0055","labels":[]}
+{"id":"gm-a-0056","labels":[]}
+{"id":"gm-a-0057","labels":[]}
+{"id":"gm-a-0058","labels":[]}
+{"id":"gm-a-0059","labels":[]}
+{"id":"gm-a-0060","labels":[]}
+{"id":"gm-a-0061","labels":[]}
+{"id":"gm-a-0062","labels":[{"category":"review","confidence":0.55,"evidence":"灯台守クロの呪文「灯を消せば、あの子たちが来る」は消灯を危険とする条件だが、直前の囁き「灯が消えねば、みんな連れていく」と、灯を消して囁きが引く結末（0039）では消灯が安全とされており条件が正反対。灯台守が囁きと取引している設定上は虚偽の可能性もあり、反転か演出か判定が曖昧"}]}
+{"id":"gm-a-0063","labels":[]}
+{"id":"gm-a-0064","labels":[]}
+{"id":"gm-a-0065","labels":[]}
+{"id":"gm-a-0066","labels":[]}
+{"id":"gm-a-0067","labels":[]}
+{"id":"gm-a-0068","labels":[]}
+{"id":"gm-a-0069","labels":[]}
+{"id":"gm-a-0070","labels":[]}
+{"id":"gm-a-0071","labels":[]}
+{"id":"gm-a-0072","labels":[]}
+{"id":"gm-a-0073","labels":[]}
+{"id":"gm-a-0074","labels":[]}
+{"id":"gm-a-0075","labels":[]}
+{"id":"gm-a-0076","labels":[]}
+{"id":"gm-a-0077","labels":[]}
+{"id":"gm-a-0078","labels":[]}
+{"id":"gm-a-0079","labels":[]}
+{"id":"gm-a-0080","labels":[]}
+{"id":"gm-a-0081","labels":[]}
+{"id":"gm-a-0082","labels":[]}
+{"id":"gm-a-0083","labels":[]}
+{"id":"gm-a-0084","labels":[]}
+{"id":"gm-a-0085","labels":[]}
+{"id":"gm-a-0086","labels":[]}
+{"id":"gm-a-0087","labels":[]}
+{"id":"gm-a-0088","labels":[]}
+{"id":"gm-a-0089","labels":[]}
+{"id":"gm-a-0090","labels":[]}
+{"id":"gm-a-0091","labels":[]}
+{"id":"gm-a-0092","labels":[]}
+{"id":"gm-a-0093","labels":[]}
+{"id":"gm-a-0094","labels":[]}
+{"id":"gm-a-0095","labels":[]}
+{"id":"gm-a-0096","labels":[]}
+{"id":"gm-a-0097","labels":[]}
+{"id":"gm-a-0098","labels":[]}
+{"id":"gm-a-0099","labels":[{"category":"review","confidence":0.6,"evidence":"『かすかに残る三つ目の星』——直前の同アークで『残る光は二つだけ』『二つの星のうち一つ』と星は二つと示されており、三つ目の星の根拠が曖昧（薄い跡の一片を指すなら矛盾ではない）"}]}
+{"id":"gm-a-0100","labels":[]}
+{"id":"gm-a-0101","labels":[]}
+{"id":"gm-a-0102","labels":[]}
+{"id":"gm-a-0103","labels":[]}
+{"id":"gm-a-0104","labels":[]}
+{"id":"gm-a-0105","labels":[]}
+{"id":"gm-a-0106","labels":[]}
+{"id":"gm-a-0107","labels":[]}
+{"id":"gm-a-0108","labels":[]}
+{"id":"gm-a-0109","labels":[]}
+{"id":"gm-a-0110","labels":[]}
+{"id":"gm-a-0111","labels":[]}
+{"id":"gm-a-0112","labels":[]}
+{"id":"gm-a-0113","labels":[]}
+{"id":"gm-a-0114","labels":[]}
+{"id":"gm-a-0115","labels":[]}
+{"id":"gm-a-0116","labels":[]}
+{"id":"gm-a-0117","labels":[]}
+{"id":"gm-a-0118","labels":[]}
+{"id":"gm-a-0119","labels":[]}
+{"id":"gm-a-0120","labels":[]}
+{"id":"gm-a-0121","labels":[]}
+{"id":"gm-a-0122","labels":[]}
+{"id":"gm-a-0123","labels":[]}
+{"id":"gm-a-0124","labels":[]}
+{"id":"gm-a-0125","labels":[]}
+{"id":"gm-a-0126","labels":[]}
+{"id":"gm-a-0127","labels":[]}
+{"id":"gm-a-0128","labels":[]}
+{"id":"gm-a-0129","labels":[]}
+{"id":"gm-a-0130","labels":[]}
+{"id":"gm-a-0131","labels":[{"category":"review","confidence":0.55,"evidence":"原文『玄関の鈴を外して調べる』に対し、生成は『鍵が折れた古い錠を外し、玄関の鈴を覗き込んだ』で、外したのは錠であり鈴を外す描写がない"}]}
+{"id":"gm-a-0132","labels":[]}
+{"id":"gm-a-0133","labels":[{"category":"review","confidence":0.5,"evidence":"原文『路地で猫の足跡を探す』に対し生成は『夜の一番街で…足跡を探した』と探索場所が異なる"}]}
+{"id":"gm-a-0134","labels":[]}
+{"id":"gm-a-0135","labels":[]}
+{"id":"gm-a-0136","labels":[]}
+{"id":"gm-a-0137","labels":[]}
+{"id":"gm-a-0138","labels":[]}
+{"id":"gm-a-0139","labels":[]}
+{"id":"gm-a-0140","labels":[]}
+{"id":"gm-a-0141","labels":[]}
+{"id":"gm-a-0142","labels":[]}
+{"id":"gm-a-0143","labels":[]}
+{"id":"gm-a-0144","labels":[]}
+{"id":"gm-a-0145","labels":[]}
+{"id":"gm-a-0146","labels":[]}
+{"id":"gm-a-0147","labels":[]}
+{"id":"gm-a-0148","labels":[]}
+{"id":"gm-a-0149","labels":[]}
+{"id":"gm-a-0150","labels":[]}
+{"id":"gm-a-0151","labels":[]}
+{"id":"gm-a-0152","labels":[]}
+{"id":"gm-a-0153","labels":[]}
+{"id":"gm-a-0154","labels":[]}
+{"id":"gm-a-0155","labels":[]}
+{"id":"gm-a-0156","labels":[]}
+{"id":"gm-a-0157","labels":[]}
+{"id":"gm-a-0158","labels":[]}
+{"id":"gm-a-0159","labels":[]}
+{"id":"gm-a-0160","labels":[]}
+{"id":"gm-a-0161","labels":[]}
+{"id":"gm-a-0162","labels":[]}
+{"id":"gm-a-0163","labels":[]}
+{"id":"gm-a-0164","labels":[{"category":"contradiction","confidence":0.8,"evidence":"原文『鉄の鉤で骨を留める』に対し『留めようとした』『鉤が外れそうになる』『留めるか、彼女に本当の用事を言わせるか』と留め切れていない"}]}
+{"id":"gm-a-0165","labels":[]}
+{"id":"gm-a-0166","labels":[]}
+{"id":"gm-a-0167","labels":[]}
+{"id":"gm-a-0168","labels":[]}
+{"id":"gm-a-0169","labels":[]}
+{"id":"gm-a-0170","labels":[]}
+{"id":"gm-a-0171","labels":[]}
+{"id":"gm-a-0172","labels":[]}
+{"id":"gm-a-0173","labels":[]}
+{"id":"gm-a-0174","labels":[]}
+{"id":"gm-a-0175","labels":[]}
+{"id":"gm-a-0176","labels":[]}
+{"id":"gm-a-0177","labels":[]}
+{"id":"gm-a-0178","labels":[]}
+{"id":"gm-a-0179","labels":[]}
+{"id":"gm-a-0180","labels":[]}
+{"id":"gm-a-0181","labels":[]}
+{"id":"gm-a-0182","labels":[]}
+{"id":"gm-a-0183","labels":[]}
+{"id":"gm-a-0184","labels":[{"category":"review","confidence":0.55,"evidence":"原文『掘れた数字を帳面に写す』に対し、生成は帳面が『三』のまま岩の『七』と食い違う描写だけで、写し取る動作がない"}]}
+{"id":"gm-a-0185","labels":[]}
+{"id":"gm-a-0186","labels":[]}
+{"id":"gm-a-0187","labels":[]}
+{"id":"gm-a-0188","labels":[]}
+{"id":"gm-a-0189","labels":[]}
+{"id":"gm-a-0190","labels":[]}
+{"id":"gm-a-0191","labels":[]}
+{"id":"gm-a-0192","labels":[]}
+{"id":"gm-a-0193","labels":[]}
+{"id":"gm-a-0194","labels":[]}
+{"id":"gm-a-0195","labels":[]}
+{"id":"gm-a-0196","labels":[]}
+{"id":"gm-a-0197","labels":[]}
+{"id":"gm-a-0198","labels":[]}
+{"id":"gm-a-0199","labels":[]}
+{"id":"gm-a-0200","labels":[]}
+{"id":"gm-a-0201","labels":[]}
+{"id":"gm-a-0202","labels":[]}
+{"id":"gm-a-0203","labels":[]}
+{"id":"gm-a-0204","labels":[]}
+{"id":"gm-a-0205","labels":[]}
+{"id":"gm-a-0206","labels":[]}
+{"id":"gm-a-0207","labels":[]}
+{"id":"gm-a-0208","labels":[]}
+{"id":"gm-a-0209","labels":[]}
+{"id":"gm-a-0210","labels":[]}
+{"id":"gm-a-0211","labels":[]}
+{"id":"gm-a-0212","labels":[]}
+{"id":"gm-a-0213","labels":[]}
+{"id":"gm-a-0214","labels":[{"category":"review","confidence":0.55,"evidence":"原文「縮んだ実を手に取り…畝の土の冷えを測る」のうち「実を手に取り」が生成側で描写されず、実を握りつぶすのは蘆田農場主で「私」は黒く縮んだ実が点在すると眺めるのみ。後半の「冷えを測る」は「鍬の柄を刺すと、冷たいはずの土が思ったより暖かい」と描写されており、複合動作の前半が落ちただけか事実改変か曖昧"}]}
+{"id":"gm-a-0215","labels":[]}
+{"id":"gm-a-0216","labels":[]}
+{"id":"gm-a-0217","labels":[]}
+{"id":"gm-a-0218","labels":[]}
+{"id":"gm-a-0219","labels":[]}
+{"id":"gm-a-0220","labels":[]}
+{"id":"gm-a-0221","labels":[]}
+{"id":"gm-a-0222","labels":[{"category":"review","confidence":0.6,"evidence":"原文「鐘が鳴らなかった日を再現してみる」に対し生成は「鐘は鳴った直後に音を止められ」と鳴った旨を記述。再現シーンでの再解釈（音を止められた）か「鳴らなかった」の否定反転か曖昧"}]}
+{"id":"gm-a-0223","labels":[]}
+{"id":"gm-a-0224","labels":[]}
+{"id":"gm-a-0225","labels":[]}
+{"id":"gm-a-0226","labels":[]}
+{"id":"gm-a-0227","labels":[]}
+{"id":"gm-a-0228","labels":[]}
+{"id":"gm-a-0229","labels":[]}
+{"id":"gm-a-0230","labels":[]}
+{"id":"gm-a-0231","labels":[]}
+{"id":"gm-a-0232","labels":[]}
+{"id":"gm-a-0233","labels":[]}
+{"id":"gm-a-0234","labels":[]}
+{"id":"gm-a-0235","labels":[]}
+{"id":"gm-a-0236","labels":[]}
+{"id":"gm-a-0237","labels":[]}
+{"id":"gm-a-0238","labels":[]}
+{"id":"gm-a-0239","labels":[]}
+{"id":"gm-a-0240","labels":[]}
+{"id":"gm-a-0241","labels":[]}
+{"id":"gm-a-0242","labels":[]}
+{"id":"gm-a-0243","labels":[]}
+{"id":"gm-a-0244","labels":[]}
+{"id":"gm-a-0245","labels":[]}
+{"id": "gm-a-0246", "labels": []}
+{"id": "gm-a-0247", "labels": []}
+{"id": "gm-a-0248", "labels": []}
+{"id": "gm-a-0249", "labels": []}
+{"id": "gm-a-0250", "labels": []}
+{"id": "gm-a-0251", "labels": []}
+{"id": "gm-a-0252", "labels": []}
+{"id": "gm-a-0253", "labels": []}
+{"id": "gm-a-0254", "labels": []}
+{"id": "gm-a-0255", "labels": []}
+{"id": "gm-a-0256", "labels": []}
+{"id": "gm-a-0257", "labels": []}
+{"id": "gm-a-0258", "labels": []}
+{"id": "gm-a-0259", "labels": []}
+{"id": "gm-a-0260", "labels": []}
+{"id": "gm-a-0261", "labels": []}
+{"id": "gm-a-0262", "labels": []}
+{"id": "gm-a-0263", "labels": []}
+{"id": "gm-a-0264", "labels": []}
+{"id": "gm-a-0265", "labels": []}
+{"id": "gm-a-0266", "labels": []}
+{"id": "gm-a-0267", "labels": []}
+{"id": "gm-a-0268", "labels": []}
+{"id": "gm-a-0269", "labels": []}
+{"id": "gm-a-0270", "labels": []}
+{"id": "gm-a-0271", "labels": []}
+{"id": "gm-a-0272", "labels": []}
+{"id": "gm-a-0273", "labels": []}
+{"id": "gm-a-0274", "labels": []}
+{"id": "gm-a-0275", "labels": []}
+{"id": "gm-a-0276", "labels": []}
+{"id": "gm-a-0277", "labels": []}
+{"id": "gm-a-0278", "labels": []}
+{"id": "gm-a-0279", "labels": []}
+{"id": "gm-a-0280", "labels": []}
+{"id": "gm-a-0281", "labels": []}
+{"id": "gm-a-0282", "labels": []}
+{"id": "gm-a-0283", "labels": []}
+{"id": "gm-a-0284", "labels": []}
+{"id": "gm-a-0285", "labels": []}
+{"id": "gm-a-0286", "labels": []}
+{"id": "gm-a-0287", "labels": []}
+{"id": "gm-a-0288", "labels": []}
+{"id": "gm-a-0289", "labels": []}
+{"id": "gm-a-0290", "labels": []}
+{"id": "gm-a-0291", "labels": []}
+{"id": "gm-a-0292", "labels": []}
+{"id": "gm-a-0293", "labels": []}
+{"id": "gm-a-0294", "labels": []}
+{"id": "gm-a-0295", "labels": []}
+{"id": "gm-a-0296", "labels": []}
+{"id": "gm-a-0297", "labels": []}
+{"id": "gm-a-0298", "labels": []}
+{"id": "gm-a-0299", "labels": []}
+{"id": "gm-a-0300", "labels": []}
+{"id": "gm-a-0301", "labels": []}
+{"id": "gm-a-0302", "labels": []}
+{"id": "gm-a-0303", "labels": []}
+{"id": "gm-a-0304", "labels": []}
+{"id":"gm-a-0305","labels":[]}
+{"id":"gm-a-0306","labels":[]}
+{"id":"gm-a-0307","labels":[]}
+{"id":"gm-a-0308","labels":[]}
+{"id":"gm-a-0309","labels":[]}
+{"id":"gm-a-0310","labels":[]}
+{"id":"gm-a-0311","labels":[]}
+{"id":"gm-a-0312","labels":[]}
+{"id":"gm-a-0313","labels":[]}
+{"id":"gm-a-0314","labels":[]}
+{"id":"gm-a-0315","labels":[]}
+{"id":"gm-a-0316","labels":[]}
+{"id":"gm-a-0317","labels":[]}
+{"id":"gm-a-0318","labels":[]}
+{"id":"gm-a-0319","labels":[]}
+{"id":"gm-a-0320","labels":[]}
+{"id":"gm-a-0321","labels":[]}
+{"id":"gm-a-0322","labels":[]}
+{"id":"gm-a-0323","labels":[]}
+{"id":"gm-a-0324","labels":[]}
+{"id":"gm-a-0325","labels":[]}
+{"id":"gm-a-0326","labels":[]}
+{"id":"gm-a-0327","labels":[]}
+{"id":"gm-a-0328","labels":[]}
+{"id":"gm-a-0329","labels":[]}
+{"id":"gm-a-0330","labels":[]}
+{"id":"gm-a-0331","labels":[]}
+{"id":"gm-a-0332","labels":[]}
+{"id":"gm-a-0333","labels":[]}
+{"id":"gm-a-0334","labels":[]}
+{"id":"gm-a-0335","labels":[]}
+{"id":"gm-a-0336","labels":[]}
+{"id":"gm-a-0337","labels":[]}
+{"id":"gm-a-0338","labels":[]}
+{"id":"gm-a-0339","labels":[]}
+{"id":"gm-a-0340","labels":[]}
+{"id":"gm-a-0341","labels":[]}
+{"id":"gm-a-0342","labels":[]}
+{"id":"gm-a-0343","labels":[]}
+{"id":"gm-a-0344","labels":[]}
+{"id":"gm-a-0345","labels":[]}
+{"id":"gm-a-0346","labels":[]}
+{"id":"gm-a-0347","labels":[]}
+{"id":"gm-a-0348","labels":[]}
+{"id":"gm-a-0349","labels":[]}
+{"id":"gm-a-0350","labels":[]}
+{"id":"gm-a-0351","labels":[]}
+{"id":"gm-a-0352","labels":[]}
+{"id":"gm-a-0353","labels":[]}
+{"id":"gm-a-0354","labels":[]}
+{"id":"gm-a-0355","labels":[]}
+{"id":"gm-a-0356","labels":[]}
+{"id":"gm-a-0357","labels":[]}
+{"id":"gm-a-0358","labels":[]}
+{"id":"gm-a-0359","labels":[]}
+{"id":"gm-a-0360","labels":[]}
+{"id":"gm-a-0361","labels":[]}
+{"id":"gm-a-0362","labels":[]}
+{"id":"gm-a-0363","labels":[]}
+{"id":"ex-0060","labels":[]}
+{"id":"ex-0061","labels":[]}
+{"id":"ex-0062","labels":[]}
+{"id":"ex-0063","labels":[]}
+{"id":"ex-0064","labels":[]}
+{"id":"ex-0065","labels":[]}
+{"id":"ex-0066","labels":[]}
+{"id":"ex-0067","labels":[]}
+{"id":"ex-0068","labels":[]}
+{"id":"ex-0069","labels":[]}
+{"id":"ex-0070","labels":[{"category":"review","confidence":0.6,"evidence":"npcMemoriesで『料理人は…一つに毒が入っていたことを後で認めた』とするが、原文は『後で判明した』のみで料理人の自認は記載なし"}]}
+{"id":"ex-0071","labels":[{"category":"review","confidence":0.55,"evidence":"⑨の日記に isSecret=true を付与し、⑩に『聞き違いの可能性もある』かつ isConfirmed=false を追加。原文はいずれも断定調で秘密・不確実性の記述なし"}]}
+{"id":"ex-0072","labels":[{"category":"fabrication","confidence":0.8,"evidence":"NPC_RELATIONで『ミナは巫女 n1 を信じることにした』とするが、原文は『ミナは巫女のことだけを覚えることにし』であり信頼関係の記述なし"}]}
+{"id":"ex-0073","labels":[]}
+{"id":"ex-0074","labels":[]}
+{"id":"ex-0075","labels":[]}
+{"id":"ex-0076","labels":[]}
+{"id":"ex-0077","labels":[]}
+{"id":"ex-0078","labels":[{"category":"fabrication","confidence":0.9,"evidence":"secrets に『冷えた炉の下に古い抄本が隠されている』『灯は誰かが遠くから点けている』を追加。原文は炉が二つあることと小屋に灯がともることのみで、抄本や点灯者の記述なし"}]}
+{"id":"ex-0079","labels":[]}
+{"id":"ex-0080","labels":[]}
+{"id":"ex-0081","labels":[]}
+{"id":"ex-0082","labels":[]}
+{"id":"ex-0083","labels":[]}
+{"id":"ex-0084","labels":[]}
+{"id":"ex-0085","labels":[]}
+{"id":"ex-0086","labels":[]}
+{"id":"ex-0087","labels":[]}
+{"id":"ex-0088","labels":[]}
+{"id":"ex-0089","labels":[]}
+{"id":"ex-0090","labels":[]}
+{"id":"ex-0091","labels":[]}
+{"id":"ex-0092","labels":[]}
+{"id":"ex-0093","labels":[]}
+{"id":"ex-0094","labels":[{"category":"fabrication","confidence":0.85,"evidence":"ギルの combat に attackSkillLevel=2・defenseSkillLevel=1 を追加。原文は攻撃4・防御3・hp十二のみで技能レベルの記載なし"},{"category":"review","confidence":0.5,"evidence":"メイの secrets に『通りすがりの者は名を名乗らなかった』を帰属。原文はギル・メイとは別の通りすがりの者についての記述"}]}
+{"id":"ex-0095","labels":[{"category":"review","confidence":0.55,"evidence":"locationName に『診療小屋』を追加（原文に場所の記載なし）。また『弟子の名は呼ばれなかった』は弟子に関する事実をノラの secrets に帰属"}]}
+{"id":"ex-0096","labels":[]}
+{"id":"ex-0097","labels":[]}
+{"id":"ex-0098","labels":[]}
+{"id":"ex-0099","labels":[]}
+{"id":"ex-0100","labels":[]}
+{"id":"ex-0101","labels":[]}
+{"id":"ex-0102","labels":[]}
+{"id":"ex-0103","labels":[]}
+{"id":"ex-0104","labels":[]}
+{"id":"ex-0105","labels":[]}
+{"id":"ex-0106","labels":[{"category":"review","confidence":0.5,"evidence":"npcMemories(n2)に isSecret=true を付与。原文は『チナはその印を昔から知っていた』のみで秘密の記述なし"}]}
+{"id":"ex-0107","labels":[]}
+{"id":"ex-0108","labels":[]}
+{"id":"ex-0109","labels":[]}
+{"id":"ex-0110","labels":[]}
+{"id":"ex-0111","labels":[]}
+{"id":"ex-0112","labels":[]}
+{"id":"ex-0113","labels":[]}
+{"id":"ex-0114","labels":[]}
+{"id":"ex-0115","labels":[]}
+{"id":"ex-0116","labels":[]}
+{"id":"ex-0117","labels":[]}
+{"id":"ex-0118","labels":[]}
+{"id":"gm-a-0364","labels":[]}
+{"id":"gm-a-0365","labels":[]}
+{"id":"gm-a-0366","labels":[]}
+{"id":"gm-a-0367","labels":[]}
+{"id":"gm-a-0368","labels":[]}
+{"id":"gm-a-0369","labels":[]}
+{"id":"gm-a-0370","labels":[]}
+{"id":"gm-a-0371","labels":[]}
+{"id":"gm-a-0372","labels":[]}
+{"id":"gm-a-0373","labels":[]}
+{"id":"gm-a-0374","labels":[]}
+{"id":"gm-a-0375","labels":[]}
+{"id":"gm-a-0376","labels":[]}
+{"id":"gm-a-0377","labels":[]}
+{"id":"gm-a-0378","labels":[]}
+{"id":"gm-a-0379","labels":[]}
+{"id":"gm-a-0380","labels":[]}
+{"id":"gm-a-0381","labels":[]}
+{"id":"gm-a-0382","labels":[]}
+{"id":"gm-a-0383","labels":[]}
+{"id":"gm-a-0384","labels":[]}
+{"id":"gm-a-0385","labels":[]}
+{"id":"gm-a-0386","labels":[]}
+{"id":"gm-a-0387","labels":[]}
+{"id":"gm-a-0388","labels":[]}
+{"id":"gm-a-0389","labels":[]}
+{"id":"gm-a-0390","labels":[]}
+{"id":"gm-a-0391","labels":[]}
+{"id":"gm-a-0392","labels":[]}
+{"id":"gm-a-0393","labels":[]}
+{"id":"gm-a-0394","labels":[]}
+{"id":"gm-a-0395","labels":[]}
+{"id":"gm-a-0396","labels":[]}
+{"id":"gm-a-0397","labels":[]}
+{"id":"gm-a-0398","labels":[]}
+{"id":"gm-a-0399","labels":[]}
+{"id":"gm-a-0400","labels":[]}
+{"id":"gm-a-0401","labels":[]}
+{"id":"gm-a-0402","labels":[]}
+{"id":"gm-a-0403","labels":[]}
+{"id":"gm-a-0404","labels":[]}
+{"id":"gm-a-0405","labels":[]}
+{"id":"gm-a-0406","labels":[]}
+{"id":"gm-a-0407","labels":[]}
+{"id":"gm-a-0408","labels":[]}
+{"id":"gm-a-0409","labels":[]}
+{"id":"gm-a-0410","labels":[]}
+{"id":"gm-a-0411","labels":[]}
+{"id":"gm-a-0412","labels":[]}
+{"id":"gm-a-0413","labels":[]}
+{"id":"gm-a-0414","labels":[]}
+{"id":"gm-a-0415","labels":[{"category":"negation","confidence":0.85,"evidence":"原文『遅れを測る』（遅延の測定）に対し生成は『必ず三秒早い』『トモがまだ口にしていない助けてが、先に聞こえた』と、遅れを『早い／先読み』へ反転"}]}
+{"id":"gm-a-0416","labels":[]}
+{"id":"gm-a-0417","labels":[{"category":"negation","confidence":0.8,"evidence":"原文『遅延装置を見せる』の『遅延』に対し生成は『三秒先の声を先読みして利益を得ようと』『言わぬ言葉を聞かされずに済む』と、遅延を未来の先読み（早い）へ反転"}]}
+{"id":"gm-a-0418","labels":[]}
+{"id":"gm-a-0419","labels":[]}
+{"id":"gm-a-0420","labels":[]}
+{"id":"gm-a-0421","labels":[]}
+{"id":"gm-a-0422","labels":[]}
+{"id":"gm-a-0423","labels":[]}
+{"id":"gm-a-0424","labels":[]}
+{"id":"gm-a-0425","labels":[]}
+{"id":"gm-a-0426","labels":[]}
+{"id":"gm-a-0427","labels":[]}
+{"id":"gm-a-0428","labels":[]}
+{"id":"gm-a-0429","labels":[]}
+{"id":"gm-a-0430","labels":[]}
+{"id":"gm-a-0431","labels":[]}
+{"id":"gm-a-0432","labels":[]}
+{"id":"gm-a-0433","labels":[]}
+{"id":"gm-a-0434","labels":[]}
+{"id":"gm-a-0435","labels":[]}
+{"id":"gm-a-0436","labels":[]}
+{"id":"gm-a-0437","labels":[]}
+{"id":"gm-a-0438","labels":[]}
+{"id":"gm-a-0439","labels":[]}
+{"id":"gm-a-0440","labels":[]}
+{"id":"gm-a-0441","labels":[]}
+{"id":"gm-a-0442","labels":[]}
+{"id":"gm-a-0443","labels":[]}
+{"id":"gm-a-0444","labels":[]}
+{"id":"gm-a-0445","labels":[]}
+{"id":"gm-a-0446","labels":[]}
+{"id":"gm-a-0447","labels":[]}
+{"id":"gm-a-0448","labels":[]}
+{"id":"gm-a-0449","labels":[]}
+{"id":"gm-a-0450","labels":[]}
+{"id":"gm-a-0451","labels":[]}
+{"id":"gm-a-0452","labels":[{"category":"review","confidence":0.7,"evidence":"生成文に『熊谷は採石場の者が<P>勝手に岩を削った』とタグ<P>が混入（前turnの地文にも伝播）"}]}
+{"id":"gm-a-0453","labels":[]}
+{"id":"gm-a-0454","labels":[]}
+{"id":"gm-a-0455","labels":[]}
+{"id":"gm-a-0456","labels":[]}
+{"id":"gm-a-0457","labels":[]}
+{"id":"gm-a-0458","labels":[]}
+{"id":"gm-a-0459","labels":[]}
+{"id":"gm-a-0460","labels":[]}
+{"id":"gm-a-0461","labels":[]}
+{"id":"gm-a-0462","labels":[]}
+{"id":"gm-a-0463","labels":[]}
+{"id":"gm-a-0464","labels":[]}
+{"id":"gm-a-0465","labels":[]}
+{"id":"gm-a-0466","labels":[]}
+{"id":"gm-a-0467","labels":[{"category":"review","confidence":0.7,"evidence":"『昨日の印影は角が丸い形だった』—前turn(0466)では返った丸い印鑑が『昨日使った印影と違う』とされ、また井戸の rule も『最後に使った時』から『心が留まった時』へ変わっている"}]}
+{"id":"gm-a-0468","labels":[{"category":"review","confidence":0.75,"evidence":"『昨日の新しい印影を心に浮かべ…角の立った印鑑…印影帳の昨日の形とぴったり一致』—前turn(0467)の『昨日の印影は角が丸い』と矛盾し、指示文は『新しい印影』なのに『昨日の』印影を想定"}]}
+{"id":"gm-a-0469","labels":[]}
+{"id":"gm-a-0470","labels":[]}
+{"id":"gm-a-0471","labels":[]}
+{"id":"gm-a-0472","labels":[]}
+{"id":"gm-a-0473","labels":[]}
+{"id":"gm-a-0474","labels":[]}
+{"id":"gm-a-0475","labels":[]}
+{"id":"gm-a-0476","labels":[{"category":"review","confidence":0.6,"evidence":"『執事が二人いる今、階段はさらに伸びる』—登場する執事は廊の一人のみ（もう一人は客人の篠）で、見た者二人を『執事が二人』と誤記"}]}
+{"id":"gm-a-0477","labels":[]}
+{"id":"gm-a-0478","labels":[]}
+{"id":"gm-a-0479","labels":[]}
+{"id":"gm-a-0480","labels":[]}
+{"id":"gm-a-0481","labels":[]}
+{"id":"gm-a-0482","labels":[]}
+{"id":"gm-a-0483","labels":[]}
+{"id":"gm-a-0484","labels":[]}
+{"id":"gm-a-0485","labels":[]}
+{"id":"gm-a-0486","labels":[]}
+{"id":"gm-a-0487","labels":[]}
+{"id":"gm-a-0488","labels":[]}
+{"id":"gm-a-0489","labels":[]}
+{"id":"gm-a-0490","labels":[]}
+{"id":"gm-a-0491","labels":[]}
+{"id":"gm-a-0492","labels":[]}
+{"id":"gm-a-0493","labels":[]}
+{"id":"gm-a-0494","labels":[]}
+{"id":"gm-a-0495","labels":[]}
+{"id":"gm-a-0496","labels":[]}
+{"id":"gm-a-0497","labels":[]}
+{"id":"gm-a-0498","labels":[]}
+{"id":"gm-a-0499","labels":[]}
+{"id":"gm-a-0500","labels":[]}
+{"id":"gm-a-0501","labels":[]}
+{"id":"gm-a-0502","labels":[]}
+{"id":"gm-a-0503","labels":[]}
+{"id":"gm-a-0504","labels":[]}
+{"id":"gm-a-0505","labels":[]}
+{"id":"gm-a-0506","labels":[]}
+{"id":"gm-a-0507","labels":[]}
+{"id":"gm-a-0508","labels":[]}
+{"id":"gm-a-0509","labels":[]}
+{"id":"gm-a-0510","labels":[]}
+{"id":"gm-a-0511","labels":[]}
+{"id":"gm-a-0512","labels":[]}
+{"id":"gm-a-0513","labels":[]}
+{"id":"gm-a-0514","labels":[]}
+{"id":"gm-a-0515","labels":[]}
+{"id":"gm-a-0516","labels":[]}
+{"id":"gm-a-0517","labels":[]}
+{"id":"gm-a-0518","labels":[]}
+{"id":"gm-a-0519","labels":[]}
+{"id":"gm-a-0520","labels":[]}
+{"id":"gm-a-0521","labels":[]}
+{"id":"gm-a-0522","labels":[]}
+{"id":"gm-a-0523","labels":[]}
+{"id":"gm-a-0524","labels":[]}
+{"id":"gm-a-0525","labels":[]}
+{"id":"gm-a-0526","labels":[]}
+{"id":"gm-a-0527","labels":[]}
+{"id":"gm-a-0528","labels":[]}
+{"id":"gm-a-0529","labels":[]}
+{"id":"gm-a-0530","labels":[]}
+{"id":"gm-a-0531","labels":[]}
+{"id":"gm-a-0532","labels":[]}
+{"id":"gm-a-0533","labels":[]}
+{"id":"gm-a-0534","labels":[]}
+{"id":"gm-a-0535","labels":[]}
+{"id":"gm-a-0536","labels":[]}
+{"id":"gm-a-0537","labels":[]}
+{"id":"gm-a-0538","labels":[]}
+{"id":"gm-a-0539","labels":[]}
+{"id":"gm-a-0540","labels":[]}
+{"id":"gm-a-0541","labels":[]}
+{"id":"gm-a-0542","labels":[]}
+{"id":"gm-a-0543","labels":[]}
+{"id":"gm-a-0544","labels":[]}
+{"id":"gm-a-0545","labels":[]}
+{"id":"gm-a-0546","labels":[]}
+{"id":"gm-a-0547","labels":[]}
+{"id":"gm-a-0548","labels":[]}
+{"id":"gm-a-0549","labels":[]}
+{"id":"gm-a-0550","labels":[]}
+{"id":"gm-a-0551","labels":[]}
+{"id":"gm-a-0552","labels":[]}
+{"id":"gm-a-0553","labels":[]}
+{"id":"gm-a-0554","labels":[]}
+{"id":"gm-a-0555","labels":[]}
+{"id":"gm-a-0556","labels":[]}
+{"id":"gm-a-0557","labels":[]}
+{"id":"gm-a-0558","labels":[]}
+{"id":"gm-a-0559","labels":[]}
+{"id":"gm-a-0560","labels":[]}
+{"id":"gm-a-0561","labels":[]}
+{"id":"gm-a-0562","labels":[]}
+{"id":"gm-a-0563","labels":[]}
+{"id":"gm-a-0564","labels":[]}
+{"id":"gm-a-0565","labels":[]}
+{"id":"gm-a-0566","labels":[]}
+{"id":"gm-a-0567","labels":[]}
+{"id":"gm-a-0568","labels":[]}
+{"id":"gm-a-0569","labels":[]}
+{"id":"gm-a-0570","labels":[]}
+{"id":"gm-a-0571","labels":[]}
+{"id":"gm-a-0572","labels":[]}
+{"id":"gm-a-0573","labels":[]}
+{"id":"gm-a-0574","labels":[]}
+{"id":"gm-a-0575","labels":[]}
+{"id":"gm-a-0576","labels":[]}
+{"id":"gm-a-0577","labels":[]}
+{"id":"gm-a-0578","labels":[]}
+{"id":"gm-a-0579","labels":[]}
+{"id":"gm-a-0580","labels":[]}
+{"id":"gm-a-0581","labels":[]}
+{"id":"gm-a-0582","labels":[]}
+{"id":"gm-a-0583","labels":[]}
+{"id":"gm-a-0584","labels":[]}
+{"id":"gm-a-0585","labels":[]}
+{"id":"gm-a-0586","labels":[]}
+{"id":"gm-a-0587","labels":[]}
+{"id":"gm-a-0588","labels":[]}
+{"id":"gm-a-0589","labels":[]}
+{"id":"gm-a-0590","labels":[]}
+{"id":"gm-a-0591","labels":[]}
+{"id":"gm-a-0592","labels":[]}
+{"id":"gm-a-0593","labels":[]}
+{"id":"gm-a-0594","labels":[]}
+{"id":"gm-a-0595","labels":[]}
+{"id":"gm-a-0596","labels":[]}
+{"id":"gm-a-0597","labels":[]}
+{"id":"gm-a-0598","labels":[]}
+{"id":"gm-a-0599","labels":[]}
+{"id":"gm-a-0600","labels":[]}
+{"id":"gm-a-0601","labels":[]}
+{"id":"gm-a-0602","labels":[]}
+{"id":"gm-a-0603","labels":[{"category":"review","confidence":0.5,"evidence":"原文『番札をしまう』に対し、生成は名が番札に残ったまま三宅が拍子木と境の石を戻して次の辻へ歩き、番札をしまう描写がない"}]}
+{"id":"gm-a-0604","labels":[]}
+{"id":"gm-a-0605","labels":[]}
+{"id":"gm-a-0606","labels":[]}
+{"id":"gm-a-0607","labels":[]}
+{"id":"gm-a-0608","labels":[{"category":"review","confidence":0.5,"evidence":"原文『出来事を書き出す』に対し、生成は小野が震えた声で昨日の出来事を繰り返すだけで、野村が出来事を書き出す動作がない"}]}
+{"id":"gm-a-0609","labels":[]}
+{"id":"gm-a-0610","labels":[]}
+{"id":"gm-a-0611","labels":[]}
+{"id":"gm-a-0612","labels":[]}
+{"id":"gm-a-0613","labels":[]}
+{"id":"gm-a-0614","labels":[]}
+{"id":"gm-a-0615","labels":[]}
+{"id":"gm-a-0616","labels":[]}
+{"id":"gm-a-0617","labels":[]}
+{"id":"gm-a-0618","labels":[]}
+{"id":"gm-a-0619","labels":[]}
+{"id":"gm-a-0620","labels":[]}
+{"id":"gm-a-0621","labels":[]}
+{"id":"gm-a-0622","labels":[{"category":"review","confidence":0.55,"evidence":"原文『被告・糸の影が映る幕を記録板に写し取る』に対し、生成は影の所作と手首の捻れに気づく描写のみで、記録板への写し取りがなく結末は別の選択で迷っている"}]}
+{"id":"gm-a-0623","labels":[]}
+{"id":"gm-a-0624","labels":[]}
+{"id":"gm-a-0625","labels":[]}
+{"id":"gm-a-0626","labels":[]}
+{"id":"gm-a-0627","labels":[]}
+{"id":"gm-a-0628","labels":[]}
+{"id":"gm-a-0629","labels":[]}
+{"id":"gm-a-0630","labels":[]}
+{"id":"gm-a-0631","labels":[]}
+{"id":"gm-a-0632","labels":[]}
+{"id":"gm-a-0633","labels":[]}
+{"id":"gm-a-0634","labels":[]}
+{"id":"gm-a-0635","labels":[]}
+{"id":"gm-a-0636","labels":[]}
+{"id":"gm-a-0637","labels":[]}
+{"id":"gm-a-0638","labels":[]}
+{"id":"gm-a-0639","labels":[]}
+{"id":"gm-a-0640","labels":[]}
+{"id":"gm-a-0641","labels":[]}
+{"id":"gm-a-0642","labels":[]}
+{"id":"gm-a-0643","labels":[]}
+{"id":"gm-a-0644","labels":[]}
+{"id":"gm-a-0645","labels":[]}
+{"id":"gm-a-0646","labels":[]}
+{"id":"gm-a-0647","labels":[]}
+{"id":"gm-a-0648","labels":[]}
+{"id":"gm-a-0649","labels":[]}
+{"id":"gm-a-0650","labels":[]}
+{"id":"gm-a-0651","labels":[]}
+{"id":"gm-a-0652","labels":[]}
+{"id":"gm-a-0653","labels":[]}
+{"id":"gm-a-0654","labels":[]}
+{"id":"gm-a-0655","labels":[]}
+{"id":"gm-a-0656","labels":[]}
+{"id":"gm-a-0657","labels":[]}
+{"id":"gm-a-0658","labels":[{"category":"review","confidence":0.6,"evidence":"原文『出回った領収証を正規の証文と比べる』に対し、生成は領収証の文字・食痕の観察だけで、正規の証文との比較がなく『糞の文字を読むか食痕を追うか』という別の選択で終わる"}]}
+{"id":"gm-a-0659","labels":[]}
+{"id":"gm-a-0660","labels":[]}
+{"id":"gm-a-0661","labels":[]}
+{"id":"gm-a-0662","labels":[]}
+{"id":"gm-a-0663","labels":[]}
+{"id":"gm-a-0664","labels":[]}
+{"id":"gm-a-0665","labels":[]}
+{"id":"gm-a-0666","labels":[]}
+{"id":"gm-a-0667","labels":[]}
+{"id":"gm-a-0668","labels":[]}
+{"id":"gm-a-0669","labels":[]}
+{"id":"gm-a-0670","labels":[]}
+{"id":"gm-a-0671","labels":[]}
+{"id":"gm-a-0672","labels":[]}
+{"id":"gm-a-0673","labels":[{"category":"review","confidence":0.6,"evidence":"猫の鳴き声を『笛で抑えて聞き取る』とあるが、生成に笛で抑える描写が無く、ミルの鳴きを聞くにとどまり『本音を聞くか』が今後の選択として残る（手段が欠落）"}]}
+{"id":"gm-a-0674","labels":[]}
+{"id":"gm-a-0675","labels":[]}
+{"id":"gm-a-0676","labels":[]}
+{"id":"gm-a-0677","labels":[]}
+{"id":"gm-a-0678","labels":[]}
+{"id":"gm-a-0679","labels":[]}
+{"id":"gm-a-0680","labels":[]}
+{"id":"gm-a-0681","labels":[]}
+{"id":"gm-a-0682","labels":[]}
+{"id":"gm-a-0683","labels":[]}
+{"id":"gm-a-0684","labels":[]}
+{"id":"gm-a-0685","labels":[]}
+{"id":"gm-a-0686","labels":[]}
+{"id":"gm-a-0687","labels":[]}
+{"id":"gm-a-0688","labels":[]}
+{"id":"gm-a-0689","labels":[]}
+{"id":"gm-a-0690","labels":[]}
+{"id":"gm-a-0691","labels":[]}
+{"id":"gm-a-0692","labels":[]}
+{"id":"gm-a-0693","labels":[]}
+{"id":"gm-a-0694","labels":[]}
+{"id":"gm-a-0695","labels":[]}
+{"id":"gm-a-0696","labels":[]}
+{"id":"gm-a-0697","labels":[]}
+{"id":"gm-a-0698","labels":[]}
+{"id":"gm-a-0699","labels":[{"category":"contradiction","confidence":0.78,"evidence":"『義眼を止め、共有を解く』に対し生成は『格納庫の単眼が、まだこちらを眺めている』『共有を続けるか、義眼を封じるかを決める時が来た』で、停止・解除とも未達のまま終わる"}]}
+{"id":"gm-a-0700","labels":[]}
+{"id":"gm-a-0701","labels":[]}
+{"id":"gm-a-0702","labels":[]}
+{"id":"gm-a-0703","labels":[]}
+{"id":"gm-a-0704","labels":[]}
+{"id":"gm-a-0705","labels":[]}
+{"id":"gm-a-0706","labels":[]}
+{"id":"gm-a-0707","labels":[]}
+{"id":"gm-a-0708","labels":[]}
+{"id":"gm-a-0709","labels":[]}
+{"id":"gm-a-0710","labels":[]}
+{"id":"gm-a-0711","labels":[]}
+{"id":"gm-a-0712","labels":[]}
+{"id":"gm-a-0713","labels":[]}
+{"id":"gm-a-0714","labels":[]}
+{"id":"gm-a-0715","labels":[]}
+{"id":"gm-a-0716","labels":[]}
+{"id":"gm-a-0717","labels":[{"category":"contradiction","confidence":0.8,"evidence":"『本物の命令を選ぶ』に対し生成は『粟田がどちらを採用するか迷う』『選ぶのは人だという』で、選択が未完了のまま結末を迎える"}]}
+{"id":"gm-a-0718","labels":[]}
+{"id":"gm-a-0719","labels":[]}
+{"id":"gm-a-0720","labels":[{"category":"contradiction","confidence":0.8,"evidence":"原文『隠し倉で粥を取り戻す』に対し生成は『粥を施粥所へ戻すか、帳面を書き換えるかを選ぶ』で、粥を取り戻す（施粥所へ戻す）動作が未完了のまま結末"}]}
+{"id":"gm-a-0721","labels":[]}
+{"id":"gm-a-0722","labels":[]}
+{"id":"gm-a-0723","labels":[]}
+{"id":"gm-a-0724","labels":[]}
+{"id":"gm-a-0725","labels":[]}
+{"id":"gm-a-0726","labels":[]}
+{"id":"gm-a-0727","labels":[]}
+{"id":"gm-a-0728","labels":[]}
+{"id":"gm-a-0729","labels":[]}
+{"id":"gm-a-0730","labels":[]}
+{"id":"gm-a-0731","labels":[]}
+{"id":"gm-a-0732","labels":[]}
+{"id":"gm-a-0733","labels":[]}
+{"id":"gm-a-0734","labels":[]}
+{"id":"gm-a-0735","labels":[]}
+{"id":"gm-a-0736","labels":[]}
+{"id":"gm-a-0737","labels":[]}
+{"id":"gm-a-0738","labels":[]}
+{"id":"gm-a-0739","labels":[]}
+{"id":"gm-a-0740","labels":[]}
+{"id":"gm-a-0741","labels":[{"category":"review","confidence":0.55,"evidence":"原文『缶の夢を排気口へ戻し、弁を手癖で正す』のうち『弁を手癖で正す』の描写が無く、夢を戻して管が呼吸するのみ"}]}
+{"id":"gm-a-0742","labels":[]}
+{"id":"gm-a-0743","labels":[]}
+{"id":"gm-a-0744","labels":[]}
+{"id":"gm-a-0745","labels":[]}
+{"id":"gm-a-0746","labels":[]}
+{"id":"gm-a-0747","labels":[{"category":"review","confidence":0.55,"evidence":"原文『細工された秤を校正し、管を塞ぐ』のうち『管を塞ぐ』描写が無く、秤を正し帳面を書き換えるのみで結末"}]}
+{"id":"gm-a-0748","labels":[]}
+{"id":"gm-a-0749","labels":[]}
+{"id":"gm-a-0750","labels":[{"category":"condition","confidence":0.8,"evidence":"前turn(0749)『すべて偶数番目の観測にだけ星が消えていた。白川は長年ずっと偶数を飛ばして数えてきた』に対し生成は『白川が初めて奇数も数え』と偶数→奇数へ反転"}]}
+{"id":"gm-a-0751","labels":[]}
+{"id":"gm-a-0752","labels":[]}
+{"id":"gm-a-0753","labels":[]}
+{"id":"gm-a-0754","labels":[]}
+{"id":"gm-a-0755","labels":[]}
+{"id":"gm-a-0756","labels":[]}
+{"id":"gm-a-0757","labels":[]}
+{"id":"gm-a-0758","labels":[{"category":"review","confidence":0.55,"evidence":"原文『商人の話を巧みに交わし、缶を開けさせる』のうち『缶を開けさせる』描写が無く、扇で表情を緩ませ壺を発見するのみ"}]}
+{"id":"gm-a-0759","labels":[]}
+{"id":"gm-a-0760","labels":[]}
+{"id":"gm-a-0761","labels":[]}
+{"id":"gm-a-0762","labels":[]}
+{"id":"gm-a-0763","labels":[]}
+{"id":"gm-a-0764","labels":[]}
+{"id":"gm-a-0765","labels":[]}
+{"id":"gm-a-0766","labels":[]}
+{"id":"gm-a-0767","labels":[]}
+{"id":"gm-a-0768","labels":[]}
+{"id":"gm-a-0769","labels":[]}
+{"id":"gm-a-0770","labels":[]}
+{"id":"gm-a-0771","labels":[]}
+{"id":"gm-a-0772","labels":[]}
+{"id":"gm-a-0773","labels":[]}
+{"id":"gm-a-0774","labels":[]}
+{"id":"gm-a-0775","labels":[]}
+{"id":"gm-a-0776","labels":[]}
+{"id":"gm-a-0777","labels":[]}
+{"id":"gm-a-0778","labels":[]}
+{"id":"gm-a-0779","labels":[]}
+{"id":"gm-a-0780","labels":[]}
+{"id":"gm-a-0781","labels":[]}
+{"id":"gm-a-0782","labels":[]}
+{"id":"gm-a-0783","labels":[]}
+{"id":"gm-a-0784","labels":[]}
+{"id":"gm-a-0785","labels":[]}
+{"id":"gm-a-0786","labels":[]}
+{"id":"gm-a-0787","labels":[]}
+{"id":"gm-a-0788","labels":[]}
+{"id":"gm-a-0789","labels":[]}
+{"id":"gm-a-0790","labels":[]}
+{"id":"gm-a-0791","labels":[]}
+{"id":"gm-a-0792","labels":[]}
+{"id":"gm-a-0793","labels":[]}
+{"id":"gm-a-0794","labels":[]}
+{"id":"gm-a-0795","labels":[]}
+{"id":"gm-a-0796","labels":[]}
+{"id":"gm-a-0797","labels":[]}
+{"id":"gm-a-0798","labels":[]}
+{"id":"gm-a-0799","labels":[]}
+{"id":"gm-a-0800","labels":[]}
+{"id":"gm-a-0801","labels":[]}
+{"id":"gm-a-0802","labels":[]}
+{"id":"world-0001","labels":[]}
+{"id":"world-0002","labels":[]}
+{"id":"world-0003","labels":[]}
+{"id":"world-0004","labels":[]}
+{"id":"world-0005","labels":[]}
+{"id":"world-0006","labels":[]}
+{"id":"world-0007","labels":[]}
+{"id":"world-0008","labels":[]}
+{"id":"world-0009","labels":[]}
+{"id":"world-0010","labels":[]}
+{"id":"world-0011","labels":[]}
+{"id":"world-0012","labels":[]}
+{"id":"world-0013","labels":[{"category":"number","confidence":0.8,"evidence":"判断時間がsettingの『答えが出るまでに数日かかることもある』(日単位)とspecialSettingsの『木は数年単位で考える』(年単位)で矛盾"}]}
+{"id":"world-0014","labels":[]}
+{"id":"world-0015","labels":[]}
+{"id":"world-0016","labels":[]}
+{"id":"world-0017","labels":[]}
+{"id":"world-0018","labels":[]}
+{"id":"world-0019","labels":[]}
+{"id":"world-0020","labels":[]}
+{"id":"world-0021","labels":[]}
+{"id":"world-0022","labels":[]}
+{"id":"world-0023","labels":[]}
+{"id":"world-0024","labels":[]}
+{"id":"world-0025","labels":[]}
+{"id":"world-0026","labels":[]}
+{"id":"world-0027","labels":[]}
+{"id":"world-0028","labels":[]}
+{"id":"world-0029","labels":[]}
+{"id":"world-0030","labels":[]}
+{"id":"world-0031","labels":[]}
+{"id":"world-0032","labels":[]}
+{"id":"world-0033","labels":[]}
+{"id": "world-0034", "labels": []}
+{"id": "world-0035", "labels": []}
+{"id": "world-0036", "labels": []}
+{"id": "world-0037", "labels": []}
+{"id": "world-0038", "labels": []}
+{"id": "world-0039", "labels": []}
+{"id": "world-0040", "labels": []}
+{"id": "world-0041", "labels": []}
+{"id": "world-0042", "labels": []}
+{"id": "world-0043", "labels": []}
+{"id": "world-0044", "labels": []}
+{"id": "world-0045", "labels": []}
+{"id": "world-0046", "labels": [{"category": "review", "confidence": 0.55, "evidence": "原文『想定難易度: 普通』に対し生成の scenario.difficulty が『やや難しい』に変更されている"}]}
+{"id": "world-0047", "labels": []}
+{"id": "world-0048", "labels": []}
+{"id": "world-0049", "labels": []}
+{"id": "world-0050", "labels": []}
+{"id": "world-0051", "labels": []}
+{"id": "world-0052", "labels": []}
+{"id": "world-0053", "labels": []}
+{"id": "world-0054", "labels": []}
+{"id": "world-0055", "labels": []}
+{"id": "world-0056", "labels": []}
+{"id": "world-0057", "labels": [{"category": "review", "confidence": 0.55, "evidence": "原文『想定難易度: 普通』に対し生成の scenario.difficulty が『やや難しい』に変更されている"}]}
+{"id": "world-0058", "labels": []}
+{"id": "world-0059", "labels": []}
+{"id": "world-0060", "labels": []}
+{"id": "world-0061", "labels": []}
+{"id": "world-0062", "labels": []}
+{"id": "world-0063", "labels": []}
+{"id": "world-0064", "labels": []}
+{"id": "world-0065", "labels": []}
+{"id": "world-0066", "labels": []}
+{"id": "world-0067", "labels": []}
+{"id": "world-0068", "labels": []}
+{"id": "world-0069", "labels": []}
+{"id": "world-0070", "labels": []}
+{"id": "world-0071", "labels": []}
+{"id": "world-0072", "labels": []}
+{"id": "world-0073", "labels": []}
+{"id": "world-0074", "labels": []}
+{"id": "world-0075", "labels": []}
+{"id": "world-0076", "labels": []}
+{"id": "world-0077", "labels": []}
+{"id": "world-0078", "labels": []}
+{"id": "world-0079", "labels": []}
+{"id": "world-0080", "labels": []}
+{"id": "world-0081", "labels": []}
+{"id": "world-0082", "labels": []}
+{"id": "world-0083", "labels": []}
+{"id": "world-0084", "labels": []}
+{"id": "world-0085", "labels": []}
+{"id": "world-0086", "labels": []}
+{"id": "world-0087", "labels": []}
+{"id": "world-0088", "labels": []}
+{"id": "world-0089", "labels": []}
+{"id": "world-0090", "labels": []}
+{"id": "world-0091", "labels": []}
+{"id": "world-0092", "labels": [{"category": "contradiction", "confidence": 0.65, "evidence": "problem『足音が途中で止まって練習場が現れた』は setting『止まった段の先には、見たことのない踊り場がある』・premise『見慣れない踊り場ができている』と食い違う"}]}
+{"id": "world-0093", "labels": []}
+{"id": "world-0094", "labels": []}
+{"id": "world-0095", "labels": []}
+{"id": "world-0096", "labels": []}
+{"id": "world-0097", "labels": []}
+{"id": "world-0098", "labels": []}
+{"id": "world-0099", "labels": []}
+{"id": "world-0100", "labels": []}
+{"id": "world-0101", "labels": []}
+{"id": "world-0102", "labels": []}
+{"id": "world-0103", "labels": [{"category": "review", "confidence": 0.6, "evidence": "techMagic「月は網ではなく、水の反射をすくう」がキーワード「月を網で撈ぐ」およびsetting「網で海に映った月を撈ぐ」の網での撈ぎを否定し、直後に「網を細かく動かすほど光は濃くなる」と続けて網を使ってもおり記述が食い違う"}]}
+{"id": "world-0104", "labels": []}
+{"id": "world-0105", "labels": []}
+{"id": "world-0106", "labels": []}
+{"id": "world-0107", "labels": []}
+{"id": "world-0108", "labels": []}
+{"id": "world-0109", "labels": []}
+{"id": "world-0110", "labels": []}
+{"id": "world-0111", "labels": []}
+{"id": "world-0112", "labels": []}
+{"id": "world-0113", "labels": []}
+{"id": "world-0114", "labels": []}
+{"id": "world-0115", "labels": []}
+{"id": "world-0116", "labels": []}
+{"id": "world-0117", "labels": []}
+{"id": "world-0118", "labels": [{"category": "review", "confidence": 0.62, "evidence": "specialSettings「日記には翌日の出来事が書かれる」とtechMagic「書かれた出来事が当日中に起きる」・problem「その夜、書かれた通りの出来事が起きた」で、予言の成就が翌日か当日(その夜)かで食い違う"}]}
+{"id": "world-0119", "labels": []}
+{"id": "world-0120", "labels": []}
+{"id": "world-0121", "labels": []}
+{"id": "world-0122", "labels": []}
+{"id": "world-0123", "labels": []}
+{"id": "world-0124", "labels": []}
+{"id": "world-0125", "labels": []}
+{"id": "world-0126", "labels": [{"category": "review", "confidence": 0.6, "evidence": "setting「庭の錆が急に広がり、読めない赤い渦が町の壁へと這い出した」とspecialSettings「壁の錆は庭から移ったのではない」で、壁の錆の発生源が庭からの移行か否かで食い違う"}]}
+{"id": "world-0127", "labels": []}
+{"id": "world-0128", "labels": []}
+{"id": "world-0129", "labels": []}
+{"id": "world-0130", "labels": []}
+{"id": "world-0131", "labels": []}
+{"id": "world-0132", "labels": []}
+{"id": "world-0133", "labels": []}
+{"id": "world-0134", "labels": []}
+{"id": "world-0135", "labels": []}
+{"id": "world-0136", "labels": []}
+{"id": "world-0137", "labels": []}
+{"id": "world-0138", "labels": []}
+{"id": "world-0139", "labels": []}
+{"id": "world-0140", "labels": []}
+{"id": "world-0141", "labels": []}
+{"id": "world-0142", "labels": []}
+{"id": "world-0143", "labels": []}
+{"id": "world-0144", "labels": []}
+{"id": "world-0145", "labels": []}
+{"id": "world-0146", "labels": []}
+{"id": "world-0147", "labels": []}
+{"id": "world-0148", "labels": []}
+{"id": "world-0149", "labels": []}
+{"id": "world-0150", "labels": []}
+{"id": "world-0151", "labels": []}
+{"id":"ex-0119","labels":[]}
+{"id":"ex-0120","labels":[]}
+{"id":"ex-0121","labels":[]}
+{"id":"ex-0122","labels":[]}
+{"id":"ex-0123","labels":[]}
+{"id":"ex-0124","labels":[]}
+{"id":"ex-0125","labels":[]}
+{"id":"ex-0126","labels":[]}
+{"id":"ex-0127","labels":[]}
+{"id":"ex-0128","labels":[]}
+{"id":"ex-0129","labels":[]}
+{"id":"ex-0130","labels":[]}
+{"id":"ex-0131","labels":[]}
+{"id":"ex-0132","labels":[]}
+{"id":"ex-0133","labels":[]}
+{"id":"ex-0134","labels":[]}
+{"id":"ex-0135","labels":[]}
+{"id":"ex-0136","labels":[]}
+{"id":"ex-0137","labels":[]}
+{"id":"ex-0138","labels":[]}
+{"id":"ex-0139","labels":[]}
+{"id":"ex-0140","labels":[]}
+{"id":"ex-0141","labels":[]}
+{"id":"ex-0142","labels":[]}
+{"id":"ex-0143","labels":[]}
+{"id":"ex-0144","labels":[]}
+{"id":"ex-0145","labels":[]}
+{"id":"ex-0146","labels":[]}
+{"id":"ex-0147","labels":[]}
+{"id":"ex-0148","labels":[]}
+{"id":"ex-0149","labels":[]}
+{"id":"ex-0150","labels":[]}
+{"id":"ex-0151","labels":[]}
+{"id":"ex-0152","labels":[]}
+{"id":"ex-0153","labels":[]}
+{"id":"ex-0154","labels":[{"category":"review","confidence":0.5,"evidence":"『本人は二つだと言い、荷札には三つと書いてある。どちらが正しいかは分からない』のに quantity:2 と確定"}]}
+{"id":"ex-0155","labels":[]}
+{"id":"ex-0156","labels":[]}
+{"id":"ex-0157","labels":[]}
+{"id":"ex-0158","labels":[]}
+{"id":"ex-0159","labels":[{"category":"fabrication","confidence":0.9,"evidence":"secrets『冷えた炉の下に古い手帳が隠されている』は原文になし"},{"category":"fabrication","confidence":0.8,"evidence":"secrets『灯は誰かが外から点けている』は原文『灯がともるが誰も暮らしていない』のみで根拠なし"}]}
+{"id":"ex-0160","labels":[{"category":"review","confidence":0.5,"evidence":"『地図の隅に「東の窪地」とだけ書かれていた』が locations は空（名称のみの地点は他では記録）"}]}
+{"id":"ex-0161","labels":[{"category":"fabrication","confidence":0.7,"evidence":"secrets『影は川底に沈んだ古い舟の仕業かもしれない』は原文になく、噂と未確認のみ"}]}
+{"id":"ex-0162","labels":[]}
+{"id":"ex-0163","labels":[]}
+{"id":"ex-0164","labels":[]}
+{"id":"ex-0165","labels":[]}
+{"id":"ex-0166","labels":[]}
+{"id":"ex-0167","labels":[]}
+{"id":"ex-0168","labels":[]}
+{"id":"ex-0169","labels":[]}
+{"id":"ex-0170","labels":[]}
+{"id":"ex-0171","labels":[]}
+{"id":"ex-0172","labels":[]}
+{"id":"ex-0173","labels":[]}
+{"id":"ex-0174","labels":[]}
+{"id":"ex-0175","labels":[]}
+{"id":"ex-0176","labels":[]}
+{"id":"ex-0177","labels":[]}
+{"id": "world-0152", "labels": []}
+{"id": "world-0153", "labels": []}
+{"id": "world-0154", "labels": []}
+{"id": "world-0155", "labels": []}
+{"id": "world-0156", "labels": []}
+{"id": "world-0157", "labels": []}
+{"id": "world-0158", "labels": []}
+{"id": "world-0159", "labels": []}
+{"id": "world-0160", "labels": []}
+{"id": "world-0161", "labels": []}
+{"id": "world-0162", "labels": []}
+{"id": "world-0163", "labels": []}
+{"id": "world-0164", "labels": []}
+{"id": "world-0165", "labels": []}
+{"id": "world-0166", "labels": []}
+{"id": "world-0167", "labels": []}
+{"id": "world-0168", "labels": []}
+{"id": "world-0169", "labels": []}
+{"id": "world-0170", "labels": []}
+{"id": "world-0171", "labels": []}
+{"id": "world-0172", "labels": []}
+{"id": "world-0173", "labels": []}
+{"id": "world-0174", "labels": []}
+{"id": "world-0175", "labels": []}
+{"id": "world-0176", "labels": []}
+{"id": "world-0177", "labels": []}
+{"id": "world-0178", "labels": []}
+{"id": "world-0179", "labels": []}
+{"id": "world-0180", "labels": []}
+{"id": "world-0181", "labels": []}
+{"id": "world-0182", "labels": []}
+{"id": "world-0183", "labels": []}
+{"id": "world-0184", "labels": []}
+{"id": "world-0185", "labels": []}
+{"id": "world-0186", "labels": []}
+{"id": "world-0187", "labels": []}
+{"id": "world-0188", "labels": []}
+{"id": "world-0189", "labels": []}
+{"id": "ex-0178", "labels": []}
+{"id": "ex-0179", "labels": []}
+{"id": "ex-0180", "labels": []}
+{"id": "ex-0181", "labels": []}
+{"id": "ex-0182", "labels": []}
+{"id": "ex-0183", "labels": []}
+{"id": "ex-0184", "labels": []}
+{"id": "ex-0185", "labels": []}
+{"id": "ex-0186", "labels": []}
+{"id": "ex-0187", "labels": []}
+{"id": "ex-0188", "labels": []}
+{"id": "ex-0189", "labels": []}
+{"id": "ex-0190", "labels": []}
+{"id": "ex-0191", "labels": []}
+{"id": "ex-0192", "labels": []}
+{"id": "ex-0193", "labels": []}
+{"id": "ex-0194", "labels": []}
+{"id": "ex-0195", "labels": []}
+{"id": "ex-0196", "labels": []}
+{"id": "ex-0197", "labels": []}
+{"id": "ex-0198", "labels": []}
+{"id": "ex-0199", "labels": []}
+{"id": "ex-0200", "labels": []}
+{"id": "ex-0201", "labels": []}
+{"id": "ex-0202", "labels": []}
+{"id": "ex-0203", "labels": []}
+{"id": "ex-0204", "labels": []}
+{"id": "ex-0205", "labels": []}
+{"id": "ex-0206", "labels": []}
+{"id": "ex-0207", "labels": []}
+{"id": "ex-0208", "labels": []}
+{"id": "ex-0209", "labels": []}
+{"id": "ex-0210", "labels": []}
+{"id": "ex-0211", "labels": []}
+{"id": "ex-0212", "labels": []}
+{"id": "ex-0213", "labels": []}
+{"id": "ex-0214", "labels": []}
+{"id": "ex-0215", "labels": []}
+{"id": "ex-0216", "labels": []}
+{"id": "ex-0217", "labels": []}
+{"id": "ex-0218", "labels": []}
+{"id": "ex-0219", "labels": []}
+{"id": "ex-0220", "labels": []}
+{"id": "ex-0221", "labels": []}
+{"id": "ex-0222", "labels": []}
+{"id": "ex-0223", "labels": []}
+{"id": "ex-0224", "labels": []}
+{"id": "ex-0225", "labels": []}
+{"id": "ex-0226", "labels": []}
+{"id": "ex-0227", "labels": []}
+{"id": "ex-0228", "labels": []}
+{"id": "ex-0229", "labels": []}
+{"id": "ex-0230", "labels": []}
+{"id": "ex-0231", "labels": []}
+{"id": "ex-0232", "labels": []}
+{"id": "ex-0233", "labels": []}
+{"id": "ex-0234", "labels": []}
+{"id": "ex-0235", "labels": [{"category": "fabrication", "confidence": 0.8, "evidence": "connectionsに「丘へ続く砂利道」、secretsに「基礎の文字は誰も読んでいない」を追加。原文は「崩れた石の灯台が一つ残っており、その基礎に古い文字が刻まれている」のみで、砂利道も「誰も読んでいない」という記述もなし"}]}
+{"id": "ex-0236", "labels": [{"category": "review", "confidence": 0.6, "evidence": "connectionsに「川沿いの小道」を追加。原文は「川のほとりに…鳥居」のみで小道の記載なし。推断による付加か捏造か曖昧"}]}
+{"id": "ex-0237", "labels": []}
+{"id": "ex-0238", "labels": []}
+{"id": "ex-0239", "labels": []}
+{"id": "ex-0240", "labels": []}
+{"id": "ex-0241", "labels": []}
+{"id": "ex-0242", "labels": []}
+{"id": "ex-0243", "labels": []}
+{"id": "ex-0244", "labels": []}
+{"id": "ex-0245", "labels": []}
+{"id": "ex-0246", "labels": []}
+{"id": "ex-0247", "labels": []}
+{"id": "ex-0248", "labels": []}
+{"id": "ex-0249", "labels": []}
+{"id": "ex-0250", "labels": []}
+{"id": "ex-0251", "labels": []}
+{"id": "ex-0252", "labels": []}
+{"id": "ex-0253", "labels": []}
+{"id": "ex-0254", "labels": []}
+{"id": "ex-0255", "labels": []}
+{"id": "ex-0256", "labels": []}
+{"id": "ex-0257", "labels": []}
+{"id": "ex-0258", "labels": []}
+{"id": "ex-0259", "labels": []}
+{"id": "ex-0260", "labels": []}
+{"id": "ex-0261", "labels": []}
+{"id": "ex-0262", "labels": []}
+{"id": "ex-0263", "labels": []}
+{"id": "ex-0264", "labels": []}
+{"id": "ex-0265", "labels": []}
+{"id": "ex-0266", "labels": []}
+{"id": "ex-0267", "labels": []}
+{"id": "ex-0268", "labels": []}
+{"id": "ex-0269", "labels": []}
+{"id": "ex-0270", "labels": []}
+{"id": "ex-0271", "labels": []}
+{"id": "ex-0272", "labels": []}
+{"id": "ex-0273", "labels": []}
+{"id": "ex-0274", "labels": []}
+{"id": "ex-0275", "labels": []}
+{"id": "ex-0276", "labels": []}
+{"id": "ex-0277", "labels": []}
+{"id": "ex-0278", "labels": []}
+{"id": "ex-0279", "labels": []}
+{"id": "ex-0280", "labels": []}
+{"id": "ex-0281", "labels": []}
+{"id": "ex-0282", "labels": []}
+{"id": "ex-0283", "labels": []}
+{"id": "ex-0284", "labels": []}
+{"id": "ex-0285", "labels": []}
+{"id": "ex-0286", "labels": []}
+{"id": "ex-0287", "labels": []}
+{"id": "ex-0288", "labels": []}
+{"id": "ex-0289", "labels": []}
+{"id": "ex-0290", "labels": []}
+{"id": "ex-0291", "labels": []}
+{"id": "ex-0292", "labels": []}
+{"id": "ex-0293", "labels": [{"category": "fabrication", "confidence": 0.75, "evidence": "secretsに『基礎の文字は誰も読んでいない』と記載。原文は『基礎に文字が刻まれている』のみで、読者の有無については何も書かれておらず、新たな事実を捏造している"}]}
+{"id": "ex-0294", "labels": []}
+{"id": "ex-0295", "labels": []}
+{"id":"ex-0296","labels":[]}
+{"id":"ex-0297","labels":[]}
+{"id":"ex-0298","labels":[]}
+{"id":"ex-0299","labels":[]}
+{"id":"ex-0300","labels":[]}
+{"id":"ex-0301","labels":[]}
+{"id":"ex-0302","labels":[]}
+{"id":"ex-0303","labels":[]}
+{"id":"ex-0304","labels":[]}
+{"id":"ex-0305","labels":[]}
+{"id":"ex-0306","labels":[]}
+{"id":"ex-0307","labels":[]}
+{"id":"ex-0308","labels":[]}
+{"id":"ex-0309","labels":[]}
+{"id":"ex-0310","labels":[]}
+{"id":"ex-0311","labels":[]}
+{"id":"ex-0312","labels":[]}
+{"id":"ex-0313","labels":[]}
+{"id":"ex-0314","labels":[]}
+{"id":"ex-0315","labels":[]}
+{"id":"ex-0316","labels":[]}
+{"id":"ex-0317","labels":[]}
+{"id":"ex-0318","labels":[]}
+{"id":"ex-0319","labels":[]}
+{"id":"ex-0320","labels":[]}
+{"id":"ex-0321","labels":[]}
+{"id":"ex-0322","labels":[]}
+{"id":"ex-0323","labels":[]}
+{"id":"ex-0324","labels":[]}
+{"id":"ex-0325","labels":[]}
+{"id":"ex-0326","labels":[]}
+{"id":"ex-0327","labels":[]}
+{"id":"ex-0328","labels":[]}
+{"id":"ex-0329","labels":[]}
+{"id":"ex-0330","labels":[]}
+{"id":"ex-0331","labels":[]}
+{"id":"ex-0332","labels":[]}
+{"id":"ex-0333","labels":[]}
+{"id":"ex-0334","labels":[]}
+{"id":"ex-0335","labels":[]}
+{"id":"ex-0336","labels":[]}
+{"id":"ex-0337","labels":[]}
+{"id":"ex-0338","labels":[]}
+{"id":"ex-0339","labels":[]}
+{"id":"ex-0340","labels":[]}
+{"id":"ex-0341","labels":[]}
+{"id":"ex-0342","labels":[]}
+{"id":"ex-0343","labels":[]}
+{"id":"ex-0344","labels":[]}
+{"id":"ex-0345","labels":[]}
+{"id":"ex-0346","labels":[]}
+{"id":"ex-0347","labels":[{"category":"review","confidence":0.6,"evidence":"UNRESOLVEDのcontentに『どちらが正しいか確定できない』とあるのに isConfirmed=true。原文も未確定（二つ→一つに訂正）で、判定フラグが物語の未確定と食い違うかどうか曖昧"}]}
+{"id":"ex-0348","labels":[]}
+{"id":"ex-0349","labels":[]}
+{"id":"ex-0350","labels":[]}
+{"id":"ex-0351","labels":[]}
+{"id":"ex-0352","labels":[]}
+{"id":"ex-0353","labels":[]}
+{"id":"ex-0354","labels":[]}
+{"id":"ex-0355","labels":[]}
+{"id":"ex-0356","labels":[]}
+{"id":"ex-0357","labels":[]}
+{"id":"ex-0358","labels":[]}
+{"id":"ex-0359","labels":[]}
+{"id":"ex-0360","labels":[]}
+{"id":"ex-0361","labels":[]}
+{"id":"ex-0362","labels":[{"category":"fabrication","confidence":0.8,"evidence":"secrets『基礎の文字は誰も読んでいない』は原文になく、原文は『基礎に文字が刻まれている』のみ"}]}
+{"id":"ex-0363","labels":[]}
+{"id":"ex-0364","labels":[]}
+{"id":"ex-0365","labels":[]}
+{"id":"ex-0366","labels":[]}
+{"id":"ex-0367","labels":[]}
+{"id":"ex-0368","labels":[]}
+{"id":"ex-0369","labels":[]}
+{"id":"ex-0370","labels":[]}
+{"id":"ex-0371","labels":[]}
+{"id":"ex-0372","labels":[]}
+{"id":"ex-0373","labels":[]}
+{"id":"ex-0374","labels":[]}
+{"id":"ex-0375","labels":[]}
+{"id":"ex-0376","labels":[]}
+{"id":"ex-0377","labels":[]}
+{"id":"ex-0378","labels":[]}
+{"id":"ex-0379","labels":[]}
+{"id":"ex-0380","labels":[]}
+{"id":"ex-0381","labels":[]}
+{"id":"ex-0382","labels":[]}
+{"id":"ex-0383","labels":[]}
+{"id":"ex-0384","labels":[]}
+{"id":"ex-0385","labels":[]}
+{"id":"ex-0386","labels":[]}
+{"id":"ex-0387","labels":[]}
+{"id":"ex-0388","labels":[]}
+{"id":"ex-0389","labels":[]}
+{"id":"ex-0390","labels":[]}
+{"id":"ex-0391","labels":[]}
+{"id":"ex-0392","labels":[]}
+{"id":"ex-0393","labels":[]}
+{"id":"ex-0394","labels":[{"category":"fabrication","confidence":0.75,"evidence":"secrets『軟膏には秘密の配合がある』は原文になく、原文は薬草を焙じて軟膏を作るのみ"}]}
+{"id":"ex-0395","labels":[]}
+{"id":"ex-0396","labels":[]}
+{"id":"ex-0397","labels":[]}
+{"id":"ex-0398","labels":[{"category":"fabrication","confidence":0.75,"evidence":"secrets『写した巻物のいくつかを自分の物として保管している』は原文になく、原文は写す・修繕・噂を書き留めるのみ"}]}
+{"id":"ex-0399","labels":[]}
+{"id":"ex-0400","labels":[]}
+{"id":"ex-0401","labels":[{"category":"fabrication","confidence":0.8,"evidence":"secrets『盗んだ品を橋の下に隠している』は原文になく、原文は夜に荷を狙い足音を立てず近づくのみ"}]}
+{"id":"ex-0402","labels":[]}
+{"id":"ex-0403","labels":[]}
+{"id":"ex-0404","labels":[]}
+{"id":"ex-0405","labels":[{"category":"fabrication","confidence":0.8,"evidence":"secrets『沈んだ船の場所を知っている』は原文になく、原文は岩場で貝を採り潮の間を読むのみ"}]}
+{"id":"ex-0406","labels":[]}
+{"id":"ex-0407","labels":[]}
+{"id":"ex-0408","labels":[]}
+{"id":"ex-0409","labels":[{"category":"fabrication","confidence":0.8,"evidence":"secrets『星図にだけ記した場所がある』は原文になく、原文は夜空の並びを書き留め日柄を読むのみ"}]}
+{"id":"ex-0410","labels":[]}
+{"id":"ex-0411","labels":[]}
+{"id":"ex-0412","labels":[]}
+{"id":"ex-0413","labels":[]}
+{"id":"ex-0414","labels":[]}
+{"id":"ex-0415","labels":[]}
+{"id":"ex-0416","labels":[]}
+{"id":"ex-0417","labels":[]}
+{"id":"ex-0418","labels":[]}
+{"id":"ex-0419","labels":[]}
+{"id":"ex-0420","labels":[]}
+{"id":"ex-0421","labels":[]}
+{"id":"ex-0422","labels":[]}
+{"id":"ex-0423","labels":[]}
+{"id":"ex-0424","labels":[]}
+{"id":"ex-0425","labels":[]}
+{"id":"ex-0426","labels":[]}
+{"id":"ex-0427","labels":[]}
+{"id":"ex-0428","labels":[{"category":"fabrication","confidence":0.8,"evidence":"rewardsに『米』『木札』を追加。原文は『片方だけでは報酬は出ないという』と報酬の条件のみで、報酬品目の記載なし"}]}
+{"id":"ex-0429","labels":[]}
+{"id":"ex-0430","labels":[]}
+{"id":"ex-0431","labels":[]}
+{"id":"ex-0432","labels":[]}
+{"id":"ex-0433","labels":[]}
+{"id":"ex-0434","labels":[]}
+{"id":"ex-0435","labels":[]}
+{"id":"ex-0436","labels":[]}
+{"id":"ex-0437","labels":[]}
+{"id":"ex-0438","labels":[]}
+{"id":"ex-0439","labels":[]}
+{"id":"ex-0440","labels":[]}
+{"id":"ex-0441","labels":[]}
+{"id":"ex-0442","labels":[]}
+{"id":"ex-0443","labels":[]}
+{"id":"ex-0444","labels":[]}
+{"id":"ex-0445","labels":[]}
+{"id":"ex-0446","labels":[]}
+{"id":"ex-0447","labels":[]}
+{"id":"ex-0448","labels":[]}
+{"id":"ex-0449","labels":[]}
+{"id":"ex-0450","labels":[]}
+{"id":"ex-0451","labels":[]}
+{"id":"ex-0452","labels":[]}
+{"id":"ex-0453","labels":[]}
+{"id":"ex-0454","labels":[]}
+{"id":"ex-0455","labels":[]}
+{"id":"ex-0456","labels":[]}
+{"id":"ex-0457","labels":[]}
+{"id":"ex-0458","labels":[]}
+{"id":"ex-0459","labels":[]}
+{"id":"ex-0460","labels":[]}
+{"id":"ex-0461","labels":[]}
+{"id":"ex-0462","labels":[]}
+{"id":"ex-0463","labels":[]}
+{"id":"ex-0464","labels":[]}
+{"id":"ex-0465","labels":[]}
+{"id":"ex-0466","labels":[]}
+{"id":"ex-0467","labels":[]}
+{"id":"ex-0468","labels":[]}
+{"id":"ex-0469","labels":[]}
+{"id":"ex-0470","labels":[]}
+{"id":"ex-0471","labels":[]}
+{"id":"ex-0472","labels":[]}
+{"id":"ex-0473","labels":[]}
+{"id":"ex-0474","labels":[]}
+{"id":"ex-0475","labels":[]}
+{"id":"ex-0476","labels":[]}
+{"id":"ex-0477","labels":[]}
+{"id":"ex-0478","labels":[]}
+{"id":"ex-0479","labels":[]}
+{"id":"ex-0480","labels":[]}
+{"id":"ex-0481","labels":[]}
+{"id":"ex-0482","labels":[]}
+{"id":"ex-0483","labels":[]}
+{"id":"ex-0484","labels":[]}
+{"id":"ex-0485","labels":[]}
+{"id":"ex-0486","labels":[]}
+{"id":"ex-0487","labels":[]}
+{"id":"ex-0488","labels":[]}
+{"id":"ex-0489","labels":[]}
+{"id":"ex-0490","labels":[]}
+{"id":"ex-0491","labels":[]}
+{"id":"ex-0492","labels":[]}
+{"id":"ex-0493","labels":[]}
+{"id":"ex-0494","labels":[]}
+{"id":"ex-0495","labels":[]}
+{"id":"ex-0496","labels":[]}
+{"id":"ex-0497","labels":[]}
+{"id":"ex-0498","labels":[]}
+{"id":"ex-0499","labels":[]}
+{"id":"ex-0500","labels":[]}
+{"id":"ex-0501","labels":[]}
+{"id":"ex-0502","labels":[]}
+{"id":"ex-0503","labels":[]}
+{"id":"ex-0504","labels":[]}
+{"id":"ex-0505","labels":[]}
+{"id":"ex-0506","labels":[]}
+{"id":"ex-0507","labels":[]}
+{"id":"ex-0508","labels":[]}
+{"id":"ex-0509","labels":[]}
+{"id":"ex-0510","labels":[]}
+{"id":"ex-0511","labels":[]}
+{"id":"ex-0512","labels":[]}
+{"id":"ex-0513","labels":[]}
+{"id":"ex-0514","labels":[]}
+{"id":"ex-0515","labels":[]}
+{"id":"ex-0516","labels":[]}
+{"id":"ex-0517","labels":[]}
+{"id":"ex-0518","labels":[]}
+{"id":"ex-0519","labels":[]}
+{"id":"ex-0520","labels":[]}
+{"id":"ex-0521","labels":[{"category":"review","confidence":0.6,"evidence":"npcMemories(n1)に『若い者に古い話を聞かせた。帳面のことはまだ詳しく言わなかった』を追加。原文は『老船長が波止場で古い帳面を前に密輸の話をしていた』のみで、聞き手が若い者であることや帳面の詳細を語らなかったことは記述されていない"}]}
+{"id":"ex-0522","labels":[]}
+{"id":"ex-0523","labels":[{"category":"fabrication","confidence":0.9,"evidence":"secretsに『満潮時だけ現れる階段がある』『帳面が隠されている』『灯がともる夜がある』を追加。原文は三地点を見て回ったことと廃墟を載せないこと、倉庫から灯台へ坂道が続くことのみで、これらの秘密の記述はない"},{"category":"review","confidence":0.6,"evidence":"connectionsに波止場↔古い倉庫を追加。原文は『倉庫から灯台へは坂道が続く』のみで波止場との接続の記述はない"}]}
+{"id":"ex-0524","labels":[]}
+{"id":"ex-0525","labels":[]}
+{"id":"ex-0526","labels":[{"category":"fabrication","confidence":0.8,"evidence":"npcMemories(n2)に『関所の裏に自分の通り道がある。誰かが気づいたかは分からない』を追加し、discoveryのrelatedIdsにもn2を付与。原文は『新しい足跡があったように見えた。暗くてはっきりしない。狼男がそこにいたかどうかも分からない』のみで、n2の通り道や秘密の保持は記載されていない"}]}
+{"id":"ex-0527","labels":[]}
+{"id":"ex-0528","labels":[]}
+{"id":"ex-0529","labels":[]}
+{"id":"ex-0530","labels":[]}
+{"id":"ex-0531","labels":[{"category":"contradiction","confidence":0.8,"evidence":"npcMemories(n1)『盗掘者に碑文の場所を知られないよう、口を慎んでいる』は、原文『案内人は…盗掘者が先に碑文を写そうとしていると漏らした』（情報を漏らした）と矛盾する"}]}

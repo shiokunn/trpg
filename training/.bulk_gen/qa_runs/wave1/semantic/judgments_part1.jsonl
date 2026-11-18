@@ -1,0 +1,24 @@
+{"id":"ex-0001","labels":[]}
+{"id":"ex-0002","labels":[]}
+{"id":"ex-0003","labels":[]}
+{"id":"ex-0004","labels":[]}
+{"id":"ex-0005","labels":[]}
+{"id":"ex-0006","labels":[]}
+{"id":"ex-0007","labels":[]}
+{"id":"ex-0008","labels":[]}
+{"id":"ex-0009","labels":[]}
+{"id":"ex-0010","labels":[]}
+{"id":"ex-0011","labels":[]}
+{"id":"ex-0012","labels":[]}
+{"id":"ex-0013","labels":[]}
+{"id":"ex-0014","labels":[]}
+{"id":"ex-0015","labels":[]}
+{"id":"ex-0016","labels":[]}
+{"id":"ex-0017","labels":[]}
+{"id":"ex-0018","labels":[]}
+{"id":"ex-0019","labels":[]}
+{"id":"ex-0020","labels":[]}
+{"id":"ex-0021","labels":[]}
+{"id":"ex-0022","labels":[{"category":"review","confidence":0.62,"evidence":"原文「そのうち一つには毒が入っていたと後で判明した」の「後で判明した」が、生成側npcMemoryでは「一つに毒が入っていたことを後で認めた」となり、料理人自身の admission（認めた）という原文に無い事実が加わっているかどうか判断が曖昧"}]}
+{"id":"ex-0023","labels":[{"category":"review","confidence":0.55,"evidence":"原文「⑩誰かが「また来る」と呟いた。」は断片として明記されているが、生成側では「誰かが「また来る」と呟いたが、聞き違いの可能性もある」と「聞き違いの可能性もある」が追加され isConfirmed:false に下げられており、許容される推定メモか事実改変か曖昧"}]}
+{"id":"ex-0024","labels":[]}

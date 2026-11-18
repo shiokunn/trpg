@@ -79,7 +79,10 @@ def cmd_seal(args) -> int:
 def cmd_take(args) -> int:
     eligible: list[tuple[Path, dict]] = []
     rejected: list[dict] = []
+    only = set(args.only or [])
     for batch in bc.iter_batch_files():
+        if only and batch.name not in only:
+            continue
         marker = bc.load_marker(batch)
         if marker is None:
             rejected.append({"file": str(batch.relative_to(bc.BASE)),
@@ -180,7 +183,10 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     sub = ap.add_subparsers(dest="command", required=True)
     s = sub.add_parser("seal"); s.set_defaults(func=cmd_seal)
-    t = sub.add_parser("take"); t.add_argument("--note", default=""); t.set_defaults(func=cmd_take)
+    t = sub.add_parser("take"); t.add_argument("--note", default="")
+    t.add_argument("--only", nargs="*", default=None,
+                   help="snapshot only these inbox batch filenames (wave isolation)")
+    t.set_defaults(func=cmd_take)
     l = sub.add_parser("list"); l.set_defaults(func=cmd_list)
     args = ap.parse_args()
     return int(args.func(args))

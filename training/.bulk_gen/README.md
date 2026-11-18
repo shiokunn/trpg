@@ -62,6 +62,52 @@ python3 bulk_audit.py trends                   # 傾向の推移
 python3 bulk_status.py                         # 目標 10,000 件までの進捗
 ```
 
+## 指定ツールによる最終監査（Wave 1 以降の共通手順）
+
+`quality_system.py` による機械監査に加え、指定の2ツールを必备します。
+
+```bash
+# 0. 完成バッチを封印 → Wave単位でスナップショット
+python3 pipeline/bulk_snapshot.py seal
+python3 pipeline/bulk_snapshot.py take --note wave2 --only <wave2のバッチ名...>
+
+# 1. 派生監査ルートを作成（IDを classify_qa の ID_RE に適合させるのみ。内容は不変）
+python3 pipeline/audit_make_derived.py --snapshot <snap-id> --run-dir ../qa_runs/wave2
+
+# 2. Python品質スコア＋Semantic判定の準備
+python3 ../../tools/quality_system.py score --root <run>/raw --out-dir <run>/python
+python3 ../../tools/semantic_llm_engine.py prepare --root <run>/raw --out <run>/semantic/packets
+#    判定者サブエージェントが packets_part*.jsonl をレビューし judgments_part*.jsonl を作成
+#    （根拠のないラベル・pass強制のための空配列は禁止）
+
+# 3. 指定ツール①: classify_qa.py（PASS / REVIEW / FAIL、UNKNOWN_ID も厳しく照合）
+python3 ../../tools/semantic_llm_engine.py ingest \
+    --packets <run>/semantic/packets/packets.jsonl \
+    --judgments <run>/semantic/judgments.jsonl --root <run>/raw --out <run>/semantic
+python3 ../../tools/classify_qa.py \
+    --scores <run>/python/score_cache.jsonl \
+    --semantic <run>/semantic/semantic_final.jsonl \
+    --manifest <run>/semantic/manifest.jsonl \
+    --root <run>/raw --allow-root --out-dir <run>/classified
+
+# 4. PASS_only の隔離SFTを生成し、指定ツール②: verify_sft_outputs.py で形式検証
+python3 pipeline/audit_build_isolated_sft.py --raw <run>/raw \
+    --pass-ids <run>/classified/pass.jsonl --out-dir <run>/sft_isolated
+python3 ../../tools/verify_sft_outputs.py --root <run>/sft_isolated \
+    > <run>/verify_sft_outputs.json
+
+# 5. 集計（件数・PASS率・問題ID・検出理由）
+python3 pipeline/audit_report.py --run-dir <run>
+```
+
+- 監査ディレクトリ名は `qa_runs/` を使ってください（`classify_qa.py` は
+  パスに `audit` / `test` / `judgment` 等のトークンがあると拒否します）。
+- `classify_qa.py` は ID 形式 `gm-a-0001` / `world-0001` / `ex-0001` のみ受理します。
+  `audit_make_derived.py` が元IDを変換し、`id_map.json` に全対応を記録します。
+- `verify_sft_outputs.py` は隔離ディレクトリの2ファイルのみを検証します。
+  正式SFTは一切読み書きしません。
+- 監査結果は `qa_runs/<wave>/AUDIT_REPORT.json` / `.md` に記録します。
+
 ## 正式データへの統合（まだ実行しない）
 
 生成と全スナップショットの監査が完了した後にのみ、

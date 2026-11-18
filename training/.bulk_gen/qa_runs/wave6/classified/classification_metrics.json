@@ -1,0 +1,44 @@
+{
+  "verifier_version": "classify-1.0",
+  "classification_counts": {
+    "PASS": 58,
+    "REVIEW": 1,
+    "FAIL": 1
+  },
+  "audit": {
+    "total": 60,
+    "counts": {
+      "PASS": 58,
+      "REVIEW": 1,
+      "FAIL": 1
+    },
+    "duplicate_input_ids": [],
+    "invalid_id_prefix": [],
+    "unique_output_ids": 60,
+    "id_format_all_valid": true,
+    "root": "/data/data/com.termux/files/home/trpg/training/.bulk_gen/qa_runs/wave6/raw",
+    "root_allowed": true
+  },
+  "reused": 0,
+  "recomputed": 60,
+  "skipped_score_lines": 0,
+  "skipped_semantic_lines": 0,
+  "manifest_duplicate_ids": [],
+  "manifest_skipped_lines": 0,
+  "review_or_fail_rows": [
+    {
+      "id": "ex-0044",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0055",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    }
+  ]
+}

@@ -32,21 +32,33 @@ def main() -> int:
             "category": batch.parent.name,
         })
 
+    # Map snapshot id -> two-tool audit report (qa_runs/<wave>/AUDIT_REPORT.json)
+    audited_by_snap: dict[str, dict] = {}
+    if (bc.BASE / "qa_runs").exists():
+        for p in (bc.BASE / "qa_runs").glob("wave*/AUDIT_REPORT.json"):
+            try:
+                rep = json.loads(p.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            sid = rep.get("source_snapshot")
+            if sid:
+                audited_by_snap[sid] = rep
+
     snaps = []
     for snap in sorted((bc.SNAPSHOTS.iterdir() if bc.SNAPSHOTS.exists() else []),
                        key=lambda p: p.name):
         if not snap.is_dir() or not (snap / "MANIFEST.json").exists():
             continue
         m = bc.load_manifest(snap)
-        ag_path = bc.AUDIT / snap.name / "AGGREGATE.json"
-        ag = json.loads(ag_path.read_text(encoding="utf-8")) if ag_path.exists() else None
+        ag = audited_by_snap.get(snap.name)
         snaps.append({
             "snapshot_id": snap.name,
             "records": m.get("total_records"),
             "by_category": m.get("by_category"),
             "audited": ag is not None,
-            "scored": ag["audit"]["scored"] if ag else None,
-            "fail": ag["audit"]["verdict_counts"].get("fail", 0) if ag else None,
+            "scored": ag["total"] if ag else None,
+            "pass": ag["counts"]["PASS"] if ag else None,
+            "non_pass": ag["counts"]["REVIEW"] + ag["counts"]["FAIL"] if ag else None,
         })
 
     sealed_records = sum(r["records"] for r in inbox_rows if r["sealed"])

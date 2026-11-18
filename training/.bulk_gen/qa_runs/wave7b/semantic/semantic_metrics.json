@@ -1,0 +1,197 @@
+{
+  "gold_cases": 0,
+  "per_category": {
+    "fabrication": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "negation": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "condition": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "number": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "contradiction": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    }
+  },
+  "precision": 0.0,
+  "recall": 0.0,
+  "f1": 0.0,
+  "disagreements": 9,
+  "disagreement_causes": {
+    "llm_only:fabrication": 7,
+    "llm_only:contradiction": 1,
+    "python_only:condition": 1
+  },
+  "disagreement_rows": [
+    {
+      "id": "ex-0026",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0029",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0030",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0033",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0037",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0041",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0060",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0064",
+      "cause": "llm_only:contradiction",
+      "python_categories": [],
+      "llm_categories": [
+        "contradiction"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0081",
+      "cause": "python_only:condition",
+      "python_categories": [
+        "condition"
+      ],
+      "llm_categories": [],
+      "python_verdict": "pass",
+      "final_verdict": "pass"
+    }
+  ],
+  "review_reasons": {
+    "llm_review": 4,
+    "python_suppressed:NEGATION_INVERSION": 32,
+    "python_suppressed:FABRICATED_NUMBER": 1,
+    "python_suppressed:CONDITION_LOST": 18
+  },
+  "review_rate": 0.027,
+  "unjudged": 0,
+  "unjudged_rate": 0.0,
+  "api_errors": 0,
+  "api_error_rate": 0.0,
+  "total": 150,
+  "reused": 0,
+  "recomputed": 150,
+  "manifest_duplicate_ids": [],
+  "manifest_skipped_lines": 0
+}

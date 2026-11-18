@@ -1,0 +1,163 @@
+{
+  "verifier_version": "classify-1.0",
+  "classification_counts": {
+    "PASS": 48,
+    "REVIEW": 19,
+    "FAIL": 0
+  },
+  "audit": {
+    "total": 67,
+    "counts": {
+      "PASS": 48,
+      "REVIEW": 19,
+      "FAIL": 0
+    },
+    "duplicate_input_ids": [],
+    "invalid_id_prefix": [],
+    "unique_output_ids": 67,
+    "id_format_all_valid": true,
+    "root": "/data/data/com.termux/files/home/trpg/training/.bulk_gen/qa_runs/wave7a/raw",
+    "root_allowed": true
+  },
+  "reused": 0,
+  "recomputed": 67,
+  "skipped_score_lines": 0,
+  "skipped_semantic_lines": 0,
+  "manifest_duplicate_ids": [],
+  "manifest_skipped_lines": 0,
+  "review_or_fail_rows": [
+    {
+      "id": "gm-a-0008",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0012",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0009",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ]
+    },
+    {
+      "id": "world-0010",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ]
+    },
+    {
+      "id": "world-0011",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ]
+    },
+    {
+      "id": "world-0012",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ]
+    },
+    {
+      "id": "world-0013",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ]
+    },
+    {
+      "id": "world-0014",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ]
+    },
+    {
+      "id": "world-0015",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ]
+    },
+    {
+      "id": "world-0016",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ]
+    },
+    {
+      "id": "world-0017",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ]
+    },
+    {
+      "id": "world-0018",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ]
+    },
+    {
+      "id": "world-0019",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ]
+    },
+    {
+      "id": "world-0020",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ]
+    },
+    {
+      "id": "world-0021",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ]
+    },
+    {
+      "id": "world-0022",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ]
+    },
+    {
+      "id": "world-0023",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ]
+    },
+    {
+      "id": "world-0024",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ]
+    },
+    {
+      "id": "world-0025",
+      "verdict": "REVIEW",
+      "reasons": [
+        "unjudged_or_missing_semantic"
+      ]
+    }
+  ]
+}

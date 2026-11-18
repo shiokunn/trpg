@@ -1,0 +1,9 @@
+{"id": "ex-0026", "cause": "llm_only:fabrication", "python_categories": [], "llm_categories": ["fabrication"], "python_verdict": "pass", "final_verdict": "fail"}
+{"id": "ex-0029", "cause": "llm_only:fabrication", "python_categories": [], "llm_categories": ["fabrication"], "python_verdict": "pass", "final_verdict": "fail"}
+{"id": "ex-0030", "cause": "llm_only:fabrication", "python_categories": [], "llm_categories": ["fabrication"], "python_verdict": "pass", "final_verdict": "fail"}
+{"id": "ex-0033", "cause": "llm_only:fabrication", "python_categories": [], "llm_categories": ["fabrication"], "python_verdict": "pass", "final_verdict": "fail"}
+{"id": "ex-0037", "cause": "llm_only:fabrication", "python_categories": [], "llm_categories": ["fabrication"], "python_verdict": "pass", "final_verdict": "fail"}
+{"id": "ex-0041", "cause": "llm_only:fabrication", "python_categories": [], "llm_categories": ["fabrication"], "python_verdict": "pass", "final_verdict": "fail"}
+{"id": "ex-0060", "cause": "llm_only:fabrication", "python_categories": [], "llm_categories": ["fabrication"], "python_verdict": "pass", "final_verdict": "fail"}
+{"id": "ex-0064", "cause": "llm_only:contradiction", "python_categories": [], "llm_categories": ["contradiction"], "python_verdict": "pass", "final_verdict": "fail"}
+{"id": "ex-0081", "cause": "python_only:condition", "python_categories": ["condition"], "llm_categories": [], "python_verdict": "pass", "final_verdict": "pass"}

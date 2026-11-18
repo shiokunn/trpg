@@ -1,0 +1,59 @@
+{"id": "ex-0591", "labels": [{"category": "fabrication", "confidence": 0.7, "evidence": "npcMemories(n1)『その札は昔、湯穴への目印として使われていた』は原文になく、原文は『どちらも山の湯穴へ通じる道を指していた』のみで過去の用途・使用事実は記載されていない"}]}
+{"id": "ex-0592", "labels": [{"category": "review", "confidence": 0.6, "evidence": "LOCATION_CHANGEのreason『遺跡の入口から地下墓所へ降りた』は原文『ザンは地下墓所へ降りた』に無い出発地（遺跡の入口）の付加。推測か捏造か曖昧"}]}
+{"id": "ex-0593", "labels": [{"category": "review", "confidence": 0.55, "evidence": "npcMemories(n2)にisSecret=trueを付与し『気にしない』という態度も追加。原文は『ミオは距離を置こうとした。互いに言葉を交わさなかった』のみで秘密や当の感覚の記述なし"}]}
+{"id": "ex-0594", "labels": []}
+{"id": "ex-0595", "labels": [{"category": "review", "confidence": 0.6, "evidence": "npcMemories(n1)『祖父からその話を聞いたが、自分は見ていない』は原文になく、伝聞元（祖父）と本人の未見という事実が新たに付加されている"}]}
+{"id": "ex-0596", "labels": [{"category": "review", "confidence": 0.65, "evidence": "LOCATION_CHANGEのreason『地下広場から地下水脈へ降りた』とNPC_RELATION_DELTAのreason『親方と意見が割れた』は原文になく、出発地と信頼低下の原因が捏造されている可能性（妥当な推測かどうか曖昧）"}]}
+{"id": "ex-0597", "labels": [{"category": "review", "confidence": 0.6, "evidence": "QUEST_OBJECTIVE_PROGRESSのreason『執事から話を聞いた』は原文『エルは大広間で城主を救う目標を一つ進めた』に無い成因の付加"}]}
+{"id": "ex-0598", "labels": []}
+{"id": "ex-0599", "labels": []}
+{"id": "ex-0600", "labels": []}
+{"id": "ex-0601", "labels": []}
+{"id": "ex-0602", "labels": []}
+{"id": "ex-0603", "labels": []}
+{"id": "ex-0604", "labels": []}
+{"id": "ex-0605", "labels": []}
+{"id": "ex-0606", "labels": []}
+{"id": "ex-0607", "labels": []}
+{"id": "ex-0608", "labels": []}
+{"id": "ex-0609", "labels": []}
+{"id": "ex-0610", "labels": []}
+{"id": "ex-0611", "labels": []}
+{"id": "ex-0612", "labels": []}
+{"id": "ex-0613", "labels": []}
+{"id": "ex-0614", "labels": []}
+{"id": "ex-0615", "labels": []}
+{"id": "ex-0616", "labels": []}
+{"id": "ex-0617", "labels": []}
+{"id": "ex-0618", "labels": []}
+{"id": "ex-0619", "labels": []}
+{"id": "ex-0620", "labels": []}
+{"id": "ex-0621", "labels": []}
+{"id": "ex-0622", "labels": []}
+{"id": "ex-0623", "labels": []}
+{"id": "ex-0624", "labels": []}
+{"id": "ex-0625", "labels": []}
+{"id": "ex-0626", "labels": []}
+{"id": "ex-0627", "labels": []}
+{"id": "ex-0628", "labels": []}
+{"id": "ex-0629", "labels": []}
+{"id": "ex-0630", "labels": []}
+{"id": "ex-0631", "labels": []}
+{"id": "ex-0632", "labels": []}
+{"id": "ex-0633", "labels": []}
+{"id": "ex-0634", "labels": []}
+{"id": "ex-0635", "labels": []}
+{"id": "ex-0636", "labels": []}
+{"id": "ex-0637", "labels": []}
+{"id": "ex-0638", "labels": []}
+{"id": "ex-0639", "labels": []}
+{"id": "ex-0640", "labels": []}
+{"id": "ex-0641", "labels": []}
+{"id": "ex-0642", "labels": []}
+{"id": "ex-0643", "labels": []}
+{"id": "ex-0644", "labels": []}
+{"id": "ex-0645", "labels": []}
+{"id": "ex-0646", "labels": []}
+{"id": "ex-0647", "labels": []}
+{"id": "ex-0648", "labels": []}
+{"id": "ex-0649", "labels": []}

@@ -1,0 +1,67 @@
+{
+  "run_dir": "/data/data/com.termux/files/home/trpg/training/.bulk_gen/qa_runs/wave5",
+  "source_snapshot": "snap-0007-20261117T120340Z",
+  "generated_at": "2026-11-17T12:08:37+00:00",
+  "counts": {
+    "PASS": 35,
+    "REVIEW": 1,
+    "FAIL": 0
+  },
+  "total": 36,
+  "pass_rate_pct": 97.2,
+  "non_pass_count": 1,
+  "problematic_ids": [
+    {
+      "audit_id": "gm-a-0013",
+      "original_id": "bgm11-0037",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    }
+  ],
+  "reason_counts": {
+    "fallback": 1
+  },
+  "id_format_all_valid": true,
+  "duplicate_input_ids": [],
+  "invalid_id_prefix": [],
+  "manifest_duplicate_ids": [],
+  "verify_sft_errors": 0,
+  "verify_sft_error_samples": [],
+  "verify_sft_files": {
+    "sft_synthetic_json.jsonl": {
+      "rows": 35,
+      "unique": 35,
+      "role_shapes": {
+        "system;user;assistant": 11,
+        "system;user;assistant;user;assistant": 12,
+        "system;user;assistant;user;assistant;user;assistant": 12
+      },
+      "bytes": 245223
+    },
+    "sft_synthetic_extraction.jsonl": {
+      "rows": 0,
+      "unique": 0,
+      "role_shapes": {},
+      "bytes": 0
+    }
+  },
+  "isolated_sft": {
+    "pass_ids": 35,
+    "rows_written": 35,
+    "by_file": {
+      "sft_synthetic_json.jsonl": 35,
+      "sft_synthetic_extraction.jsonl": 0
+    },
+    "written_ids_all_in_pass": true,
+    "pass_ids_not_found_in_raw": [],
+    "non_pass_records_excluded": 1,
+    "official_files_touched": false
+  },
+  "conclusion": "PASS品のみ隔離SFTに含まれ、形式検証エラー0。正式データへの統合は全Wave監査完了後。"
+}

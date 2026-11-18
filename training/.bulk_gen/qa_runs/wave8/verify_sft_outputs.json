@@ -1,0 +1,46 @@
+{
+  "files": {
+    "sft_synthetic_json.jsonl": {
+      "rows": 953,
+      "unique": 953,
+      "role_shapes": {
+        "system;user;assistant": 441,
+        "system;user;assistant;user;assistant": 260,
+        "system;user;assistant;user;assistant;user;assistant": 252
+      },
+      "bytes": 6518412
+    },
+    "sft_synthetic_extraction.jsonl": {
+      "rows": 701,
+      "unique": 632,
+      "role_shapes": {
+        "system;user;assistant": 701
+      },
+      "bytes": 1446751
+    }
+  },
+  "total_rows": 1654,
+  "errors": 69,
+  "error_samples": [
+    "sft_synthetic_extraction.jsonl:55: 完全一致重複",
+    "sft_synthetic_extraction.jsonl:59: 完全一致重複",
+    "sft_synthetic_extraction.jsonl:61: 完全一致重複",
+    "sft_synthetic_extraction.jsonl:67: 完全一致重複",
+    "sft_synthetic_extraction.jsonl:68: 完全一致重複",
+    "sft_synthetic_extraction.jsonl:69: 完全一致重複",
+    "sft_synthetic_extraction.jsonl:72: 完全一致重複",
+    "sft_synthetic_extraction.jsonl:163: 完全一致重複",
+    "sft_synthetic_extraction.jsonl:203: 完全一致重複",
+    "sft_synthetic_extraction.jsonl:216: 完全一致重複",
+    "sft_synthetic_extraction.jsonl:256: 完全一致重複",
+    "sft_synthetic_extraction.jsonl:299: 完全一致重複",
+    "sft_synthetic_extraction.jsonl:300: 完全一致重複",
+    "sft_synthetic_extraction.jsonl:301: 完全一致重複",
+    "sft_synthetic_extraction.jsonl:302: 完全一致重複",
+    "sft_synthetic_extraction.jsonl:303: 完全一致重複",
+    "sft_synthetic_extraction.jsonl:304: 完全一致重複",
+    "sft_synthetic_extraction.jsonl:305: 完全一致重複",
+    "sft_synthetic_extraction.jsonl:306: 完全一致重複",
+    "sft_synthetic_extraction.jsonl:307: 完全一致重複"
+  ]
+}

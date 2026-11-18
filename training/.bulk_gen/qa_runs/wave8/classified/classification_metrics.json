@@ -1,0 +1,695 @@
+{
+  "verifier_version": "classify-1.0",
+  "classification_counts": {
+    "PASS": 1654,
+    "REVIEW": 69,
+    "FAIL": 26
+  },
+  "audit": {
+    "total": 1749,
+    "counts": {
+      "PASS": 1654,
+      "REVIEW": 69,
+      "FAIL": 26
+    },
+    "duplicate_input_ids": [],
+    "invalid_id_prefix": [],
+    "unique_output_ids": 1749,
+    "id_format_all_valid": true,
+    "root": "/data/data/com.termux/files/home/trpg/training/.bulk_gen/qa_runs/wave8/raw",
+    "root_allowed": true
+  },
+  "reused": 0,
+  "recomputed": 1749,
+  "skipped_score_lines": 0,
+  "skipped_semantic_lines": 0,
+  "manifest_duplicate_ids": [],
+  "manifest_skipped_lines": 0,
+  "review_or_fail_rows": [
+    {
+      "id": "ex-0022",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0070",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0071",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0072",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0078",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0094",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0095",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0106",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0154",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0159",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0160",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0161",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0235",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0236",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0293",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0347",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0362",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0394",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0398",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0401",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0405",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0409",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0428",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0521",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0523",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0526",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0529",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0531",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0538",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0561",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0580",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0584",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0591",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0592",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0593",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0595",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0596",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0597",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0609",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0653",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0666",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0689",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0706",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0707",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0708",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0719",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0720",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0722",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0723",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0724",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0725",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0726",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0727",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0728",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0730",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0734",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0745",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "gm-a-0004",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0006",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "gm-a-0007",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0009",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "gm-a-0012",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0062",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0099",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0131",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0133",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0164",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "gm-a-0184",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0214",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0222",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0415",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "gm-a-0417",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "gm-a-0452",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0467",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0468",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0476",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0603",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0608",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0622",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0658",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0673",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0699",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "gm-a-0717",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "gm-a-0720",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "gm-a-0741",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0747",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0750",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "gm-a-0758",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0013",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "world-0046",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0057",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0092",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "world-0103",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0118",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0126",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    }
+  ]
+}
