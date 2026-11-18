@@ -1,0 +1,123 @@
+{
+  "gold_cases": 0,
+  "per_category": {
+    "fabrication": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "negation": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "condition": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "number": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "contradiction": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    }
+  },
+  "precision": 0.0,
+  "recall": 0.0,
+  "f1": 0.0,
+  "disagreements": 2,
+  "disagreement_causes": {
+    "llm_only:contradiction": 2
+  },
+  "disagreement_rows": [
+    {
+      "id": "gm-a-0030",
+      "cause": "llm_only:contradiction",
+      "python_categories": [],
+      "llm_categories": [
+        "contradiction"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "review"
+    },
+    {
+      "id": "world-0071",
+      "cause": "llm_only:contradiction",
+      "python_categories": [],
+      "llm_categories": [
+        "contradiction"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "review"
+    }
+  ],
+  "review_reasons": {
+    "llm_review": 21,
+    "llm_low_confidence": 2
+  },
+  "review_rate": 0.069,
+  "unjudged": 0,
+  "unjudged_rate": 0.0,
+  "api_errors": 0,
+  "api_error_rate": 0.0,
+  "total": 333,
+  "reused": 0,
+  "recomputed": 333,
+  "manifest_duplicate_ids": [],
+  "manifest_skipped_lines": 0
+}

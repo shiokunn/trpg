@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-18T13:04:59+00:00",
+  "generated_at": "2026-11-18T13:18:02+00:00",
   "target_records": 10000,
   "waves": [
     {
@@ -272,12 +272,47 @@
         "bgm24-0030",
         "bwd02-0003"
       ]
+    },
+    {
+      "wave": "wave9",
+      "snapshot": "snap-0012-20261118T130810Z",
+      "total": 333,
+      "PASS": 310,
+      "REVIEW": 23,
+      "FAIL": 0,
+      "pass_rate_pct": 93.1,
+      "verify_errors": 0,
+      "problem_ids": [
+        "bgm17-0055",
+        "bgm17-0075",
+        "bgm17-0084",
+        "bgm22-0011",
+        "bgm22-0048",
+        "bgm23-0001",
+        "bgm23-0002",
+        "bgm23-0039",
+        "bgm23-0047",
+        "bgm23-0164",
+        "bgm25-0002",
+        "bgm25-0037",
+        "bgm25-0055",
+        "bwd11-0032",
+        "bwd12-0007",
+        "bwd12-0009",
+        "bwd12-0013",
+        "bwd12-0014",
+        "bwd12-0016",
+        "bwd12-0026",
+        "bwd12-0027",
+        "bwd13-0001",
+        "bwd13-0004"
+      ]
     }
   ],
-  "total_audited": 2674,
-  "total_pass": 2511,
-  "overall_pass_rate_pct": 93.9,
-  "total_non_pass": 163,
+  "total_audited": 3007,
+  "total_pass": 2821,
+  "overall_pass_rate_pct": 93.8,
+  "total_non_pass": 186,
   "verify_errors_total": 69,
   "official_data_touched": false
 }
