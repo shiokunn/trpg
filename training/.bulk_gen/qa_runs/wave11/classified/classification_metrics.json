@@ -1,0 +1,674 @@
+{
+  "verifier_version": "classify-1.0",
+  "classification_counts": {
+    "PASS": 1037,
+    "REVIEW": 31,
+    "FAIL": 61
+  },
+  "audit": {
+    "total": 1129,
+    "counts": {
+      "PASS": 1037,
+      "REVIEW": 31,
+      "FAIL": 61
+    },
+    "duplicate_input_ids": [],
+    "invalid_id_prefix": [],
+    "unique_output_ids": 1129,
+    "id_format_all_valid": true,
+    "root": "/data/data/com.termux/files/home/trpg/training/.bulk_gen/qa_runs/wave11/raw",
+    "root_allowed": true
+  },
+  "reused": 0,
+  "recomputed": 1129,
+  "skipped_score_lines": 0,
+  "skipped_semantic_lines": 0,
+  "manifest_duplicate_ids": [],
+  "manifest_skipped_lines": 0,
+  "review_or_fail_rows": [
+    {
+      "id": "ex-0004",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0012",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0064",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0089",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0121",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0124",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0131",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0135",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0138",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0155",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0168",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0176",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0196",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0202",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0203",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0209",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0210",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0211",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0230",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0235",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0280",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0282",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0283",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0284",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0285",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0286",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0287",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0289",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0290",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0292",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0294",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0295",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0296",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0298",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0360",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0365",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0369",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0372",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0373",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0375",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0377",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0452",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0453",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0470",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0474",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0479",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0522",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0550",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "gm-a-0001",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "gm-a-0004",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "gm-a-0146",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0160",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0163",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0208",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0230",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0059",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0077",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0141",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0142",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0143",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0144",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0145",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0146",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0147",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0148",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0149",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0150",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0151",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0152",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0153",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0154",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0155",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0156",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0157",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0158",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0159",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0160",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0161",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0162",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0163",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0164",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0165",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0166",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0167",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0168",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0169",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0170",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0171",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0172",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0173",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0174",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    },
+    {
+      "id": "world-0175",
+      "verdict": "FAIL",
+      "reasons": [
+        "python_red_flags:SCHEMA_ERROR"
+      ]
+    }
+  ]
+}

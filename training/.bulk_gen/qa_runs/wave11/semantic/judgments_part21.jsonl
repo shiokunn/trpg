@@ -1,0 +1,50 @@
+{"id":"world-0117","labels":[]}
+{"id":"world-0118","labels":[]}
+{"id":"world-0119","labels":[]}
+{"id":"world-0120","labels":[]}
+{"id":"world-0121","labels":[]}
+{"id":"world-0122","labels":[]}
+{"id":"world-0123","labels":[]}
+{"id":"world-0124","labels":[]}
+{"id":"world-0125","labels":[]}
+{"id":"world-0126","labels":[]}
+{"id":"world-0127","labels":[]}
+{"id":"world-0128","labels":[]}
+{"id":"world-0129","labels":[]}
+{"id":"world-0130","labels":[]}
+{"id":"world-0131","labels":[]}
+{"id":"world-0132","labels":[]}
+{"id":"world-0133","labels":[]}
+{"id":"world-0134","labels":[]}
+{"id":"world-0135","labels":[]}
+{"id":"world-0136","labels":[]}
+{"id":"world-0137","labels":[]}
+{"id":"world-0138","labels":[]}
+{"id":"world-0139","labels":[]}
+{"id":"world-0140","labels":[]}
+{"id":"world-0141","labels":[{"category":"review","confidence":0.7,"evidence":"geography「郊外には流れの異なる支流がeveralある」— 原文にない英語片「everal」が混入し文が壊れている"}]}
+{"id":"world-0142","labels":[{"category":"review","confidence":0.7,"evidence":"history「一番 ambitiousな鵜が石を飲み込んだまま戻らず」、techMagic「石の記憶は '--' ではなく、表面の傷として残る」— 原文にない「ambitious」「'--'」が混入"}]}
+{"id":"world-0143","labels":[{"category":"review","confidence":0.75,"evidence":"setting「 recent に浮上した」、geography「麓に villagers の集落」、premise「returned った鷹の羽」— 原文にない英語語が三か所混入"}]}
+{"id":"world-0144","labels":[]}
+{"id":"world-0145","labels":[{"category":"review","confidence":0.7,"evidence":"techMagic「牛を静止させるozilla具が使われる」— 原文にない「ozilla」が混入"}]}
+{"id":"world-0146","labels":[{"category":"review","confidence":0.7,"evidence":"premise「判事は古い契りを shuff ることを望んでいたという」、openingHook「The 貝は割れた」— 原文にない英語語が混入"}]}
+{"id":"world-0147","labels":[]}
+{"id":"world-0148","labels":[{"category":"review","confidence":0.7,"evidence":"npcs「静かだが calculation 高い」— 原文にない「calculation」が混入"}]}
+{"id":"world-0149","labels":[{"category":"review","confidence":0.7,"evidence":"problem「town の決定が清書で変えられ」、objective「辨別し」、openingHook「字が违うことを诉えている」— 原文にない英語・簡体字が混入"}]}
+{"id":"world-0150","labels":[]}
+{"id":"world-0151","labels":[]}
+{"id":"world-0152","labels":[]}
+{"id":"world-0153","labels":[{"category":"review","confidence":0.7,"evidence":"problem「町の牢に innocent な者が入っている」— 原文にない「innocent」が混入"}]}
+{"id":"world-0154","labels":[]}
+{"id":"world-0155","labels":[{"category":"review","confidence":0.7,"evidence":"history「村は焼き栗に year を託してきた」— 原文にない「year」が混入"}]}
+{"id":"world-0156","labels":[{"category":"review","confidence":0.7,"evidence":"geography「 дорога に選別の台が並ぶ」— 原文にないロシア語「дорога」が混入"}]}
+{"id":"world-0157","labels":[{"category":"review","confidence":0.7,"evidence":"description「冷たい山風が Take を揺らす」、connections「巫女のikt」— 原文にない混入トークンがある"}]}
+{"id":"world-0158","labels":[]}
+{"id":"world-0159","labels":[{"category":"review","confidence":0.7,"evidence":"history「童子がどこから also 姿を消し」、socialStructure「-commerce が衰える」— 原文にない混入トークンがある"}]}
+{"id":"world-0160","labels":[{"category":"review","confidence":0.7,"evidence":"setting「Packetを包んだ者を違う場所へ運ぶ」、problem「増えてdashboardが混乱している」— 原文にない混入トークンがある"}]}
+{"id":"world-0161","labels":[{"category":"review","confidence":0.7,"evidence":"techMagic「綱はSpecialな麻を撚って作り」— 原文にない「Special」が混入"}]}
+{"id":"world-0162","labels":[{"category":"review","confidence":0.7,"evidence":"techMagic「影を-write直すと予告を消せる」— 原文にない「-write」が混入"}]}
+{"id":"world-0163","labels":[{"category":"review","confidence":0.7,"evidence":"geography「雀의巣が屋根に多い」、objective「雀が种を運ばない原因」— 原文にない韓国語・簡体字が混入"}]}
+{"id":"world-0164","labels":[{"category":"review","confidence":0.7,"evidence":"premise「糠 mix には、昨夜の米のとぎ汁が混じっている」— 原文にない「mix」が混入"}]}
+{"id":"world-0165","labels":[{"category":"review","confidence":0.7,"evidence":"npcs「葛師  root野」— 原文にない「root」が混入"}]}
+{"id":"world-0166","labels":[]}

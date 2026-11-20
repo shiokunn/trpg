@@ -1,0 +1,497 @@
+{
+  "gold_cases": 0,
+  "per_category": {
+    "fabrication": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "negation": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "condition": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "number": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "contradiction": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    }
+  },
+  "precision": 0.0,
+  "recall": 0.0,
+  "f1": 0.0,
+  "disagreements": 38,
+  "disagreement_causes": {
+    "llm_only:fabrication": 21,
+    "python_only:number": 10,
+    "mixed": 4,
+    "python_only:negation": 2,
+    "llm_only:negation": 1
+  },
+  "disagreement_rows": [
+    {
+      "id": "ex-0012",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0121",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0124",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0131",
+      "cause": "python_only:number",
+      "python_categories": [
+        "number"
+      ],
+      "llm_categories": [],
+      "python_verdict": "pass",
+      "final_verdict": "pass"
+    },
+    {
+      "id": "ex-0138",
+      "cause": "mixed",
+      "python_categories": [
+        "number"
+      ],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0196",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0202",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0203",
+      "cause": "python_only:number",
+      "python_categories": [
+        "number"
+      ],
+      "llm_categories": [],
+      "python_verdict": "pass",
+      "final_verdict": "pass"
+    },
+    {
+      "id": "ex-0210",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0211",
+      "cause": "python_only:number",
+      "python_categories": [
+        "number"
+      ],
+      "llm_categories": [],
+      "python_verdict": "pass",
+      "final_verdict": "pass"
+    },
+    {
+      "id": "ex-0230",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0235",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0280",
+      "cause": "python_only:negation",
+      "python_categories": [
+        "negation"
+      ],
+      "llm_categories": [],
+      "python_verdict": "pass",
+      "final_verdict": "pass"
+    },
+    {
+      "id": "ex-0282",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0283",
+      "cause": "python_only:number",
+      "python_categories": [
+        "number"
+      ],
+      "llm_categories": [],
+      "python_verdict": "pass",
+      "final_verdict": "pass"
+    },
+    {
+      "id": "ex-0284",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0285",
+      "cause": "python_only:number",
+      "python_categories": [
+        "number"
+      ],
+      "llm_categories": [],
+      "python_verdict": "pass",
+      "final_verdict": "pass"
+    },
+    {
+      "id": "ex-0286",
+      "cause": "python_only:number",
+      "python_categories": [
+        "number"
+      ],
+      "llm_categories": [],
+      "python_verdict": "pass",
+      "final_verdict": "pass"
+    },
+    {
+      "id": "ex-0289",
+      "cause": "python_only:number",
+      "python_categories": [
+        "number"
+      ],
+      "llm_categories": [],
+      "python_verdict": "pass",
+      "final_verdict": "review"
+    },
+    {
+      "id": "ex-0290",
+      "cause": "mixed",
+      "python_categories": [
+        "number"
+      ],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0292",
+      "cause": "mixed",
+      "python_categories": [
+        "number"
+      ],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0295",
+      "cause": "python_only:number",
+      "python_categories": [
+        "number"
+      ],
+      "llm_categories": [],
+      "python_verdict": "pass",
+      "final_verdict": "pass"
+    },
+    {
+      "id": "ex-0298",
+      "cause": "python_only:number",
+      "python_categories": [
+        "number"
+      ],
+      "llm_categories": [],
+      "python_verdict": "pass",
+      "final_verdict": "pass"
+    },
+    {
+      "id": "ex-0360",
+      "cause": "python_only:negation",
+      "python_categories": [
+        "negation"
+      ],
+      "llm_categories": [],
+      "python_verdict": "pass",
+      "final_verdict": "pass"
+    },
+    {
+      "id": "ex-0365",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0369",
+      "cause": "python_only:number",
+      "python_categories": [
+        "number"
+      ],
+      "llm_categories": [],
+      "python_verdict": "pass",
+      "final_verdict": "pass"
+    },
+    {
+      "id": "ex-0372",
+      "cause": "mixed",
+      "python_categories": [
+        "number"
+      ],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0373",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0377",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0452",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0453",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0470",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0474",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0479",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0522",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0550",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "gm-a-0001",
+      "cause": "llm_only:negation",
+      "python_categories": [],
+      "llm_categories": [
+        "negation"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "gm-a-0004",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    }
+  ],
+  "review_reasons": {
+    "llm_review": 39,
+    "python_suppressed:NEGATION_INVERSION": 135,
+    "python_suppressed:CONDITION_LOST": 68,
+    "python_suppressed:FABRICATED_NUMBER": 26
+  },
+  "review_rate": 0.018,
+  "unjudged": 0,
+  "unjudged_rate": 0.0,
+  "api_errors": 0,
+  "api_error_rate": 0.0,
+  "total": 1129,
+  "reused": 0,
+  "recomputed": 1129,
+  "manifest_duplicate_ids": [],
+  "manifest_skipped_lines": 0
+}
