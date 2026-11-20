@@ -1,0 +1,755 @@
+{
+  "run_dir": "/data/data/com.termux/files/home/trpg/training/.bulk_gen/qa_runs/wave12",
+  "source_snapshot": "snap-0016-20261120T232123Z",
+  "generated_at": "2026-11-20T23:36:28+00:00",
+  "counts": {
+    "PASS": 1225,
+    "REVIEW": 33,
+    "FAIL": 25
+  },
+  "total": 1283,
+  "pass_rate_pct": 95.5,
+  "non_pass_count": 58,
+  "problematic_ids": [
+    {
+      "audit_id": "ex-0044",
+      "original_id": "bex18-0044",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "ex-0058",
+      "original_id": "bex18-0058",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "ex-0089",
+      "original_id": "bex25-0009",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "pass",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "ex-0119",
+      "original_id": "bex25-0039",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "ex-0125",
+      "original_id": "bex25-0045",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "ex-0129",
+      "original_id": "bex25-0049",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "ex-0136",
+      "original_id": "bex25-0056",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "ex-0153",
+      "original_id": "bex25-0073",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "pass",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "gm-a-0055",
+      "original_id": "bgm35-0001",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "gm-a-0295",
+      "original_id": "bgm41-0073",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "gm-a-0345",
+      "original_id": "bgm42-0057",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "gm-a-0349",
+      "original_id": "bgm42-0073",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0001",
+      "original_id": "bwd28-0001",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0018",
+      "original_id": "bwd28-0018",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0020",
+      "original_id": "bwd28-0020",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0023",
+      "original_id": "bwd28-0023",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0027",
+      "original_id": "bwd28-0027",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0058",
+      "original_id": "bwd33-0023",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0071",
+      "original_id": "bwd34-0001",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0256",
+      "original_id": "bwd39-0011",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0261",
+      "original_id": "bwd39-0016",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0277",
+      "original_id": "bwd39-0032",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0340",
+      "original_id": "bwd41-0025",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0342",
+      "original_id": "bwd41-0027",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0349",
+      "original_id": "bwd41-0034",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0353",
+      "original_id": "bwd42-0003",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0355",
+      "original_id": "bwd42-0005",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0357",
+      "original_id": "bwd42-0007",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0359",
+      "original_id": "bwd42-0009",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0534",
+      "original_id": "bwd47-0009",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0605",
+      "original_id": "bwd49-0010",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0609",
+      "original_id": "bwd49-0014",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0631",
+      "original_id": "bwd50-0001",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "ex-0050",
+      "original_id": "bex18-0050",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "ex-0053",
+      "original_id": "bex18-0053",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "ex-0130",
+      "original_id": "bex25-0050",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "ex-0209",
+      "original_id": "bex26-0049",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "gm-a-0021",
+      "original_id": "bgm33-0057",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0011",
+      "original_id": "bwd28-0011",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0145",
+      "original_id": "bwd36-0005",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0263",
+      "original_id": "bwd39-0018",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0279",
+      "original_id": "bwd39-0034",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0310",
+      "original_id": "bwd40-0030",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0311",
+      "original_id": "bwd40-0031",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0330",
+      "original_id": "bwd41-0015",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0387",
+      "original_id": "bwd43-0002",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0396",
+      "original_id": "bwd43-0011",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0400",
+      "original_id": "bwd43-0015",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0412",
+      "original_id": "bwd43-0027",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0414",
+      "original_id": "bwd43-0029",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0447",
+      "original_id": "bwd44-0027",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0456",
+      "original_id": "bwd45-0001",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0530",
+      "original_id": "bwd47-0005",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0532",
+      "original_id": "bwd47-0007",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0547",
+      "original_id": "bwd47-0022",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0549",
+      "original_id": "bwd47-0024",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0602",
+      "original_id": "bwd49-0007",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0620",
+      "original_id": "bwd49-0025",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    }
+  ],
+  "reason_counts": {
+    "fallback": 30,
+    "semantic_final_verdict=fail": 25,
+    "python_semantic_category_mismatch": 3
+  },
+  "id_format_all_valid": true,
+  "duplicate_input_ids": [],
+  "invalid_id_prefix": [],
+  "manifest_duplicate_ids": [],
+  "verify_sft_errors": 0,
+  "verify_sft_error_samples": [],
+  "verify_sft_files": {
+    "sft_synthetic_json.jsonl": {
+      "rows": 997,
+      "unique": 997,
+      "role_shapes": {
+        "system;user;assistant": 747,
+        "system;user;assistant;user;assistant": 126,
+        "system;user;assistant;user;assistant;user;assistant": 124
+      },
+      "bytes": 7251530
+    },
+    "sft_synthetic_extraction.jsonl": {
+      "rows": 228,
+      "unique": 228,
+      "role_shapes": {
+        "system;user;assistant": 228
+      },
+      "bytes": 493965
+    }
+  },
+  "isolated_sft": {
+    "pass_ids": 1225,
+    "rows_written": 1225,
+    "by_file": {
+      "sft_synthetic_json.jsonl": 997,
+      "sft_synthetic_extraction.jsonl": 228
+    },
+    "written_ids_all_in_pass": true,
+    "pass_ids_not_found_in_raw": [],
+    "non_pass_records_excluded": 58,
+    "official_files_touched": false
+  },
+  "conclusion": "PASS品のみ隔離SFTに含まれ、形式検証エラー0。正式データへの統合は全Wave監査完了後。"
+}

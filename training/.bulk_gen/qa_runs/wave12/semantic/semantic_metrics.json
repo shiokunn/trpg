@@ -1,0 +1,394 @@
+{
+  "gold_cases": 0,
+  "per_category": {
+    "fabrication": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "negation": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "condition": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "number": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "contradiction": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    }
+  },
+  "precision": 0.0,
+  "recall": 0.0,
+  "f1": 0.0,
+  "disagreements": 28,
+  "disagreement_causes": {
+    "llm_only:fabrication": 2,
+    "mixed": 1,
+    "python_only:number": 2,
+    "llm_only:contradiction": 15,
+    "llm_only:negation": 2,
+    "llm_only:condition": 5,
+    "llm_only:number": 1
+  },
+  "disagreement_rows": [
+    {
+      "id": "ex-0050",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0053",
+      "cause": "mixed",
+      "python_categories": [
+        "number"
+      ],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0089",
+      "cause": "python_only:number",
+      "python_categories": [
+        "number"
+      ],
+      "llm_categories": [],
+      "python_verdict": "pass",
+      "final_verdict": "pass"
+    },
+    {
+      "id": "ex-0130",
+      "cause": "llm_only:contradiction",
+      "python_categories": [],
+      "llm_categories": [
+        "contradiction"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0153",
+      "cause": "python_only:number",
+      "python_categories": [
+        "number"
+      ],
+      "llm_categories": [],
+      "python_verdict": "pass",
+      "final_verdict": "pass"
+    },
+    {
+      "id": "ex-0209",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "gm-a-0021",
+      "cause": "llm_only:contradiction",
+      "python_categories": [],
+      "llm_categories": [
+        "contradiction"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0011",
+      "cause": "llm_only:contradiction",
+      "python_categories": [],
+      "llm_categories": [
+        "contradiction"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0145",
+      "cause": "llm_only:negation",
+      "python_categories": [],
+      "llm_categories": [
+        "negation"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0261",
+      "cause": "llm_only:contradiction",
+      "python_categories": [],
+      "llm_categories": [
+        "contradiction"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "review"
+    },
+    {
+      "id": "world-0263",
+      "cause": "llm_only:contradiction",
+      "python_categories": [],
+      "llm_categories": [
+        "contradiction"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0279",
+      "cause": "llm_only:contradiction",
+      "python_categories": [],
+      "llm_categories": [
+        "contradiction"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0310",
+      "cause": "llm_only:negation",
+      "python_categories": [],
+      "llm_categories": [
+        "negation"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0311",
+      "cause": "llm_only:contradiction",
+      "python_categories": [],
+      "llm_categories": [
+        "contradiction"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0330",
+      "cause": "llm_only:contradiction",
+      "python_categories": [],
+      "llm_categories": [
+        "contradiction"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0387",
+      "cause": "llm_only:condition",
+      "python_categories": [],
+      "llm_categories": [
+        "condition"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0396",
+      "cause": "llm_only:condition",
+      "python_categories": [],
+      "llm_categories": [
+        "condition"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0400",
+      "cause": "llm_only:condition",
+      "python_categories": [],
+      "llm_categories": [
+        "condition"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0412",
+      "cause": "llm_only:condition",
+      "python_categories": [],
+      "llm_categories": [
+        "condition"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0414",
+      "cause": "llm_only:condition",
+      "python_categories": [],
+      "llm_categories": [
+        "condition"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0447",
+      "cause": "llm_only:contradiction",
+      "python_categories": [],
+      "llm_categories": [
+        "contradiction"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0456",
+      "cause": "llm_only:number",
+      "python_categories": [],
+      "llm_categories": [
+        "number"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0530",
+      "cause": "llm_only:contradiction",
+      "python_categories": [],
+      "llm_categories": [
+        "contradiction"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0532",
+      "cause": "llm_only:contradiction",
+      "python_categories": [],
+      "llm_categories": [
+        "contradiction"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0547",
+      "cause": "llm_only:contradiction",
+      "python_categories": [],
+      "llm_categories": [
+        "contradiction"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0549",
+      "cause": "llm_only:contradiction",
+      "python_categories": [],
+      "llm_categories": [
+        "contradiction"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0602",
+      "cause": "llm_only:contradiction",
+      "python_categories": [],
+      "llm_categories": [
+        "contradiction"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0620",
+      "cause": "llm_only:contradiction",
+      "python_categories": [],
+      "llm_categories": [
+        "contradiction"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    }
+  ],
+  "review_reasons": {
+    "python_suppressed:CONDITION_LOST": 32,
+    "python_suppressed:NEGATION_INVERSION": 57,
+    "llm_review": 30,
+    "python_suppressed:FABRICATED_NUMBER": 2,
+    "llm_low_confidence": 1
+  },
+  "review_rate": 0.024,
+  "unjudged": 0,
+  "unjudged_rate": 0.0,
+  "api_errors": 0,
+  "api_error_rate": 0.0,
+  "total": 1283,
+  "reused": 0,
+  "recomputed": 1283,
+  "manifest_duplicate_ids": [],
+  "manifest_skipped_lines": 0
+}
