@@ -1,14 +1,23 @@
 package io.github.shiokunn.trpg.ui.game
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -17,10 +26,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -42,12 +50,19 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.contentDescription
@@ -142,6 +157,7 @@ private fun GameContent(
     val location = current.locations.firstOrNull { it.id == current.session.currentLocationId }
     val character = current.character
     val hasNarrative = chat.any { it.role == ChatRole.GM }
+    val latestGmId = chat.lastOrNull { it.role == ChatRole.GM }?.id
     val recent = chat.takeLast(6)
     val busy = turn.running
     val view = LocalView.current
@@ -237,7 +253,12 @@ private fun GameContent(
 
         if (hasNarrative) {
             items(recent, key = { it.id }) { message ->
-                ChatMessageRow(message)
+                // Only the freshly generated GM message fades in; older messages stay put.
+                if (message.role == ChatRole.GM && message.id == latestGmId) {
+                    FadeInContent { ChatMessageRow(message) }
+                } else {
+                    ChatMessageRow(message)
+                }
             }
         }
 
@@ -245,6 +266,7 @@ private fun GameContent(
             item {
                 StreamingCard(
                     phase = turn.phase,
+                    generatedTokens = turn.generatedTokens,
                     cancelling = turn.cancelling,
                     onCancel = onCancel,
                 )
@@ -261,15 +283,31 @@ private fun GameContent(
             }
         }
 
-        if (!busy && hasNarrative && turn.error == null && choices.isNotEmpty() &&
+        val showChoices = !busy && hasNarrative && turn.error == null && choices.isNotEmpty() &&
             current.session.activeCombat == null
-        ) {
-            items(choices, key = { it.id }) { choice ->
-                ChoiceButton(
-                    choice = choice,
-                    enabled = modelReady && !busy,
-                    onClick = { onChoose(choice) },
-                )
+        val choicesKey = sceneTitle + "|" + choices.joinToString { it.id + ":" + it.text }
+        item {
+            key(choicesKey) {
+                AnimatedVisibility(
+                    visible = showChoices,
+                    enter = expandVertically(
+                        animationSpec = tween(
+                            durationMillis = 698,
+                            easing = FastOutSlowInEasing,
+                        ),
+                    ) + fadeIn(animationSpec = tween(durationMillis = 698, easing = FastOutSlowInEasing)),
+                    exit = shrinkVertically() + fadeOut(),
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        choices.forEach { choice ->
+                            ChoiceButton(
+                                choice = choice,
+                                enabled = modelReady && !busy,
+                                onClick = { onChoose(choice) },
+                            )
+                        }
+                    }
+                }
             }
         }
 
@@ -443,9 +481,23 @@ private fun String.withoutCheckPrefix(): String {
     return action.ifBlank { this }
 }
 
+/** Fades newly generated content in once per message. Older messages stay in place. */
+@Composable
+private fun FadeInContent(content: @Composable () -> Unit) {
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { visible = true }
+    val alpha by animateFloatAsState(
+        targetValue = if (visible) 1f else 0f,
+        animationSpec = tween(durationMillis = 1143, easing = LinearOutSlowInEasing),
+        label = "fadeIn",
+    )
+    Box(Modifier.fillMaxWidth().alpha(alpha)) { content() }
+}
+
 @Composable
 private fun StreamingCard(
     phase: GmTurnPhase?,
+    generatedTokens: Int,
     cancelling: Boolean,
     onCancel: () -> Unit,
 ) {
@@ -454,20 +506,19 @@ private fun StreamingCard(
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                EqualizerBars(
-                    modifier = Modifier.semantics { contentDescription = "ゲームマスターが生成中" },
-                )
-                Text(
-                    text = when (phase) {
-                        is GmTurnPhase.Repairing -> "応答を修正しています（再試行 1/1）"
-                        is GmTurnPhase.Committing -> "ターンを保存しています"
-                        else -> if (cancelling) "生成を中止しています" else "ゲームマスターが応答を生成しています"
-                    },
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            Shimmer(
+                modifier = Modifier.semantics { contentDescription = "ゲームマスターが生成中" },
+            )
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text = when (phase) {
+                    is GmTurnPhase.Repairing -> "応答を修正しています（再試行 1/1）"
+                    is GmTurnPhase.Committing -> "ターンを保存しています"
+                    else -> if (cancelling) "生成を中止しています" else "ゲームマスターが応答を生成しています"
+                },
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             Spacer(Modifier.height(4.dp))
             Text(
                 "画面を消さないでください（背景では推論が遅くなります）。",
@@ -478,40 +529,53 @@ private fun StreamingCard(
                 onClick = onCancel,
                 enabled = !cancelling,
             ) { Text(if (cancelling) "中止中" else "生成を中止") }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                Text(
+                    text = "生成トークン: $generatedTokens",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }
 
-/** Animated loading indicator. Only composed while generation is running. */
+/** Light sweep from left to right. Only composed while generation is running. */
 @Composable
-private fun EqualizerBars(modifier: Modifier = Modifier) {
-    val transition = rememberInfiniteTransition(label = "equalizer")
-    val phase by transition.animateFloat(
+private fun Shimmer(modifier: Modifier = Modifier) {
+    val transition = rememberInfiniteTransition(label = "shimmer")
+    val progress by transition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1400, easing = LinearEasing),
+            animation = tween(952, easing = LinearEasing),
             repeatMode = RepeatMode.Restart,
         ),
-        label = "phase",
+        label = "shimmer",
     )
-    val color = MaterialTheme.colorScheme.primary
 
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    BoxWithConstraints(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(120.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant),
     ) {
-        repeat(9) { index ->
-            val wave = kotlin.math.sin(phase * Math.PI * 2.0 + index * 0.72)
-            val barHeight = 12f + ((wave.toFloat() + 1f) / 2f) * 43.19038f
-            Box(
-                modifier = Modifier
-                    .width(10.dp)
-                    .height(barHeight.dp)
-                    .background(color, CircleShape),
-            )
-        }
+        val width = constraints.maxWidth.toFloat()
+        val start = (progress * (width + width * 0.32f)) - width * 0.32f
+        val brush = Brush.linearGradient(
+            colors = listOf(
+                MaterialTheme.colorScheme.surfaceVariant,
+                MaterialTheme.colorScheme.surface,
+                MaterialTheme.colorScheme.surfaceVariant,
+            ),
+            start = Offset(start, 0f),
+            end = Offset(start + width * 0.32f, width * 0.31111112f),
+        )
+        Box(Modifier.fillMaxSize().background(brush))
     }
 }
 

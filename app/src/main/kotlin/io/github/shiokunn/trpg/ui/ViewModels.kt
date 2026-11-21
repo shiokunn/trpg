@@ -80,6 +80,8 @@ data class GameTurnUiState(
     val running: Boolean = false,
     val phase: GmTurnPhase? = null,
     val streamedText: String = "",
+    /** Exact generated-token count reported by the engine for the current attempt. */
+    val generatedTokens: Int = 0,
     val error: String? = null,
     val errorDetails: List<String> = emptyList(),
     val lastCheck: DiceResult? = null,
@@ -163,12 +165,21 @@ class GameViewModel(
                 override suspend fun onPhase(phase: GmTurnPhase) {
                     _turn.update {
                         val restart = phase is GmTurnPhase.Generating || phase is GmTurnPhase.Repairing
-                        it.copy(phase = phase, streamedText = if (restart) "" else it.streamedText, cancelling = false)
+                        it.copy(
+                            phase = phase,
+                            streamedText = if (restart) "" else it.streamedText,
+                            generatedTokens = if (restart) 0 else it.generatedTokens,
+                            cancelling = false,
+                        )
                     }
                 }
 
                 override suspend fun onToken(piece: String) {
                     _turn.update { it.copy(streamedText = it.streamedText + piece) }
+                }
+
+                override fun onProgress(progress: GenerationProgress) {
+                    _turn.update { it.copy(generatedTokens = progress.generatedTokens) }
                 }
             }
             val result = try {
@@ -185,6 +196,7 @@ class GameViewModel(
                         running = false,
                         phase = null,
                         streamedText = "",
+                        generatedTokens = 0,
                         cancelling = false,
                         error = "生成をキャンセルしました。このターンは保存されていません。",
                     )
@@ -192,6 +204,7 @@ class GameViewModel(
                         running = false,
                         phase = null,
                         streamedText = "",
+                        generatedTokens = 0,
                         cancelling = false,
                         error = result.message,
                         errorDetails = result.errors,

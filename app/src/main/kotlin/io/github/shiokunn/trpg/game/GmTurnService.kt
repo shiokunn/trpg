@@ -2,6 +2,7 @@ package io.github.shiokunn.trpg.game
 
 import io.github.shiokunn.trpg.ai.engine.EngineStatus
 import io.github.shiokunn.trpg.ai.engine.GenerationOutcome
+import io.github.shiokunn.trpg.ai.engine.GenerationProgress
 import io.github.shiokunn.trpg.ai.engine.GenerationRequest
 import io.github.shiokunn.trpg.ai.engine.InferenceEngine
 import io.github.shiokunn.trpg.ai.engine.PromptMessage
@@ -51,6 +52,9 @@ interface GmTurnListener {
     suspend fun onPhase(phase: GmTurnPhase) {}
 
     suspend fun onToken(piece: String) {}
+
+    /** Live token accounting reported by llama.cpp (never derived from text length). */
+    fun onProgress(progress: GenerationProgress) {}
 }
 
 /** What the player chose to do this turn. A check is already resolved by the app. */
@@ -235,6 +239,7 @@ class GmTurnService(
                 params = SamplingParams.from(settings),
             ),
             onToken = { piece -> listener.onToken(piece) },
+            onProgress = { progress -> listener.onProgress(progress) },
         )
     } catch (cancelled: CancellationException) {
         throw cancelled
