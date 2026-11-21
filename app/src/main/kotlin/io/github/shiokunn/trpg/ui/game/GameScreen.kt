@@ -1,5 +1,12 @@
 package io.github.shiokunn.trpg.ui.game
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,9 +17,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -24,7 +32,6 @@ import androidx.compose.material.icons.filled.Public
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -55,8 +62,6 @@ import io.github.shiokunn.trpg.core.ai.GmChoice
 import io.github.shiokunn.trpg.core.domain.ChatMessage
 import io.github.shiokunn.trpg.core.domain.ChatRole
 import io.github.shiokunn.trpg.core.domain.CombatState
-import io.github.shiokunn.trpg.core.domain.DiceResult
-import io.github.shiokunn.trpg.core.domain.Difficulty
 import io.github.shiokunn.trpg.game.GmTurnPhase
 import io.github.shiokunn.trpg.ui.GameTurnUiState
 import io.github.shiokunn.trpg.ui.GameViewModel
@@ -240,16 +245,9 @@ private fun GameContent(
             item {
                 StreamingCard(
                     phase = turn.phase,
-                    streamedText = turn.streamedText,
                     cancelling = turn.cancelling,
                     onCancel = onCancel,
                 )
-            }
-        }
-
-        turn.lastCheck?.let { dice ->
-            if (!busy) {
-                item { CheckResultCard(dice) }
             }
         }
 
@@ -266,13 +264,6 @@ private fun GameContent(
         if (!busy && hasNarrative && turn.error == null && choices.isNotEmpty() &&
             current.session.activeCombat == null
         ) {
-            item {
-                Text(
-                    "選択してください",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
             items(choices, key = { it.id }) { choice ->
                 ChoiceButton(
                     choice = choice,
@@ -290,17 +281,6 @@ private fun GameContent(
             }
         }
 
-        item {
-            Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(16.dp))
-                Text(
-                    "ステータス・所持品・クエストは各画面から確認できます。",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
     }
 }
 
@@ -441,7 +421,7 @@ private fun ChatMessageRow(message: ChatMessage) {
                 ),
             ) {
                 Text(
-                    text = message.content,
+                    text = message.content.withoutCheckPrefix(),
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -456,10 +436,16 @@ private fun ChatMessageRow(message: ChatMessage) {
     }
 }
 
+/** Keeps the stored game log intact while hiding the check prefix on screen. */
+private fun String.withoutCheckPrefix(): String {
+    if (!startsWith("【判定:")) return this
+    val action = substringAfter('\n', "")
+    return action.ifBlank { this }
+}
+
 @Composable
 private fun StreamingCard(
     phase: GmTurnPhase?,
-    streamedText: String,
     cancelling: Boolean,
     onCancel: () -> Unit,
 ) {
@@ -469,11 +455,8 @@ private fun StreamingCard(
     ) {
         Column(Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .size(18.dp)
-                        .semantics { contentDescription = "ゲームマスターが生成中" },
-                    strokeWidth = 2.dp,
+                EqualizerBars(
+                    modifier = Modifier.semantics { contentDescription = "ゲームマスターが生成中" },
                 )
                 Text(
                     text = when (phase) {
@@ -487,19 +470,47 @@ private fun StreamingCard(
             }
             Spacer(Modifier.height(4.dp))
             Text(
-                "生成中は画面を消さないでください。バックグラウンドでは推論が大幅に遅くなります。",
-                style = MaterialTheme.typography.bodySmall,
+                "画面を消さないでください（背景では推論が遅くなります）。",
+                style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            if (streamedText.isNotBlank()) {
-                Spacer(Modifier.height(12.dp))
-                NarrativeText(streamedText)
-            }
-            Spacer(Modifier.height(8.dp))
             TextButton(
                 onClick = onCancel,
                 enabled = !cancelling,
             ) { Text(if (cancelling) "中止中" else "生成を中止") }
+        }
+    }
+}
+
+/** Animated loading indicator. Only composed while generation is running. */
+@Composable
+private fun EqualizerBars(modifier: Modifier = Modifier) {
+    val transition = rememberInfiniteTransition(label = "equalizer")
+    val phase by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1400, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart,
+        ),
+        label = "phase",
+    )
+    val color = MaterialTheme.colorScheme.primary
+
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        repeat(9) { index ->
+            val wave = kotlin.math.sin(phase * Math.PI * 2.0 + index * 0.72)
+            val barHeight = 12f + ((wave.toFloat() + 1f) / 2f) * 43.19038f
+            Box(
+                modifier = Modifier
+                    .width(10.dp)
+                    .height(barHeight.dp)
+                    .background(color, CircleShape),
+            )
         }
     }
 }
@@ -514,21 +525,6 @@ private fun ChoiceButton(choice: GmChoice, enabled: Boolean, onClick: () -> Unit
     ) {
         Column(Modifier.fillMaxWidth()) {
             Text(choice.text, style = MaterialTheme.typography.bodyMedium)
-            choice.check?.let { check ->
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = buildString {
-                        append("判定: ").append(check.attribute.label)
-                        append(" ／ 難易度 ").append(check.difficulty)
-                        append("（").append(Difficulty.labelFor(check.difficulty)).append("）")
-                        if (check.rollMode != io.github.shiokunn.trpg.core.domain.RollMode.NORMAL) {
-                            append(" ／ ").append(check.rollMode.label)
-                        }
-                    },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
         }
     }
 }
@@ -562,33 +558,6 @@ private fun FreeActionRow(onSend: (String) -> Unit) {
         )
         IconButton(onClick = { submit() }, enabled = input.isNotBlank()) {
             Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "送信")
-        }
-    }
-}
-
-@Composable
-private fun CheckResultCard(dice: DiceResult) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Column(Modifier.padding(12.dp)) {
-            Text(
-                text = "判定結果: ${dice.outcome.label}",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSecondaryContainer,
-            )
-            Text(
-                text = buildString {
-                    append(dice.attributeId.label).append(" ").append(dice.attributeValue)
-                    if (dice.skillName.isNotBlank()) append(" + ").append(dice.skillName).append(" ").append(dice.skillLevel)
-                    append(" / 出目 ").append(dice.dice.joinToString(", "))
-                    append(" = ").append(dice.total)
-                    append(" / 難易度 ").append(dice.difficulty)
-                },
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSecondaryContainer,
-            )
         }
     }
 }
