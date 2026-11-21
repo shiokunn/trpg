@@ -114,6 +114,51 @@ class MemorySelectorTest {
     }
 
     @Test
+    fun singleStoryMemoryOverLimitIsTruncatedToBudget() {
+        val over = memory(
+            "over",
+            "あ".repeat(MemorySelector.DEFAULT_MAX_CHARACTERS + 25),
+            importance = 5,
+            turn = 1,
+        )
+
+        val selected = MemorySelector.select(listOf(over), "", currentTurn = 1)
+
+        assertEquals(listOf("over"), selected.map { it.id })
+        assertEquals(MemorySelector.DEFAULT_MAX_CHARACTERS, selected.first().content.length)
+        assertTrue(selected.all { it.content.length <= MemorySelector.DEFAULT_MAX_CHARACTERS })
+    }
+
+    @Test
+    fun storyMemoryJustBelowLimitIsKeptIntact() {
+        val almost = memory(
+            "almost",
+            "い".repeat(MemorySelector.DEFAULT_MAX_CHARACTERS - 1),
+            importance = 5,
+            turn = 1,
+        )
+
+        val selected = MemorySelector.select(listOf(almost), "", currentTurn = 1)
+
+        assertEquals(listOf("almost"), selected.map { it.id })
+        assertEquals(MemorySelector.DEFAULT_MAX_CHARACTERS - 1, selected.first().content.length)
+    }
+
+    @Test
+    fun multipleStoryMemoriesAreTruncatedToCombinedBudget() {
+        val first = memory("first", "あ".repeat(1000), importance = 5, turn = 2)
+        val second = memory("second", "い".repeat(1000), importance = 4, turn = 1)
+
+        val selected = MemorySelector.select(listOf(first, second), "", currentTurn = 2)
+
+        assertEquals(listOf("first", "second"), selected.map { it.id })
+        assertEquals(MemorySelector.DEFAULT_MAX_CHARACTERS, selected.sumOf { it.content.length })
+        assertEquals(1000, selected[0].content.length)
+        assertEquals(MemorySelector.DEFAULT_MAX_CHARACTERS - 1000, selected[1].content.length)
+        assertTrue(selected.all { it.content.length <= MemorySelector.DEFAULT_MAX_CHARACTERS })
+    }
+
+    @Test
     fun npcMemoriesAreSeparatedByNpcAndRespectPerNpcLimit() {
         val npcs = listOf(
             Npc("n1", "マリナ", isDiscovered = true),
@@ -145,6 +190,85 @@ class MemorySelectorTest {
 
         assertTrue(selected.isNotEmpty())
         assertTrue(selected.sumOf { it.content.length } <= 130)
+    }
+
+    @Test
+    fun singleNpcMemoryOverLimitIsTruncatedToBudget() {
+        val npcs = listOf(Npc("n1", "マリナ", isDiscovered = true))
+        val over = NpcMemory(
+            "over",
+            "n1",
+            "あ".repeat(MemorySelector.NPC_MEMORY_MAX_CHARACTERS + 25),
+            importance = 5,
+            turn = 1,
+        )
+
+        val selected = MemorySelector.selectNpcMemories(listOf(over), npcs, "", currentTurn = 1)
+
+        assertEquals(listOf("over"), selected.map { it.id })
+        assertEquals(MemorySelector.NPC_MEMORY_MAX_CHARACTERS, selected.first().content.length)
+        assertTrue(selected.all { it.content.length <= MemorySelector.NPC_MEMORY_MAX_CHARACTERS })
+    }
+
+    @Test
+    fun npcMemoryJustBelowLimitIsKeptIntact() {
+        val npcs = listOf(Npc("n1", "マリナ", isDiscovered = true))
+        val almost = NpcMemory(
+            "almost",
+            "n1",
+            "い".repeat(MemorySelector.NPC_MEMORY_MAX_CHARACTERS - 1),
+            importance = 5,
+            turn = 1,
+        )
+
+        val selected = MemorySelector.selectNpcMemories(listOf(almost), npcs, "", currentTurn = 1)
+
+        assertEquals(listOf("almost"), selected.map { it.id })
+        assertEquals(MemorySelector.NPC_MEMORY_MAX_CHARACTERS - 1, selected.first().content.length)
+    }
+
+    @Test
+    fun multipleNpcMemoriesAreTruncatedToCombinedBudget() {
+        val npcs = listOf(Npc("n1", "マリナ", isDiscovered = true))
+        val first = NpcMemory("first", "n1", "あ".repeat(600), importance = 5, turn = 2)
+        val second = NpcMemory("second", "n1", "い".repeat(600), importance = 4, turn = 1)
+
+        val selected = MemorySelector.selectNpcMemories(
+            listOf(first, second),
+            npcs,
+            "",
+            currentTurn = 2,
+        )
+
+        assertEquals(listOf("first", "second"), selected.map { it.id })
+        assertEquals(MemorySelector.NPC_MEMORY_MAX_CHARACTERS, selected.sumOf { it.content.length })
+        assertEquals(600, selected[0].content.length)
+        assertEquals(MemorySelector.NPC_MEMORY_MAX_CHARACTERS - 600, selected[1].content.length)
+        assertTrue(selected.all { it.content.length <= MemorySelector.NPC_MEMORY_MAX_CHARACTERS })
+    }
+
+    @Test
+    fun truncationKeepsNpcSeparationAndDuplicateSuppression() {
+        val npcs = listOf(
+            Npc("n1", "マリナ", isDiscovered = true),
+            Npc("n2", "灯台守", isDiscovered = true),
+        )
+        val base = "長い記憶内容".padEnd(1000, 'あ')
+        val first = NpcMemory("a1", "n1", base, importance = 5, turn = 2)
+        val nearDuplicate = NpcMemory("a2", "n1", base + "補足", importance = 4, turn = 1)
+        val other = NpcMemory("b1", "n2", "別のNPCの記憶", importance = 3, turn = 2)
+
+        val selected = MemorySelector.selectNpcMemories(
+            listOf(first, nearDuplicate, other),
+            npcs,
+            "",
+            currentTurn = 2,
+            maxCharacters = 1100,
+        )
+
+        assertEquals(listOf("a1", "b1"), selected.map { it.id })
+        assertEquals(1000, selected[0].content.length)
+        assertTrue(selected.all { it.content.length <= 1100 })
     }
 
     private fun memory(

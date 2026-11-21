@@ -87,6 +87,9 @@ object MemorySelector {
             .groupBy { it.npcId }
 
         val selected = mutableListOf<NpcMemory>()
+        // Keep the untruncated rows for duplicate checks: truncation must not change
+        // which memories are considered duplicates.
+        val originals = mutableListOf<NpcMemory>()
         var characters = 0
         for (npcId in visibleIds) {
             val ranked = byNpc[npcId].orEmpty()
@@ -108,17 +111,20 @@ object MemorySelector {
             for (entry in ranked) {
                 if (takenForNpc >= perNpcLimit) break
                 val memory = entry.memory
-                if (selected.any {
+                if (originals.any {
                         it.npcId == npcId && it.isSecret == memory.isSecret &&
                             isNearDuplicate(it.content, memory.content)
                     }
                 ) {
                     continue
                 }
-                val length = memory.content.length
-                if (selected.isNotEmpty() && characters + length > maxCharacters) continue
-                selected += memory
-                characters += length
+                val remaining = maxCharacters - characters
+                if (remaining <= 0) continue
+                val content = truncateToBudget(memory.content, remaining)
+                if (content.isEmpty() && memory.content.isNotEmpty()) continue
+                selected += if (content == memory.content) memory else memory.copy(content = content)
+                originals += memory
+                characters += content.length
                 takenForNpc++
             }
         }
@@ -155,15 +161,19 @@ object MemorySelector {
         maxCharacters: Int,
     ): List<StoryMemory> {
         val selected = ArrayList<StoryMemory>(minOf(limit, ordered.size))
+        val originals = ArrayList<StoryMemory>(minOf(limit, ordered.size))
         var characters = 0
         for (entry in ordered) {
             if (selected.size >= limit) break
             val memory = entry.memory
-            if (selected.any { isDuplicate(it, memory) }) continue
-            val length = memory.content.length
-            if (selected.isNotEmpty() && characters + length > maxCharacters) continue
-            selected += memory
-            characters += length
+            if (originals.any { isDuplicate(it, memory) }) continue
+            val remaining = maxCharacters - characters
+            if (remaining <= 0) break
+            val content = truncateToBudget(memory.content, remaining)
+            if (content.isEmpty() && memory.content.isNotEmpty()) continue
+            selected += if (content == memory.content) memory else memory.copy(content = content)
+            originals += memory
+            characters += content.length
         }
         return selected
     }
@@ -222,6 +232,24 @@ object MemorySelector {
             }
         }
         return score
+    }
+
+    /**
+     * Cuts [text] to at most [maxLength] UTF-16 code units without splitting a surrogate
+     * pair. The caller counts the returned length, so the budget is exact even when the
+     * first (most relevant) memory is longer than the whole budget.
+     */
+    private fun truncateToBudget(text: String, maxLength: Int): String {
+        if (text.length <= maxLength) return text
+        if (maxLength <= 0) return ""
+        var end = maxLength
+        if (end < text.length &&
+            Character.isHighSurrogate(text[end - 1]) &&
+            Character.isLowSurrogate(text[end])
+        ) {
+            end--
+        }
+        return text.substring(0, end)
     }
 
     /** Same text but a different truth status / category / secrecy is not a duplicate. */
