@@ -14,6 +14,7 @@ import io.github.shiokunn.trpg.core.domain.Quest
 import io.github.shiokunn.trpg.core.domain.QuestStatus
 import io.github.shiokunn.trpg.core.domain.StoryMemory
 import io.github.shiokunn.trpg.core.domain.World
+import io.github.shiokunn.trpg.core.memory.MemorySelector
 import io.github.shiokunn.trpg.core.rules.CharacterRules
 
 /** One chat turn in the final prompt. */
@@ -277,7 +278,9 @@ class PromptBuilder(
                 append(" (").append(npc.relationship).append(")")
                 if (npc.description.isNotBlank()) append("\n  説明: ").append(npc.description)
                 if (npc.personality.isNotBlank()) append("\n  性格: ").append(npc.personality)
-                val memories = npcMemories.filter { it.npcId == npc.id }.sortedByDescending { it.importance }.take(3)
+                // The selector has already ranked, separated and bounded these memories.
+                // Re-sorting here would undo relevance ordering.
+                val memories = npcMemories.filter { it.npcId == npc.id }
                 if (memories.isNotEmpty()) {
                     append("\n  記憶: ").append(memories.joinToString(" / ") { it.content })
                 }
@@ -291,7 +294,8 @@ class PromptBuilder(
 
     private fun renderMemories(memories: List<StoryMemory>): String {
         if (memories.isEmpty()) return ""
-        return memories.sortedByDescending { it.importance }
+        // Preserve the order supplied by MemorySelector (relevance first).
+        return memories
             .take(MAX_MEMORIES)
             .joinToString("\n") { memory ->
                 buildString {
@@ -354,7 +358,7 @@ class PromptBuilder(
     }
 
     private companion object {
-        const val MAX_MEMORIES = 12
+        const val MAX_MEMORIES = MemorySelector.DEFAULT_LIMIT
         const val MAX_HISTORY_MESSAGES = 8
         const val MIN_TRUNCATED_CHARS = 40
 

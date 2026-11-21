@@ -132,7 +132,14 @@ class GmTurnService(
             currentTurn = bundle.session.turnCount,
             limit = MAX_LONG_TERM_MEMORIES,
         )
-        val npcMemories = memories.npcMemories(sessionId)
+        // NPC memories are selected per NPC so one character's memories never leak into
+        // another character's section, and undiscovered NPCs do not consume the budget.
+        val npcMemories = MemorySelector.selectNpcMemories(
+            memories = memories.npcMemories(sessionId),
+            npcs = bundle.npcs,
+            query = action.text,
+            currentTurn = bundle.session.turnCount,
+        )
 
         val context = PromptContext(
             world = bundle.world,
@@ -448,7 +455,7 @@ class GmTurnService(
 
     companion object {
         const val MAX_HISTORY_MESSAGES = 40
-        const val MAX_LONG_TERM_MEMORIES = 20
+        const val MAX_LONG_TERM_MEMORIES = MemorySelector.DEFAULT_LIMIT
         const val SUMMARY_CHARS = 600
     }
 }
