@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/data/data/com.termux/files/usr/bin/python3",
+    "/data/data/com.termux/files/home/trpg/training/tools/quality_system.py",
+    "score",
+    "--root",
+    "/data/data/com.termux/files/home/trpg/training/.bulk_gen/snapshots/snap-0003-20261117T111330Z/raw",
+    "--out-dir",
+    "/data/data/com.termux/files/home/trpg/training/.bulk_gen/audit/snap-0003-20261117T111330Z"
+  ],
+  "returncode": 0,
+  "stdout": "{\n  \"newly_processed\": 96,\n  \"resume_skipped\": 0,\n  \"scored\": 96,\n  \"review_queue\": 0,\n  \"verdict_counts\": {\n    \"pass\": 96\n  },\n  \"red_flag_counts\": {},\n  \"average_score\": 98.1\n}\n",
+  "stderr": ""
+}

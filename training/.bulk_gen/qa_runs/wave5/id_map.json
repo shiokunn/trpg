@@ -1,0 +1,68 @@
+{
+  "run_dir": "../qa_runs/wave5",
+  "source_snapshot": "snap-0007-20261117T120340Z",
+  "snapshot_manifest": {
+    "total_records": 36,
+    "by_category": {
+      "trpg_gm": 36,
+      "world_json": 0,
+      "extraction": 0
+    },
+    "created_at": "2026-11-17T12:03:40+00:00"
+  },
+  "purpose": "ID正規化した派生監査ルート。元データ・スナップショットは不変。",
+  "notation": "classify_qa.py の ID_RE に適合させるための外側IDの変換のみ。内容・根拠・判定は変更しない。",
+  "counters": {
+    "trpg_gm": 36,
+    "world_json": 0,
+    "extraction": 0
+  },
+  "total_derived_records": 36,
+  "id_map": {
+    "bgm11-0001": "gm-a-0001",
+    "bgm11-0002": "gm-a-0002",
+    "bgm11-0003": "gm-a-0003",
+    "bgm11-0010": "gm-a-0004",
+    "bgm11-0011": "gm-a-0005",
+    "bgm11-0012": "gm-a-0006",
+    "bgm11-0019": "gm-a-0007",
+    "bgm11-0020": "gm-a-0008",
+    "bgm11-0021": "gm-a-0009",
+    "bgm11-0028": "gm-a-0010",
+    "bgm11-0029": "gm-a-0011",
+    "bgm11-0030": "gm-a-0012",
+    "bgm11-0037": "gm-a-0013",
+    "bgm11-0038": "gm-a-0014",
+    "bgm11-0039": "gm-a-0015",
+    "bgm11-0046": "gm-a-0016",
+    "bgm11-0047": "gm-a-0017",
+    "bgm11-0048": "gm-a-0018",
+    "bgm11-0055": "gm-a-0019",
+    "bgm11-0056": "gm-a-0020",
+    "bgm11-0057": "gm-a-0021",
+    "bgm11-0064": "gm-a-0022",
+    "bgm11-0065": "gm-a-0023",
+    "bgm11-0066": "gm-a-0024",
+    "bgm11-0073": "gm-a-0025",
+    "bgm11-0074": "gm-a-0026",
+    "bgm11-0075": "gm-a-0027",
+    "bgm11-0082": "gm-a-0028",
+    "bgm11-0083": "gm-a-0029",
+    "bgm11-0084": "gm-a-0030",
+    "bgm11-0091": "gm-a-0031",
+    "bgm11-0092": "gm-a-0032",
+    "bgm11-0093": "gm-a-0033",
+    "bgm11-0100": "gm-a-0034",
+    "bgm11-0101": "gm-a-0035",
+    "bgm11-0102": "gm-a-0036"
+  },
+  "files": [
+    {
+      "source": "snapshots/snap-0007-20261117T120340Z/raw/trpg_gm/bgm11.jsonl",
+      "derived": "raw/trpg_gm/bgm11.jsonl",
+      "records": 36,
+      "sha256": "cfbf3885d9fd43ed4c49f35aa9645cde60997ec4b0b9587554adb488458aab89"
+    }
+  ],
+  "derived_at": "2026-11-17T12:04:18+00:00"
+}

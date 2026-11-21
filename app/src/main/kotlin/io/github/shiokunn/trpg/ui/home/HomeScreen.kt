@@ -66,12 +66,6 @@ fun HomeScreen(
                 style = MaterialTheme.typography.displaySmall,
                 color = MaterialTheme.colorScheme.onBackground,
             )
-            Spacer(Modifier.height(6.dp))
-            Text(
-                text = "端末の中のLLMが、あなただけの物語を語る。",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
         }
 
         item {

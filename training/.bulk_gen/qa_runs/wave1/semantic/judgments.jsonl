@@ -1,0 +1,96 @@
+{"id":"ex-0001","labels":[]}
+{"id":"ex-0002","labels":[]}
+{"id":"ex-0003","labels":[]}
+{"id":"ex-0004","labels":[]}
+{"id":"ex-0005","labels":[]}
+{"id":"ex-0006","labels":[]}
+{"id":"ex-0007","labels":[]}
+{"id":"ex-0008","labels":[]}
+{"id":"ex-0009","labels":[]}
+{"id":"ex-0010","labels":[]}
+{"id":"ex-0011","labels":[]}
+{"id":"ex-0012","labels":[]}
+{"id":"ex-0013","labels":[]}
+{"id":"ex-0014","labels":[]}
+{"id":"ex-0015","labels":[]}
+{"id":"ex-0016","labels":[]}
+{"id":"ex-0017","labels":[]}
+{"id":"ex-0018","labels":[]}
+{"id":"ex-0019","labels":[]}
+{"id":"ex-0020","labels":[]}
+{"id":"ex-0021","labels":[]}
+{"id":"ex-0022","labels":[{"category":"review","confidence":0.62,"evidence":"原文「そのうち一つには毒が入っていたと後で判明した」の「後で判明した」が、生成側npcMemoryでは「一つに毒が入っていたことを後で認めた」となり、料理人自身の admission（認めた）という原文に無い事実が加わっているかどうか判断が曖昧"}]}
+{"id":"ex-0023","labels":[{"category":"review","confidence":0.55,"evidence":"原文「⑩誰かが「また来る」と呟いた。」は断片として明記されているが、生成側では「誰かが「また来る」と呟いたが、聞き違いの可能性もある」と「聞き違いの可能性もある」が追加され isConfirmed:false に下げられており、許容される推定メモか事実改変か曖昧"}]}
+{"id":"ex-0024","labels":[]}
+{"id":"ex-0025","labels":[]}
+{"id":"ex-0026","labels":[]}
+{"id":"ex-0027","labels":[]}
+{"id":"ex-0028","labels":[]}
+{"id":"ex-0029","labels":[]}
+{"id":"ex-0030","labels":[]}
+{"id":"ex-0031","labels":[]}
+{"id":"ex-0032","labels":[]}
+{"id":"ex-0033","labels":[]}
+{"id":"ex-0034","labels":[]}
+{"id":"ex-0035","labels":[]}
+{"id":"ex-0036","labels":[]}
+{"id":"ex-0037","labels":[]}
+{"id":"ex-0038","labels":[]}
+{"id":"ex-0039","labels":[]}
+{"id":"ex-0040","labels":[]}
+{"id":"ex-0041","labels":[]}
+{"id":"ex-0042","labels":[]}
+{"id":"ex-0043","labels":[]}
+{"id":"ex-0044","labels":[]}
+{"id":"ex-0045","labels":[]}
+{"id":"ex-0046","labels":[]}
+{"id":"ex-0047","labels":[]}
+{"id":"ex-0048","labels":[]}
+{"id":"gm-a-0001","labels":[]}
+{"id":"gm-a-0002","labels":[]}
+{"id":"gm-a-0003","labels":[]}
+{"id":"gm-a-0004","labels":[{"category":"review","confidence":0.6,"evidence":"採集ナイフで足元の道を切り拓く（生成側に対応する「切り拓く」描写が無く、足元のつるが靴底を舐める描写に留まる）"}]}
+{"id":"gm-a-0005","labels":[]}
+{"id":"gm-a-0006","labels":[{"category":"contradiction","confidence":0.8,"evidence":"延焼した弟子の袖を叩き消す（生成では火が袖に移ったまま「弟子を先に救うか」が選択肢として残り、消化が完了していない）"}]}
+{"id":"gm-a-0007","labels":[{"category":"review","confidence":0.6,"evidence":"柊組合長への面会を申し入れる（生成では「柊組合長は議事堂に姿を見せない」で申し入れの結果が示されない）"}]}
+{"id":"gm-a-0008","labels":[]}
+{"id":"gm-a-0009","labels":[{"category":"contradiction","confidence":0.88,"evidence":"柊から公式な承認を受ける（生成では「組合の印が要る」「公式な承認を取りに行くか」と未取得の扱い）"}]}
+{"id":"gm-a-0010","labels":[]}
+{"id":"gm-a-0011","labels":[]}
+{"id":"gm-a-0012","labels":[{"category":"review","confidence":0.55,"evidence":"溶接で線路を開通させ（生成では「スパナが最後のボルトを締め」と手段が異なる）"}]}
+{"id":"gm-a-0013","labels":[]}
+{"id":"gm-a-0014","labels":[]}
+{"id":"gm-a-0015","labels":[]}
+{"id":"gm-a-0016","labels":[]}
+{"id":"gm-a-0017","labels":[]}
+{"id":"gm-a-0018","labels":[]}
+{"id":"gm-a-0019","labels":[]}
+{"id":"gm-a-0020","labels":[]}
+{"id":"gm-a-0021","labels":[]}
+{"id":"gm-a-0022","labels":[]}
+{"id":"gm-a-0023","labels":[]}
+{"id":"gm-a-0024","labels":[]}
+{"id": "gm-a-0025", "labels": []}
+{"id": "gm-a-0026", "labels": []}
+{"id": "gm-a-0027", "labels": []}
+{"id": "gm-a-0028", "labels": []}
+{"id": "world-0001", "labels": []}
+{"id": "world-0002", "labels": []}
+{"id": "world-0003", "labels": []}
+{"id": "world-0004", "labels": []}
+{"id": "world-0005", "labels": []}
+{"id": "world-0006", "labels": []}
+{"id": "world-0007", "labels": []}
+{"id": "world-0008", "labels": []}
+{"id": "world-0009", "labels": []}
+{"id": "world-0010", "labels": []}
+{"id": "world-0011", "labels": []}
+{"id": "world-0012", "labels": []}
+{"id": "world-0013", "labels": [{"category": "review", "confidence": 0.68, "evidence": "settingの「木は時間をかけて考えるため、答えが出るまでに数日かかることもある」とspecialSettingsの「木は数年単位で考える」で、判決までの時間規模が数日と数年で食い違っている"}]}
+{"id": "world-0014", "labels": []}
+{"id": "world-0015", "labels": []}
+{"id": "world-0016", "labels": []}
+{"id": "world-0017", "labels": []}
+{"id": "world-0018", "labels": []}
+{"id": "world-0019", "labels": []}
+{"id": "world-0020", "labels": []}

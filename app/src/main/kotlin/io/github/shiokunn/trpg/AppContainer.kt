@@ -16,6 +16,7 @@ import io.github.shiokunn.trpg.data.repository.WorldRepository
 import io.github.shiokunn.trpg.creation.AdventureCreator
 import io.github.shiokunn.trpg.game.CombatService
 import io.github.shiokunn.trpg.game.GmTurnService
+import java.io.File
 
 /**
  * Manual dependency container. Keeps Android specifics out of the core module
@@ -37,7 +38,7 @@ class AppContainer(context: Context) {
         GmTurnService(sessions, memories, models, engine)
     }
     val adventureCreator: AdventureCreator by lazy {
-        AdventureCreator(models, engine)
+        AdventureCreator(models, engine, File(context.filesDir, "debug/raw"))
     }
     val combat: CombatService by lazy { CombatService(sessions) }
     val backups = BackupRepository(database)

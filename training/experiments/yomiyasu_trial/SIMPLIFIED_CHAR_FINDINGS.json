@@ -1,0 +1,23 @@
+{
+  "simplified_characters": [
+    {
+      "file": "training/raw/trpg_gm/gm_f_01.jsonl",
+      "line": 3,
+      "char": "误",
+      "suggested": "誤"
+    },
+    {
+      "file": "training/raw/trpg_gm/gm_f_01.jsonl",
+      "line": 3,
+      "char": "录",
+      "suggested": "録"
+    },
+    {
+      "file": "training/raw/world_json/world_03.jsonl",
+      "line": 3,
+      "char": "采",
+      "suggested": "採"
+    }
+  ],
+  "count": 3
+}

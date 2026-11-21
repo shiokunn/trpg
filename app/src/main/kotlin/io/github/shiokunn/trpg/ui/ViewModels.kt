@@ -10,6 +10,7 @@ import io.github.shiokunn.trpg.AppContainer
 import io.github.shiokunn.trpg.ai.engine.BackendInfo
 import io.github.shiokunn.trpg.ai.engine.EngineStatus
 import io.github.shiokunn.trpg.ai.engine.GenerationProgress
+import io.github.shiokunn.trpg.ai.engine.GenerationFailureKind
 import io.github.shiokunn.trpg.BuildConfig
 import io.github.shiokunn.trpg.ai.model.ModelFileManager
 import io.github.shiokunn.trpg.core.ai.CharacterDraft
@@ -353,7 +354,7 @@ class NewAdventureViewModel(private val container: AppContainer) : ViewModel() {
                         return@launch
                     }
                     is CreationResult.Failed -> {
-                        failGeneration(worldResult.message, worldResult.errors)
+                        failGeneration(worldResult.message, worldResult.errors, worldResult.failureKind)
                         return@launch
                     }
                 }
@@ -368,7 +369,11 @@ class NewAdventureViewModel(private val container: AppContainer) : ViewModel() {
                         )
                     }
                     is CreationResult.Cancelled -> failGeneration("生成をキャンセルしました。", emptyList())
-                    is CreationResult.Failed -> failGeneration(characterResult.message, characterResult.errors)
+                    is CreationResult.Failed -> failGeneration(
+                        characterResult.message,
+                        characterResult.errors,
+                        characterResult.failureKind,
+                    )
                 }
             } catch (cancelled: CancellationException) {
                 failGeneration("生成をキャンセルしました。", emptyList())
@@ -404,13 +409,27 @@ class NewAdventureViewModel(private val container: AppContainer) : ViewModel() {
         }
     }
 
-    private fun failGeneration(message: String, details: List<String>) {
+    private fun failGeneration(
+        message: String,
+        details: List<String>,
+        failureKind: GenerationFailureKind? = null,
+    ) {
+        val classified = when (failureKind) {
+            GenerationFailureKind.GRAMMAR ->
+                listOf("分類: JSON文法エラー（文法を適用できませんでした）") + details
+            GenerationFailureKind.MEMORY ->
+                listOf("分類: メモリ不足（コンテキストサイズまたはモデルサイズを下げてください）") + details
+            GenerationFailureKind.TIMEOUT ->
+                listOf("分類: 推論タイムアウト（5分間トークンが生成されませんでした）") + details
+            GenerationFailureKind.INFERENCE -> listOf("分類: 推論エラー") + details
+            null -> details
+        }
         _state.update {
             it.copy(
                 stage = CreationStage.FORM,
                 statusText = "",
                 error = message,
-                details = details,
+                details = classified,
                 cancelling = false,
             )
         }

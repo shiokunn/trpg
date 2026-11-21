@@ -1,0 +1,3 @@
+{"snapshot_id": "snap-0001-20261117T103945Z", "audited_at": "2026-11-17T10:39:59+00:00", "scored": 4, "verdict_counts": {"pass": 4}, "average_score": 98.0, "red_flags": {}}
+{"snapshot_id": "snap-0002-20261117T110619Z", "audited_at": "2026-11-17T11:07:14+00:00", "scored": 96, "verdict_counts": {"pass": 87, "fail": 9}, "average_score": 97.5, "red_flags": {"UNKNOWN_ID": 9}}
+{"snapshot_id": "snap-0003-20261117T111330Z", "audited_at": "2026-11-17T11:13:31+00:00", "scored": 96, "verdict_counts": {"pass": 96}, "average_score": 98.1, "red_flags": {}}

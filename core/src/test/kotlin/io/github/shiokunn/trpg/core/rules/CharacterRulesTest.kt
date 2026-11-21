@@ -10,16 +10,18 @@ import org.junit.Test
 class CharacterRulesTest {
 
     @Test
-    fun totalEighteenIsValid() {
-        val attributes = Attributes(5, 4, 3, 2, 2, 2)
-        assertEquals(18, attributes.total())
-        assertTrue(CharacterRules.validateAttributes(attributes).isEmpty())
-    }
+    fun anyInRangeAttributeTotalIsValid() {
+        val standard = Attributes(5, 4, 3, 2, 2, 2)
+        assertEquals(18, standard.total())
+        assertTrue(CharacterRules.validateAttributes(standard).isEmpty())
 
-    @Test
-    fun wrongTotalIsRejected() {
-        val errors = CharacterRules.validateAttributes(Attributes(3, 3, 3, 3, 3, 2))
-        assertFalse(errors.isEmpty())
+        val low = Attributes(1, 1, 1, 1, 1, 1)
+        assertEquals(6, low.total())
+        assertTrue(CharacterRules.validateAttributes(low).isEmpty())
+
+        val high = Attributes(5, 5, 5, 5, 5, 5)
+        assertEquals(30, high.total())
+        assertTrue(CharacterRules.validateAttributes(high).isEmpty())
     }
 
     @Test
@@ -29,19 +31,27 @@ class CharacterRulesTest {
     }
 
     @Test
-    fun skillCreationRequiresSixPointsAndMaxTwo() {
-        val ok = listOf(
+    fun skillCreationAcceptsAnyLevelSumWithinRange() {
+        val belowSix = listOf(
+            Skill("s1", "調査", 1),
+            Skill("s2", "交渉", 1),
+            Skill("s3", "隠密", 1),
+        )
+        assertTrue(CharacterRules.validateSkillsForCreation(belowSix).isEmpty())
+
+        val aboveSix = listOf(
             Skill("s1", "調査", 2),
             Skill("s2", "交渉", 2),
             Skill("s3", "隠密", 2),
+            Skill("s4", "料理", 2),
         )
-        assertTrue(CharacterRules.validateSkillsForCreation(ok).isEmpty())
+        assertTrue(CharacterRules.validateSkillsForCreation(aboveSix).isEmpty())
+    }
 
+    @Test
+    fun skillCreationRejectsLevelAboveTwo() {
         val tooHigh = listOf(Skill("s1", "調査", 3), Skill("s2", "交渉", 3))
         assertFalse(CharacterRules.validateSkillsForCreation(tooHigh).isEmpty())
-
-        val wrongTotal = listOf(Skill("s1", "調査", 2), Skill("s2", "交渉", 2))
-        assertFalse(CharacterRules.validateSkillsForCreation(wrongTotal).isEmpty())
     }
 
     @Test

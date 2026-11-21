@@ -1,0 +1,20 @@
+{"id":"ex-0041","labels":[]}
+{"id":"ex-0042","labels":[]}
+{"id":"ex-0043","labels":[]}
+{"id":"ex-0044","labels":[{"category":"review","confidence":0.7,"evidence":"category=UNRESOLVED かつ content『どちらが正しいか確定できない』なのに isConfirmed=true（物語は未確定で判定と食い違う）"}]}
+{"id":"ex-0045","labels":[]}
+{"id":"ex-0046","labels":[]}
+{"id":"ex-0047","labels":[]}
+{"id":"ex-0048","labels":[]}
+{"id":"ex-0049","labels":[]}
+{"id":"ex-0050","labels":[]}
+{"id":"ex-0051","labels":[]}
+{"id":"ex-0052","labels":[]}
+{"id":"ex-0053","labels":[]}
+{"id":"ex-0054","labels":[]}
+{"id":"ex-0055","labels":[{"category":"fabrication","confidence":0.9,"evidence":"secrets『基礎の文字は誰も読んでいない』は原文に無い事実（原文は『基礎に文字が刻まれている』のみ）。connections『丘へ続く砂利道』も原文に無い"}]}
+{"id":"ex-0056","labels":[]}
+{"id":"ex-0057","labels":[]}
+{"id":"ex-0058","labels":[]}
+{"id":"ex-0059","labels":[]}
+{"id":"ex-0060","labels":[]}

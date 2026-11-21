@@ -1,0 +1,153 @@
+{
+  "purpose": "yomiyasu gate-A trial, 274-copy dry run, and final candidate after REVIEW_15",
+  "version": "yomiyasu 3.1.0 / db78b9b",
+  "gate_A": "approved 2026-11-17",
+  "gate_B": "pending",
+  "files": [
+    {
+      "path": "MANIFEST.json",
+      "bytes": 3887,
+      "sha256": "0fa65dc4dc8610346a3b703ff2dfba8bafeb1f6d9ffb31dcd7ad30981e14c7a0"
+    },
+    {
+      "path": "REPORT.md",
+      "bytes": 9037,
+      "sha256": "d3aafe25837b353f5d9f3a8a957551ff59dbc16ff1dbf4046e40964832685d48"
+    },
+    {
+      "path": "REVIEW_15.md",
+      "bytes": 8668,
+      "sha256": "3e8fb722462dd56e60ec857d6322e8b2b7d314f696e807b174b12a8d1cc3dad2"
+    },
+    {
+      "path": "SIMPLIFIED_CHAR_FINDINGS.json",
+      "bytes": 438,
+      "sha256": "fd1df101d3716b2e7e5a7671ab1b19309e556c48f43d7c53a52f39d3879184e3"
+    },
+    {
+      "path": "check_run.txt",
+      "bytes": 19172,
+      "sha256": "7a4e47cfbc33e0eae493365431a33718d13d8fd921917b3bb8bf00c2d98263b2"
+    },
+    {
+      "path": "check_verify.txt",
+      "bytes": 702,
+      "sha256": "325b02a2a59d59da9f9df2df4e63ee891c1a015c2860a70be47747da1a5718e3"
+    },
+    {
+      "path": "compare_12.json",
+      "bytes": 447,
+      "sha256": "dfcb3688ba71a4c8660aadf38e6dcea0bcc83b4e72bb1696321e729111b7ec2e"
+    },
+    {
+      "path": "diff.txt",
+      "bytes": 11696,
+      "sha256": "a54f3b837ae7e2144b47b594488269610d82f82a51175700d088e54d26db1a2c"
+    },
+    {
+      "path": "dryrun_274/after.jsonl",
+      "bytes": 1530334,
+      "sha256": "285399a576a018080a9c646773edbf99023323e2e29dd78bcfdf91b6e42415c9"
+    },
+    {
+      "path": "dryrun_274/before.jsonl",
+      "bytes": 1530331,
+      "sha256": "da20e91c85d64b7ff0922e5226e192eccbb42ab6d4dee759989903d406bd1246"
+    },
+    {
+      "path": "dryrun_274/check_run.txt",
+      "bytes": 19172,
+      "sha256": "7a4e47cfbc33e0eae493365431a33718d13d8fd921917b3bb8bf00c2d98263b2"
+    },
+    {
+      "path": "dryrun_274/check_verify.txt",
+      "bytes": 702,
+      "sha256": "325b02a2a59d59da9f9df2df4e63ee891c1a015c2860a70be47747da1a5718e3"
+    },
+    {
+      "path": "dryrun_274/compare_12.json",
+      "bytes": 447,
+      "sha256": "dfcb3688ba71a4c8660aadf38e6dcea0bcc83b4e72bb1696321e729111b7ec2e"
+    },
+    {
+      "path": "dryrun_274/diff.txt",
+      "bytes": 11696,
+      "sha256": "a54f3b837ae7e2144b47b594488269610d82f82a51175700d088e54d26db1a2c"
+    },
+    {
+      "path": "dryrun_274/dryrun_report.json",
+      "bytes": 571,
+      "sha256": "bb6bad7d58c6bfbe4b17705c0ba6fe44cdff442f100fe0c7777cbf31d113ca37"
+    },
+    {
+      "path": "dryrun_274/final.md",
+      "bytes": 5926,
+      "sha256": "9d618a8fe7ac6b6f771b14cdff1311e26745eff3d0b9a221ffa1a17d177e4217"
+    },
+    {
+      "path": "dryrun_274/json_check.json",
+      "bytes": 830,
+      "sha256": "699b1ea7f45cd1a1b5511aeff126ca4ab2935648fda529c67b043a47ddde0c20"
+    },
+    {
+      "path": "dryrun_274/lint_final.json",
+      "bytes": 3501,
+      "sha256": "fe837c45da26ce7742d53bc8ccd7d32cbf3f3c997f04ea0479903d0777c31802"
+    },
+    {
+      "path": "dryrun_274/lint_source.json",
+      "bytes": 3495,
+      "sha256": "8131141bc101953aac6fab4d4159a0292c7143c12216f0ef95f42aa87648e966"
+    },
+    {
+      "path": "dryrun_274/protected_compare.json",
+      "bytes": 448,
+      "sha256": "15f9395f090858e2578c101f4655d4bc808e6795dcadce3da2e49aa4dc10049d"
+    },
+    {
+      "path": "dryrun_274/source.md",
+      "bytes": 6025,
+      "sha256": "62d21cfadd456d8234c6a8f54a7ac627b1411b9822f9eb4a81cfa94488bb8c4f"
+    },
+    {
+      "path": "final.md",
+      "bytes": 5926,
+      "sha256": "9d618a8fe7ac6b6f771b14cdff1311e26745eff3d0b9a221ffa1a17d177e4217"
+    },
+    {
+      "path": "json_check.json",
+      "bytes": 830,
+      "sha256": "699b1ea7f45cd1a1b5511aeff126ca4ab2935648fda529c67b043a47ddde0c20"
+    },
+    {
+      "path": "lint_final.json",
+      "bytes": 3501,
+      "sha256": "fe837c45da26ce7742d53bc8ccd7d32cbf3f3c997f04ea0479903d0777c31802"
+    },
+    {
+      "path": "lint_source.json",
+      "bytes": 3495,
+      "sha256": "8131141bc101953aac6fab4d4159a0292c7143c12216f0ef95f42aa87648e966"
+    },
+    {
+      "path": "selected.json",
+      "bytes": 7036,
+      "sha256": "a7ae95fc71ed594156ec7c3960c03c66f35f4b356bc057ffbe25f6d972621296"
+    },
+    {
+      "path": "source.md",
+      "bytes": 6025,
+      "sha256": "62d21cfadd456d8234c6a8f54a7ac627b1411b9822f9eb4a81cfa94488bb8c4f"
+    },
+    {
+      "path": "trial_after.jsonl",
+      "bytes": 88381,
+      "sha256": "7221087c6a3a465a75df5fb4a6af3c8ac99fe19f09bb2268d1b618689b42ae45"
+    },
+    {
+      "path": "trial_before.jsonl",
+      "bytes": 88378,
+      "sha256": "ab014a081149c21fd5507a4b82b79651346ee084fe484b0ae0f5fb17b2abb2c3"
+    }
+  ]
+}

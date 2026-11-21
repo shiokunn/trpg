@@ -1,153 +1,130 @@
-# 検証レポート（Phase 8 — llama.cpp v0.9.0 統合）
+# 検証レポート（Phase 9 — 推論安定化 / 2026-11-16）
 
 ## 0. 環境
 
 | 項目 | 値 |
 |---|---|
-| 端末 | arrows Alpha (FCNT M08 / fuji) |
-| Android | 16 (SDK 36) |
-| SoC | Dimensity 8350-Extreme (MT6897) |
-| RAM | 12GB |
+| 端末 | FCNT M08（model=M08, device=fuji, brand=FCNT） |
+| SoC | MediaTek MT6897（Dimensity 8350 系。指示書の環境に相当） |
+| Android | 16（SDK 36） |
+| RAM | `MemTotal 11,728,556 kB`（約11.2 GiB） / `MemAvailable 3,376,596 kB`（計測時点） |
 | ABI | arm64-v8a |
-| Thread Profile | A |
-| GGUF | `/sdcard/localLLM/qwen3-4b.Q4_K_M.gguf`（2.32 GiB, Q4_K, qwen3, 36 blocks, 40960 ctx） |
-| APK | `app-debug.apk`（CI run 42905312348 / 42992514053 成果物、v0.1.0、code=1） |
-| 既存アプリデータ | 導入前に完全バックアップ → アンインストール → インストール → 復元（DB・DataStore・Kyalulu 3.4GB も原本と完全一致） |
+| Thread Profile | A（ビルド時指定） |
+| スタティック設定 | Debug でも `RelWithDebInfo`（`-O2 -g -DNDEBUG`） |
+| モデル | `Kyalulu-E2B-JP-Rolepaly-beta-Q4_K_M.gguf`（3.2 GB, Q4_K_M, `nCtxTrain=131072`） |
+| コンテキスト | **8192**（本 Phase で推奨値を採用）。旧設定は 16384 |
+| APK | commit `2a2c51b` / CI run `43857282916` / v0.1.0 (code=1) |
+| APK SHA-256 | `b31e1cc8021d1cc84efc27d87404e16e957200f699ba03c044fb4ba0825940e4` |
+| 署名 | `CN=Android Debug, O=Android, C=US` |
+| ADB シリアル | `emulator-5554`（ただし `ro.soc.model=MT6897` の実機） |
 
-## 1. APK 導入
+> 本ファイルは 2026-11-16 時点の結果に更新した。Phase 8（llama.cpp v0.9.0 統合）の
+> 旧レポートは、端末・方法・結論が現在と一致しないため置き換えた。
+
+## 1. ビルド / テスト / APK 導入
 
 | 項目 | 結果 |
 |---|---|
-| アーキテクチャ | arm64-v8a（CI 成果物通り） |
-| 署名 | Signer DN: C=US, O=Android, CN=Android Debug |
-| インストール | 署名不一致のため `adb install -r` は失敗。バックアップ保存後、uninstall→install で導入（既存データは保護） |
-| 導入記録 | 2026-11-11 18:31:31（firstInstallTime/lastUpdateTime） |
+| C++ 構文検証 | `clang++ -std=c++17 -fsyntax-only -DTRPG_THREAD_PROFILE=0 ...` 成功 |
+| `./gradlew -p core test` | 150件成功（ローカル、2026-11-16） |
+| GitHub Actions | run `43857282916` / commit `2a2c51b` — **成功**（core 150件、app 11件、arm64-v8a APK） |
+| APK 導入 | `adb install -r app-debug.apk` 成功 |
+| 既存データ | `firstInstallTime=2026-11-12 07:17:30` は不変。セッション「霧灯台の残響 ／ カイル」は維持 |
+| `lastUpdateTime` | `2026-11-16 20:35:53` |
 
 **PASS**
 
-## 2. JNI ライブラリロード・アプリ起動
+## 2. モデル管理画面のメモリ推奨
 
-- アプリ起動時、クラッシュ・ANR なし。
-- `run-as` で Room DB (`trpg.db`) が正常にオープン（WAL 247KB も正常に同期）。
-- `logcat` に `TrpgLlama` タグの初期化ログ出力。
-
-**PASS**
-
-## 3. モデル読み込み（qwen3-4b.Q4_K_M）
-
-```
-llama_model_loader: loaded meta data with 28 key-value pairs and 398 tensors
-... qwen3.context_length u32 = 40960 ...
-print_info: file format = GGUF V3 (latest)
-print_info: file type   = Q4_K - Medium
-print_info: file size   = 2.32 GiB (4.95 BPW)
-init_tokenizer: initializing tokenizer for type 2
-load: 0 unused tokens
-sched_reserve: CPU compute buffer size = 329.77 MiB
-sched_reserve: graph: nodes = 1269, splits = 1, input objects = 4, input tensors = 9
-template_init=227ms template=applied explicit=1 applied=1
-attach_threadpool: call
-Threadpool attached: profile=A threads=1 strict_cpu=true cpus=7
-threadpool_attach=1ms ggml_threadpool available; profile=0; attach=true
-```
-
-画面：「モデルを読み込みました。」「qwen3 4B Q4_K - Medium」「コンテキスト 8192 / 学習時 40960・チャットテンプレート あり（対応済み）」「読み込み済み」
+- 起動直後は保存済みの `nCtx=16384` が表示され、警告が出た:
+  - `推奨: 8192 トークン（端末RAM 11.2 GB / モデル 3.2 GB）`
+  - `このモデルと端末RAMでは 16384 トークンはメモリ不足の可能性があります。推奨は 8192 トークンです。`
+- 「推奨値（8192）を使う」→「設定を保存」で 8192 を保存。警告は消えた。
+- 再読み込み後のモデル情報: `コンテキスト 8192 / 学習時 131072`。
 
 **PASS**
 
-## 4. テンプレート適用
+## 3. スレッド / バックエンド / メモリ
+
+読み込み直後のネイティブ・デバッグ情報:
 
 ```
-template_init=227ms template=applied explicit=1 applied=1
-template_apply[chat]: apply_ms=15 tokenize_ms=34 parts=7 tokens=737
+Threadpool attached: profile=A threads=4 strict_cpu=true cpus=7,4,5,6 allowed=0,1,2,3,4,5,6,7
+threads requested=4 actual=4
+llama_kv_cache: size = 96.00 MiB (8192 cells, 12 layers, 1/1 seqs), K (f16): 48.00 MiB, V (f16): 48.00 MiB
 ```
 
-`template=applied explicit=1 applied=1` → Qwen3 の GGUF 埋め込みテンプレートが正しく読み込まれ、`enable_thinking=false` で適用（`<|im_start|>` 等）。**テンプレート適用は正常動作**。
+- デバッグ画面で `Threads 4 / 4`、`CPU affinity ... allowed=0,1,2,3,4,5,6,7`、
+  `許可CPU（プロセス） 0-7` を確認。
+- 旧設定（16384）では `VmSwap` が約 2.04 GB に達していたが、8192 では読み込み直後
+  `VmRSS 4,964,904 kB` / `VmSwap 24,904 kB` に低下。KV も 96 MiB（16K の半分）。
+- デバッグ画面のメモリカードで `VmRSS 2,124,184 kB` / `VmSwap 179,888 kB` /
+  `MemAvailable 3,952,080 kB` / `SwapFree 4,659,088 kB` を確認（新規追加項目）。
+
+**PASS**（メモリ推奨の効果を実測で確認）
+
+## 4. 生成・KV キャッシュ
+
+初回（キャッシュなし）:
+
+```
+generate start: prompt_tokens=2314 budget=1088 cache_ms=0 reused=0
+[KvCache] prepare generation=1 status=miss reused=0 recompute=2314 cached=0 reason=no_cache
+```
+
+修復生成（同一ペアの再利用）:
+
+```
+generate start: prompt_tokens=2999 budget=1088 cache_ms=0 reused=2938
+[KvCache] finish generation=2 valid=1 cached=3623 reused=2938 computed=61 reason=prefix_reuse
+generate: prompt_tokens=2999 prompt_ms=841 generated_tokens=624 gen_ms=69188 tok_per_sec=9.02 ttft_ms=843 cancelled=0 failed=0
+[TokenCounter] finish generation=2 generated=624 maxTokens=1088 budget=1088 finishReason=eos limitReached=0
+```
+
+- 別の試行では `reused=2313 recompute=1` の再利用も確認。
+- 生成で得られた JSON は `difficulty` が契約値（4/6/8/10/12/14）外で、
+  `LOCATION_CHANGE` も「既にその場所にいます」だった。アプリ側の検証が働き、
+  ターンは保存されなかった。**これは既知のコンテンツ/契約順守の問題であり、
+  KV キャッシュや①の変更とは無関係**。
+- タイムアウト（5分）は発火しなかった。
+
+**PASS**（推論継続・KV 再利用）、**既知の残課題**（JSON 契約違反）
+
+## 5. キャンセル / エラー後復帰
+
+```
+graph_compute: ggml_backend_sched_graph_compute_async failed with error 1
+[KvCache] invalidate reason=decode_error cached_before=2555
+[KvCache] finish generation=4 valid=0 cached=0 reused=2555 computed=0 reason=decode_error
+generate: prompt_tokens=3138 prompt_ms=45585 generated_tokens=0 gen_ms=0 tok_per_sec=0.00 ttft_ms=-1 cancelled=1 failed=0
+[TokenCounter] finish generation=4 generated=0 maxTokens=1088 budget=1088 finishReason=cancelled limitReached=0
+```
+
+- UI に「生成をキャンセルしました。このターンは保存されていません。」を表示。
+- クラッシュ・ANR なし。ネイティブの KV を無効化し、リソース状態が整合。
+- キャンセル後の再生成も開始できた（KV は miss から再構築）。
 
 **PASS**
 
-## 5. Threadpool attach（Profile A）
+## 6. 未検証 / 残課題
 
-```
-Threadpool attached: profile=A threads=1 strict_cpu=true cpus=7
-```
+実機で意図的な再現を行っていない項目:
 
-Profile A は「最速コアあたり 1 スレッド」の仕様。端末の周波数：
-```
-cpu0-3: 2200000 / cpu4-6: 3200000 / cpu7: 3350000  → 最速は cpu7 のみ（1 コア）
-```
-そのため `threads = min(4, 1) = 1` になります。attach 自体は成功（`threadpool_attach=1ms`）。
+| 項目 | 状況 |
+|---|---|
+| 5分間の無進捗で watchdog が発火するか | 単体テストでは時間経過を検証済み。実機で5分待つ試験は未実施 |
+| `errorKind=alloc/context_alloc` の表示 | コード追加・パーサテスト済み。実機で OOM を強制していない |
+| 背景移行後の cpuset 縮小（0-2） | `keepScreenOn` と cpuset 交差で緩和。生成中にホームへ移す試験は未実施 |
+| モデル切り替え後の KV 無効化 | 前回セッションで一部確認済みだが、本 APK では未再検証 |
+| JSON 契約違反（difficulty）の是正 | ②〜⑥の③（選択肢/プロンプト改善）の対象 |
+| Vulkan バックエンド | 未ビルド・未検証（既定は CPU） |
 
-**attach は動作したが、実効スレッド数が 1 に低下（後述の生成不具合の原因）**
+## 7. 未コミット変更の扱い
 
-## 6. 生成（重大問題 — 原因確定）
+本 Phase では、以下の未コミット/未追跡ファイルに触れていない:
 
-### 6.1 現象
-- 世界生成（「宇宙」1 トピック、737 トークン）：355.7 秒かかり、`graph_compute: ggml_backend_sched_graph_compute_async failed with error 1` で中断。
-  ```
-  generate: prompt_tokens=737 prompt_ms=355704 generated_tokens=0 gen_ms=0 tok_per_sec=0.00 ttft_ms=-1 cancelled=1 failed=0
-  ```
-- 短プロンプト「宇宙」でも同一エラー：`cplan requested more threads (4) than available (1)`
-- **問題の原因はプロンプト長に依存せず、すべての生成で再現**
+- `.github/workflows/android.yml`（GBNF 検証ステップの追加）
+- `docs/LLAMA_V090_INVESTIGATION.md`, `docs/LLM_*.md`, `docs/PROMPT_EVAL_INVESTIGATION.md`
+- `scripts/gbnf-check/`, `scripts/validate-gbnf.sh`
 
-### 6.2 原因分析（確定）
-
-端末の CPU 周波数（実機確認）：
-```
-cpu0-3: 2200000 / cpu4-6: 3200000 / cpu7: 3350000  → 最速コアは cpu7 のみ（1 コア）
-```
-- Profile A の実装（`llama_jni.cpp` `build_threadpool_params()`、profile 0 の「one thread per core」分岐）は**最速コア 1 つあたり 1 スレッド**とするため、`threads = min(4, 1) = 1` になります。
-- スレッドプールが実質 1 スレッドしかない状態で llama.cpp の `ggml_backend_sched_graph_compute_async` を実行すると、cplan が並列化のために 4 スレッドを要求しますが「利用可能 (1)」となり、**error 1 (ALLOC_FAILED) で失敗**します。
-- 結果、prompt decode が極端に遅延（各トークンが逐次的に処理され 2 トークン/秒程度）し、最終的に graph_compute エラーで 1 トークンも生成されずにキャンセルされます。
-
-### 6.3 修正方針（承認待ち）
-`build_threadpool_params()` の profile 0 分岐に fallback を追加：`high_cpus` が 1 コアしかない場合でも、第 2 次クロック（3.2GHz 以上）や全コアを fallback として含め、最低スレッド数を確保する（例：`threads >= min(requested_threads, 2)` 程度）。
-
-**FAIL** — コード修正が必要。
-
-## 7. UTF-8 検証
-
-生成が失敗するため **未実施（BLOCKED）**。
-
-## 8. キャンセル検証
-
-- 生成中のキャンセル：UI 側は正常に反応（「生成をキャンセルしました」）、`generate: ... cancelled=1 failed=0`（約 340ms 応答）。
-- バックグラウンドの生成完了処理：未確認（graph_compute エラー直後の挙動）。
-- キャンセル直後の再生成・連続キャンセル防止：未実施（生成バグのため）。
-
-**部分 PASS**（UI 応答 OK / バックグラウンド完了は未確認）。
-
-## 9. モデル管理（読み込み→生成→解放→再読み込み→再生成）
-
-- 読み込み：PASS
-- 生成：FAIL（バグのため）
-- 解放 / 再読み込み / 再生成：未実施（生成バグのため）
-
-**未確認**（アプリ再起動済み、データは intact）。
-
-## 10. 発生した問題
-
-1. **生成バグ（重大）**：Profile A（最速コア 1 つあたり 1 スレッド）の仕様により、Dimensity 8350-Extreme では実効スレッド数が 1 となり、llama.cpp の `ggml_backend_sched_graph_compute_async` が error 1 で失敗。prompt decode に 355 秒かかり、1 トークンも生成されずにキャンセルされます。
-   - 再現条件：Profile A で、最速コアが 1 コアしかない環境（本端末）。
-   - 原因ファイル：`app/src/main/cpp/llama_jni.cpp` の `build_threadpool_params()`（profile 0 の「one thread per core」分岐）。
-   - 修正方針：`high_cpus` が 1 コアだけになる場合、第 2 次クロック以上のコアや全コアを fallback として含め、最低スレッド数を確保する。
-   - 修正にはコードレビューの承認が必要。
-
-2. **`adb install -r` 署名不一致**：CI 毎に異なる debug keystore になるため、インストール時はアンインストールを要する（アプリデータは別途バックアップ/復元が必要）。
-
-## 11. Phase 8 の残課題
-
-| No. | 課題 | 状態 |
-|---|---|---|
-| 1 | **生成バグ修正（Profile A / threadpool）** | **要コード修正（承認待ち）** |
-| 2 | UTF-8 検証（絵文字・日本語混在・ストリーミング一致） | バグ修正後に再試 |
-| 3 | 生成性能測定（TTFT/tok/s/tokenize_ms/clear_ms/decode_ms/attach_ms） | バグ修正後に再試 |
-| 4 | キャンセルの詳細検証（prompt decode 中/生成中/連続/再生成） | バグ修正後に再試 |
-| 5 | モデル管理（解放→再読み込み→再生成） | バグ修正後に再試 |
-| 6 | Golden test（Gemma4/Qwen3/LFM2.5/未対応テンプレート） | 未着手（P1-3） |
-| 7 | CI host job / A/B/C 計測 | 未着手（未承認） |
-| 8 | 実モデル（Kyalulu）による検証 | モデル未取得（本機には保存済みだが未使用） |
-
----
-
-*更新日：2026-11-11（arrows Alpha 実機検証。検証結果を docs/VERIFICATION.md に記録）*
+これらは今後のコミット判断を保留するため、そのまま保持する。

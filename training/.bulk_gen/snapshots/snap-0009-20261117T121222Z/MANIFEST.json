@@ -1,0 +1,32 @@
+{
+  "snapshot_id": "snap-0009-20261117T121222Z",
+  "created_at": "2026-11-17T12:12:22+00:00",
+  "note": "wave7a",
+  "source": "training/.bulk_gen/inbox (sealed batches only)",
+  "audit_reads": "snapshots/snap-0009-20261117T121222Z/raw",
+  "files": [
+    {
+      "file": "raw/trpg_gm/bgm14.jsonl",
+      "category": "trpg_gm",
+      "records": 42,
+      "sha256": "b8e3be6a83a8861e5ddd94ffa50a732c2d1989184deead851bc5e9373a75116b",
+      "bytes": 223525,
+      "sealed_at": "2026-11-17T12:12:22+00:00"
+    },
+    {
+      "file": "raw/world_json/bwd08.jsonl",
+      "category": "world_json",
+      "records": 25,
+      "sha256": "1c36f7e73f36c260c9bfaed3cee8647bc7fb8422d1e9ab004a3d819b800b4d85",
+      "bytes": 107553,
+      "sealed_at": "2026-11-17T12:12:22+00:00"
+    }
+  ],
+  "total_files": 2,
+  "total_records": 67,
+  "by_category": {
+    "trpg_gm": 42,
+    "world_json": 25,
+    "extraction": 0
+  }
+}

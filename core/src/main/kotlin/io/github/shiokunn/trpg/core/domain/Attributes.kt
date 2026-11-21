@@ -21,7 +21,7 @@ enum class AttributeId(val label: String, val meaning: String) {
 
 /**
  * Character attributes. Creation rules live in [io.github.shiokunn.trpg.core.rules.CharacterRules]:
- * each value is 1..5 and the sum is exactly 18.
+ * each value is 1..5. There is no fixed total.
  */
 @Serializable
 data class Attributes(
@@ -59,7 +59,6 @@ data class Attributes(
     companion object {
         const val MIN = 1
         const val MAX = 5
-        const val TOTAL_POINTS = 18
 
         fun balanced(): Attributes = Attributes(3, 3, 3, 3, 3, 3)
     }

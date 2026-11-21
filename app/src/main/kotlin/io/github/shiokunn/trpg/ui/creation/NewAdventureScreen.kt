@@ -501,7 +501,7 @@ private fun CharacterSummaryCard(character: CharacterDraft) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(10.dp))
-            Text("能力値（合計 ${character.attributes.total()} / 18）", style = MaterialTheme.typography.labelMedium)
+            Text("能力値（合計 ${character.attributes.total()}）", style = MaterialTheme.typography.labelMedium)
             Text(
                 AttributeId.entries.joinToString(" ／ ") { id ->
                     "${id.label} ${character.attributes.valueOf(id)}"

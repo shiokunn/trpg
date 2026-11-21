@@ -1,6 +1,8 @@
 package io.github.shiokunn.trpg.creation
 
 import io.github.shiokunn.trpg.ai.engine.EngineStatus
+import io.github.shiokunn.trpg.ai.engine.GenerationFailureKind
+import io.github.shiokunn.trpg.ai.engine.GenerationFinishReason
 import io.github.shiokunn.trpg.ai.engine.GenerationOutcome
 import io.github.shiokunn.trpg.ai.engine.GenerationProgress
 import io.github.shiokunn.trpg.ai.engine.GenerationRequest
@@ -11,8 +13,11 @@ import io.github.shiokunn.trpg.core.ai.AiParseResult
 import io.github.shiokunn.trpg.core.ai.CharacterDraft
 import io.github.shiokunn.trpg.core.ai.CharacterDraftParser
 import io.github.shiokunn.trpg.core.ai.WorldDraft
+import io.github.shiokunn.trpg.core.ai.WorldDraftGrammar
 import io.github.shiokunn.trpg.core.ai.WorldDraftParser
 import io.github.shiokunn.trpg.core.ai.toCharacter
+import io.github.shiokunn.trpg.core.debug.DebugConfig
+import io.github.shiokunn.trpg.core.debug.RawOutputJournal
 import io.github.shiokunn.trpg.core.domain.Location
 import io.github.shiokunn.trpg.core.domain.ModelSettings
 import io.github.shiokunn.trpg.core.domain.Npc
@@ -22,6 +27,9 @@ import io.github.shiokunn.trpg.core.domain.World
 import io.github.shiokunn.trpg.data.repository.ModelRepository
 import io.github.shiokunn.trpg.data.repository.NewAdventure
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.File
 import java.util.UUID
 
 enum class CreationMode(val label: String, val description: String) {
@@ -44,6 +52,8 @@ sealed interface CreationResult<out T> {
     data class Failed(
         val message: String,
         val errors: List<String> = emptyList(),
+        /** Engine-level classification, so the UI can tell a grammar failure apart. */
+        val failureKind: GenerationFailureKind? = null,
     ) : CreationResult<Nothing>
 }
 
@@ -57,6 +67,8 @@ sealed interface CreationResult<out T> {
 class AdventureCreator(
     private val models: ModelRepository,
     private val engine: InferenceEngine,
+    /** Root for debug-only raw replies. `null` keeps the feature completely off. */
+    private val debugRawRoot: File? = null,
 ) {
 
     suspend fun generateWorld(
@@ -69,7 +81,16 @@ class AdventureCreator(
             PromptMessage("system", WORLD_SYSTEM),
             PromptMessage("user", worldRequest(input)),
         )
-        return generateWithRepair(settings, messages, onProgress, WorldDraftParser::parse)
+        val journal = RawOutputJournal.begin(
+            root = debugRawRoot,
+            enabled = DebugConfig.isEnabled,
+            label = "world",
+        )
+        return generateWithRepair(
+            settings, messages, onProgress, WorldDraftParser::parse, WORLD_REPAIR_RULES,
+            grammar = WorldDraftGrammar.GBNF,
+            journal = journal,
+        )
     }
 
     suspend fun generateCharacter(
@@ -101,28 +122,80 @@ class AdventureCreator(
         messages: List<PromptMessage>,
         onProgress: (GenerationProgress) -> Unit,
         parser: (String) -> AiParseResult<T>,
+        repairRules: String = "",
+        grammar: String? = null,
+        journal: RawOutputJournal? = null,
     ): CreationResult<T> {
-        val first = generate(settings, messages, onProgress)
-        val firstText = when (first) {
+        val first = generate(settings, messages, onProgress, grammar)
+        val firstSuccess = when (first) {
             is GenerationOutcome.Cancelled -> return CreationResult.Cancelled
-            is GenerationOutcome.Failure -> return CreationResult.Failed(first.message)
-            is GenerationOutcome.Success -> first.text
+            is GenerationOutcome.Failure -> return CreationResult.Failed(
+                first.message,
+                failureKind = first.kind,
+            )
+            is GenerationOutcome.Success -> first
+        }
+        val firstText = firstSuccess.text
+        journal?.let { record ->
+            withContext(Dispatchers.IO) {
+                record.writeInitial(
+                    text = firstText,
+                    finishReason = firstSuccess.finishReason.name,
+                    generatedTokens = firstSuccess.generatedTokens,
+                    grammarApplied = grammar != null,
+                )
+            }
+        }
+        val firstTruncated = firstSuccess.isTruncated()
+        val firstParsed = if (firstTruncated) null else parser(firstText)
+        when (firstParsed) {
+            is AiParseResult.Success -> return CreationResult.Success(firstParsed.value)
+            is AiParseResult.Failure, null -> Unit
         }
 
-        when (val parsed = parser(firstText)) {
-            is AiParseResult.Success -> return CreationResult.Success(parsed.value)
-            is AiParseResult.Failure -> {
-                val repair = messages + PromptMessage("assistant", firstText) +
-                    PromptMessage("user", repairInstruction(parsed.errors))
-                val second = generate(settings, repair, onProgress)
-                return when (second) {
-                    is GenerationOutcome.Cancelled -> CreationResult.Cancelled
-                    is GenerationOutcome.Failure -> CreationResult.Failed(second.message)
-                    is GenerationOutcome.Success -> when (val retried = parser(second.text)) {
+        // Either the reply was truncated or it violated the JSON contract. Both
+        // are repaired once; a repair that is itself truncated is reported as a
+        // token-budget problem instead of being parsed as a complete answer.
+        val firstErrors = (firstParsed as? AiParseResult.Failure)?.errors
+            ?.map { it.message }
+            .orEmpty()
+        val errors = if (firstTruncated) {
+            firstErrors + truncationMessage(firstSuccess)
+        } else {
+            firstErrors
+        }
+        val repair = messages + PromptMessage("assistant", firstText) +
+            PromptMessage("user", repairInstruction(errors, repairRules))
+        val second = generate(settings, repair, onProgress, grammar)
+        return when (second) {
+            is GenerationOutcome.Cancelled -> CreationResult.Cancelled
+            is GenerationOutcome.Failure -> CreationResult.Failed(
+                second.message,
+                failureKind = second.kind,
+            )
+            is GenerationOutcome.Success -> {
+                journal?.let { record ->
+                    withContext(Dispatchers.IO) {
+                        record.writeRepair(
+                            text = second.text,
+                            finishReason = second.finishReason.name,
+                            generatedTokens = second.generatedTokens,
+                            grammarApplied = grammar != null,
+                        )
+                    }
+                }
+                if (second.isTruncated()) {
+                    CreationResult.Failed(
+                        "AIの応答がトークン上限で途中に切れました。最大生成トークンを増やすか、" +
+                            "コンテキストサイズを下げてください。",
+                        errors + truncationMessage(second),
+                    )
+                } else {
+                    when (val retried = parser(second.text)) {
                         is AiParseResult.Success -> CreationResult.Success(retried.value)
                         is AiParseResult.Failure -> CreationResult.Failed(
                             "AIの応答が規定のJSON契約を満たしませんでした。もう一度生成してください。",
-                            retried.errors,
+                            retried.errors.map { it.message },
                         )
                     }
                 }
@@ -130,15 +203,27 @@ class AdventureCreator(
         }
     }
 
+    private fun GenerationOutcome.Success.isTruncated(): Boolean =
+        finishReason == GenerationFinishReason.LENGTH ||
+            finishReason == GenerationFinishReason.CONTEXT
+
+    private fun truncationMessage(outcome: GenerationOutcome.Success): String {
+        val budget = if (outcome.budget > 0) "（予算 ${outcome.budget} トークン）" else ""
+        return "応答がトークン上限${budget}で途中に切れました。" +
+            "生成 ${outcome.generatedTokens} トークン、終了理由 ${outcome.finishReason.name.lowercase()}。"
+    }
+
     private suspend fun generate(
         settings: ModelSettings,
         messages: List<PromptMessage>,
         onProgress: (GenerationProgress) -> Unit,
+        grammar: String? = null,
     ): GenerationOutcome = try {
         engine.generate(
             GenerationRequest(
                 messages = messages,
                 params = SamplingParams.from(settings).copy(temperature = (settings.temperature + 0.1f).coerceAtMost(1.2f)),
+                grammar = grammar,
             ),
             onToken = {},
             onProgress = onProgress,
@@ -172,16 +257,29 @@ class AdventureCreator(
         append("シナリオ: ").append(world.scenario.title).append('\n')
         append("あらすじ: ").append(world.scenario.premise).append('\n')
         append("主人公への希望: ").append(input.protagonistWish.ifBlank { "指定なし" }).append('\n')
-        append("能力値は各1〜5で合計18、スキルはレベル合計6（各0〜2）、所持品は2〜5個にしてください。")
+        append("能力値は各1〜5、スキルは3〜5個（各0〜2）、所持品は2〜5個にしてください。合計値の指定はありません。")
     }
 
-    private fun repairInstruction(errors: List<String>): String = buildString {
+    private fun repairInstruction(errors: List<String>, extraRules: String = ""): String = buildString {
         append("前回の応答は次の理由で契約に違反していました。\n")
         errors.take(10).forEach { error -> append("- ").append(error).append('\n') }
+        if (extraRules.isNotBlank()) {
+            append(extraRules.trimEnd()).append('\n')
+        }
         append("説明やコードフェンスを含めず、指定のJSONオブジェクトを1つだけ出力してください。")
     }
 
     private companion object {
+        val WORLD_REPAIR_RULES = """
+            - JSONオブジェクト1つだけを出力する。
+            - 文字列の開始・終了にはASCIIの " だけを使い、閉じ括弧 」 の直後にも " を置く。スマートクォートは使わない。
+            - 末尾カンマとJSONコメントを使わない。
+            - 配列は要素が1つでも必ず配列にし、配列フィールドに文字列を直接入れない。任意配列は [] にする。
+            - 数値は数値で出力する。
+            - NPCのcombatが不要なら null にし、空の {} は使わない。
+            - キー名・階層は元のJSONスキーマと一致させる。
+        """.trimIndent()
+
         val WORLD_SYSTEM = """
             あなたは完全オフラインのAndroid TRPGアプリで、世界観とシナリオを設計するゲームデザイナーです。
             日本語で、プレイヤーが自由に探索できる具体的な世界を作ってください。
@@ -191,7 +289,14 @@ class AdventureCreator(
             - すべての文字列は日本語。空の必須項目を作らない。
             - 既存の特定作品の固有名詞をそのまま使わない。
             - secrets にはGM専用の秘密（真相・黒幕・隠された事実）を入れる。
-            - NPCのcombatは戦闘になる場合のみ設定し、hpは1〜30、攻撃力・防御は0〜20、技能は0〜3。
+            - JSONのキー名・階層は【JSONスキーマ】と一致させる。キーを追加・変更しない。
+            - 文字列の開始・終了にはASCIIの " だけを使う。スマートクォート（“ ”）や日本語の引用符をJSONの区切りに使わない。
+            - 日本語の 「」『』 は文字列の内容としてのみ使い、閉じ括弧 」 の直後にも必ずASCIIの " を置いて文字列を閉じる。
+            - 末尾カンマとJSONコメント（//、/* */）は禁止。
+            - 配列フィールドは要素が1つでも必ず配列にする。配列フィールドに文字列を直接入れない。任意配列が不要なら [] にする。
+            - 数値フィールドは数値で出力し、文字列にしない。
+            - NPCのcombatは不要なら null にする。空のcombatオブジェクト {} は出力しない。戦闘時のみ hp 1〜30、攻撃力・防御 0〜20、技能 0〜3。
+            - 戦闘NPCのcombat例: {"attackPower": 3, "defense": 1, "attackSkillLevel": 1, "defenseSkillLevel": 1, "hp": 10}
 
             【JSONスキーマ】
             {
@@ -203,12 +308,12 @@ class AdventureCreator(
               "history": "歴史",
               "geography": "地理",
               "socialStructure": "社会構造",
-              "factions": ["勢力名"],
+              "factions": ["勢力A", "勢力B"],
               "techMagic": "技術・魔法",
-              "specialSettings": ["特殊設定"],
+              "specialSettings": ["特殊設定A", "特殊設定B"],
               "objective": "プレイヤーの目的",
               "problem": "世界が抱える問題",
-              "secrets": ["GM専用の秘密"],
+              "secrets": ["秘密A", "秘密B"],
               "scenario": {
                 "title": "シナリオ名",
                 "premise": "あらすじ",
@@ -220,8 +325,8 @@ class AdventureCreator(
                 "location": {
                   "name": "開始地点名",
                   "description": "説明",
-                  "connections": ["つながる場所"],
-                  "secrets": ["GM専用の秘密"]
+                  "connections": ["場所A", "場所B"],
+                  "secrets": ["秘密A", "秘密B"]
                 },
                 "npcs": [
                   {
@@ -231,14 +336,8 @@ class AdventureCreator(
                     "occupation": "職業",
                     "disposition": "プレイヤーへの態度",
                     "locationName": "開始地点名",
-                    "secrets": ["GM専用の秘密"],
-                    "combat": {
-                      "attackPower": 3,
-                      "defense": 1,
-                      "attackSkillLevel": 1,
-                      "defenseSkillLevel": 1,
-                      "hp": 10
-                    }
+                    "secrets": ["秘密A", "秘密B"],
+                    "combat": null
                   }
                 ],
                 "quests": [
@@ -246,7 +345,7 @@ class AdventureCreator(
                     "title": "クエスト名",
                     "description": "説明",
                     "objectives": ["目的1", "目的2"],
-                    "rewards": ["報酬"]
+                    "rewards": ["報酬A", "報酬B"]
                   }
                 ]
               }
@@ -258,8 +357,9 @@ class AdventureCreator(
             日本語で、世界とシナリオに合う魅力的なキャラクターを作ってください。
 
             【厳守する作成ルール】
-            - 能力値 str/dex/int/wil/per/cha はそれぞれ1〜5の整数で、合計は必ず18。
-            - スキルは3〜5個。各レベルは0〜2で、レベルの合計は必ず6。
+            - 能力値 str/dex/int/wil/per/cha はそれぞれ1〜5の整数。
+            - スキルは3〜5個。各レベルは0〜2。
+            - 能力値・スキルの合計値を特定の値に合わせる必要はありません。
             - 所持品は2〜5個。quantityは1〜99、power/defenseは0〜20。
             - JSONオブジェクト1つだけを出力する。説明文・コードフェンス・JSON以外の文字を含めない。
 

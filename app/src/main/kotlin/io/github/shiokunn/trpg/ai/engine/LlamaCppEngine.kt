@@ -9,9 +9,11 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -46,16 +48,17 @@ class LlamaCppEngine(
         withContext(Dispatchers.Default) {
             try {
                 LlamaCppNative.ensureInitialized(nativeLibraryDir)
+                val normalized = settings.normalized()
                 val raw = LlamaCppNative.nativeLoadModel(
                     path = modelPath,
-                    nCtx = settings.normalized().nCtx,
+                    nCtx = normalized.nCtx,
                     nThreads = defaultThreads(),
-                    nGpuLayers = settings.normalized().gpuLayers,
+                    nGpuLayers = normalized.gpuLayers,
                 )
                 val info = LlamaCppNative.parseModelInfo(raw)
-                    ?: throw IllegalStateException(
-                        LlamaCppNative.parseError(raw) ?: "モデルの読み込みに失敗しました",
-                    )
+                if (info == null) {
+                    throw IllegalStateException(loadErrorMessage(raw, normalized.nCtx))
+                }
                 _status.value = EngineStatus.Ready(modelFileName, info)
                 Result.success(info)
             } catch (t: Throwable) {
@@ -157,6 +160,22 @@ class LlamaCppEngine(
                             }
                         }
 
+                        // The native call is synchronous. If the model stops making
+                        // progress (swap thrash, a stuck backend, ...) the watchdog
+                        // asks the native side to abort so the UI is not stuck forever.
+                        val activity = NoProgressTimer(NO_PROGRESS_TIMEOUT_NANOS)
+                        val timedOut = AtomicBoolean(false)
+                        val watchdog = launch {
+                            while (isActive) {
+                                delay(WATCHDOG_POLL_MS)
+                                if (activity.timedOut()) {
+                                    timedOut.set(true)
+                                    LlamaCppNative.nativeCancelGeneration(id)
+                                    break
+                                }
+                            }
+                        }
+
                         var thrown: Throwable? = null
                         val raw = try {
                             if (request.prompt.isNullOrBlank()) {
@@ -182,6 +201,7 @@ class LlamaCppEngine(
                                     else -> null
                                 }
                                 if (formatFailure != null) {
+                                    watchdog.cancel()
                                     pieces.close()
                                     consumer.join()
                                     progress.finish(
@@ -205,9 +225,11 @@ class LlamaCppEngine(
                                     seed = params.seed,
                                     generationId = id,
                                     callback = TokenCallback { piece, generated ->
+                                        activity.touch()
                                         pieces.trySend(GeneratedPiece(piece, generated))
                                         recording?.onToken() // DEBUG MODE (temporary)
                                     },
+                                    grammar = request.grammar,
                                 )
                             } else {
                                 LlamaCppNative.nativeGenerateEx(
@@ -220,17 +242,20 @@ class LlamaCppEngine(
                                     seed = params.seed,
                                     generationId = id,
                                     callback = TokenCallback { piece, generated ->
+                                        activity.touch()
                                         pieces.trySend(GeneratedPiece(piece, generated))
                                         recording?.onToken() // DEBUG MODE (temporary)
                                     },
                                     stops = emptyArray(),
                                     addSpecial = true,
+                                    grammar = request.grammar,
                                 )
                             }
                         } catch (t: Throwable) {
                             thrown = t
                             null
                         } finally {
+                            watchdog.cancel()
                             pieces.close()
                         }
 
@@ -239,13 +264,26 @@ class LlamaCppEngine(
                         val failure = thrown
                         if (failure != null) {
                             if (failure is CancellationException) throw failure
-                            val outcome = GenerationOutcome.Failure(
-                                when {
-                                    failure is OutOfMemoryError -> OOM_GENERATE_MESSAGE
-                                    else -> failure.message?.takeIf { it.isNotBlank() }
-                                        ?: "推論中にエラーが発生しました"
-                                },
-                            )
+                            val timeoutNow = timedOut.get()
+                            val outcome = if (timeoutNow) {
+                                GenerationOutcome.Failure(
+                                    TIMEOUT_MESSAGE,
+                                    GenerationFailureKind.TIMEOUT,
+                                )
+                            } else {
+                                GenerationOutcome.Failure(
+                                    when {
+                                        failure is OutOfMemoryError -> OOM_GENERATE_MESSAGE
+                                        else -> failure.message?.takeIf { it.isNotBlank() }
+                                            ?: "推論中にエラーが発生しました"
+                                    },
+                                    if (failure is OutOfMemoryError) {
+                                        GenerationFailureKind.MEMORY
+                                    } else {
+                                        GenerationFailureKind.INFERENCE
+                                    },
+                                )
+                            }
                             progress.finish(
                                 finishReason = GenerationFinishReason.ERROR,
                                 limitReached = false,
@@ -257,12 +295,14 @@ class LlamaCppEngine(
                         // DEBUG MODE (temporary) — parses the metrics object only.
                         recording?.attachResult(raw)
                         val result = LlamaCppNative.parseGeneration(raw)
+                        val timedOutNow = timedOut.get()
                         progress.finish(
                             generatedTokens = result.generatedTokens.takeIf { it >= 0 }
                                 ?: progress.lastGenerated,
                             promptTokens = result.promptTokens.takeIf { it >= 0 },
                             budget = result.budget.takeIf { it > 0 },
                             finishReason = when {
+                                timedOutNow -> GenerationFinishReason.ERROR
                                 result.error != null -> GenerationFinishReason.ERROR
                                 result.cancelled -> GenerationFinishReason.CANCELLED
                                 else -> GenerationFinishReason.fromWire(result.finishReason)
@@ -274,9 +314,37 @@ class LlamaCppEngine(
                             },
                         )
                         val outcome = when {
+                            // A completion that raced the watchdog is still a success.
+                            (result.cancelled || result.error != null) && timedOutNow ->
+                                GenerationOutcome.Failure(
+                                    TIMEOUT_MESSAGE,
+                                    GenerationFailureKind.TIMEOUT,
+                                )
                             result.cancelled -> GenerationOutcome.Cancelled
-                            result.error != null -> GenerationOutcome.Failure(result.error)
-                            else -> GenerationOutcome.Success(result.text)
+                            result.error != null -> GenerationOutcome.Failure(
+                                result.error,
+                                when (result.errorKind) {
+                                    "grammar" -> GenerationFailureKind.GRAMMAR
+                                    "memory", "context" -> GenerationFailureKind.MEMORY
+                                    else -> GenerationFailureKind.INFERENCE
+                                },
+                            )
+                            else -> GenerationOutcome.Success(
+                                text = result.text,
+                                finishReason = GenerationFinishReason.fromWire(result.finishReason),
+                                limitReached = result.limitReached == true,
+                                generatedTokens = result.generatedTokens.takeIf { it >= 0 } ?: 0,
+                                promptTokens = result.promptTokens.takeIf { it >= 0 } ?: 0,
+                                budget = result.budget.takeIf { it > 0 } ?: 0,
+                                kvCache = KvCacheStats(
+                                    valid = result.kvCache.valid,
+                                    hit = result.kvCache.hit,
+                                    reusedTokens = result.kvCache.reusedTokens,
+                                    computedPromptTokens = result.kvCache.computedPromptTokens,
+                                    cachedTokens = result.kvCache.cachedTokens,
+                                    invalidationReason = result.kvCache.invalidationReason,
+                                ),
+                            )
                         }
                         recording?.finish(outcome)
                         outcome
@@ -333,9 +401,28 @@ class LlamaCppEngine(
         activeGenerationId.set(0)
     }
 
+    private fun loadErrorMessage(raw: String?, nCtx: Int): String {
+        val native = LlamaCppNative.parseError(raw)
+        return when (LlamaCppNative.parseErrorKind(raw)) {
+            "context_alloc" ->
+                "推論コンテキストの確保に失敗しました。コンテキストサイズ（現在 ${nCtx}）を下げるか、より小さいモデルを使用してください。"
+            "model_load" ->
+                "GGUFモデルの読み込みに失敗しました。ファイル形式と空きメモリを確認し、コンテキストサイズを下げるか小さいモデルを使用してください。"
+            "encoder_only" ->
+                "エンコーダ専用モデルには対応していません。デコーダ対応のGGUFモデルを使用してください。"
+            "invalid_path" ->
+                "モデルファイルのパスが無効です。モデルを取り込み直してください。"
+            "batch_alloc" ->
+                "推論バッチの確保に失敗しました。空きメモリを増やし、コンテキストサイズを下げてください。"
+            else -> native
+                ?: "モデルの読み込みに失敗しました（ネイティブライブラリまたはメモリを確認してください）"
+        }
+    }
+
     /**
      * Use the build-time thread profile: profile A uses 4 threads, B/C use 6.
-     * The native side applies CPU affinity for the selected profile.
+     * The native side applies CPU affinity for the selected profile and may reduce
+     * the actual count to the process cpuset.
      */
     private fun defaultThreads(): Int {
         val profileThreads = when (BuildConfig.THREAD_PROFILE) {
@@ -431,3 +518,7 @@ private class ProgressReporter(
 private const val TAG = "TrpgLlama"
 private const val PROGRESS_UPDATE_INTERVAL_NANOS = 150_000_000L
 private const val PROGRESS_LOG_INTERVAL_NANOS = 1_000_000_000L
+private const val WATCHDOG_POLL_MS = 5_000L
+private const val NO_PROGRESS_TIMEOUT_NANOS = 300_000_000_000L
+private const val TIMEOUT_MESSAGE =
+    "5分間トークンが生成されなかったため推論を停止しました。端末を再起動するか、コンテキストサイズを下げて再試行してください。"

@@ -1,0 +1,150 @@
+{"id":"ex-0001","labels":[]}
+{"id":"ex-0002","labels":[]}
+{"id":"ex-0003","labels":[]}
+{"id":"ex-0004","labels":[]}
+{"id":"ex-0005","labels":[]}
+{"id":"ex-0006","labels":[]}
+{"id":"ex-0007","labels":[]}
+{"id":"ex-0008","labels":[]}
+{"id":"ex-0009","labels":[]}
+{"id":"ex-0010","labels":[]}
+{"id":"ex-0011","labels":[]}
+{"id":"ex-0012","labels":[]}
+{"id":"ex-0013","labels":[]}
+{"id":"ex-0014","labels":[]}
+{"id":"ex-0015","labels":[]}
+{"id":"ex-0016","labels":[]}
+{"id":"ex-0017","labels":[]}
+{"id":"ex-0018","labels":[]}
+{"id":"ex-0019","labels":[{"category":"review","confidence":0.6,"evidence":"上流は渡し守の小屋へ——原文は『上流の渡し守は初めての客に場所を教え』であり、『渡し守の小屋』という地点は明示されていない（妥当な推測か曖昧）"}]}
+{"id":"ex-0020","labels":[]}
+{"id":"ex-0021","labels":[]}
+{"id":"ex-0022","labels":[]}
+{"id":"ex-0023","labels":[]}
+{"id":"ex-0024","labels":[]}
+{"id":"ex-0025","labels":[]}
+{"id":"ex-0026","labels":[{"category":"fabrication","confidence":0.85,"evidence":"軟膏には秘密の配合がある——原文は薬草を焙じて軟膏を作るのみで『秘密の配合』の記述なし"}]}
+{"id":"ex-0027","labels":[]}
+{"id":"ex-0028","labels":[]}
+{"id":"ex-0029","labels":[{"category":"fabrication","confidence":0.85,"evidence":"口数が少な目つきが鋭い——原文に性格の記述はなく、原文は『森の獣の通り道を知り、罠を仕掛ける』のみ"}]}
+{"id":"ex-0030","labels":[{"category":"fabrication","confidence":0.85,"evidence":"写した巻物の一部を自分の物として保管している——原文は古い文字を写し巻物を修繕するのみで、そのような秘密の記述なし"}]}
+{"id":"ex-0031","labels":[]}
+{"id":"ex-0032","labels":[]}
+{"id":"ex-0033","labels":[{"category":"fabrication","confidence":0.85,"evidence":"盗んだ品を橋の下に隠している"}]}
+{"id":"ex-0034","labels":[]}
+{"id":"ex-0035","labels":[]}
+{"id":"ex-0036","labels":[]}
+{"id":"ex-0037","labels":[{"category":"fabrication","confidence":0.85,"evidence":"沈んだ船の場所を知っている"}]}
+{"id":"ex-0038","labels":[]}
+{"id":"ex-0039","labels":[]}
+{"id":"ex-0040","labels":[]}
+{"id":"ex-0041","labels":[{"category":"fabrication","confidence":0.85,"evidence":"星図にだけ記した場所がある"}]}
+{"id":"ex-0042","labels":[]}
+{"id":"ex-0043","labels":[]}
+{"id":"ex-0044","labels":[{"category":"review","confidence":0.65,"evidence":"薬師の元へ届ける"}]}
+{"id":"ex-0045","labels":[]}
+{"id":"ex-0046","labels":[]}
+{"id":"ex-0047","labels":[]}
+{"id":"ex-0048","labels":[]}
+{"id":"ex-0049","labels":[]}
+{"id":"ex-0050","labels":[]}
+{"id":"ex-0051","labels":[]}
+{"id":"ex-0052","labels":[]}
+{"id":"ex-0053","labels":[]}
+{"id":"ex-0054","labels":[]}
+{"id":"ex-0055","labels":[]}
+{"id":"ex-0056","labels":[]}
+{"id":"ex-0057","labels":[]}
+{"id":"ex-0058","labels":[]}
+{"id":"ex-0059","labels":[]}
+{"id":"ex-0060","labels":[{"category":"fabrication","confidence":0.9,"evidence":"報酬 米・木札（原文は報酬内容を指定せず「片方だけでは報酬は出ない」のみ）"}]}
+{"id": "ex-0061", "labels": []}
+{"id": "ex-0062", "labels": [{"category": "review", "confidence": 0.65, "evidence": "QUEST_OBJECTIVE_PROGRESSのreason『基壇の文字を写し』——原文はq1『塔の文字を写す』の「最初の目標を進めた」のみで『基壇』という記述はなく、具体地点が捏造されている可能性（妥当な推測かどうか曖昧）"}]}
+{"id": "ex-0063", "labels": []}
+{"id": "ex-0064", "labels": [{"category": "contradiction", "confidence": 0.8, "evidence": "ITEM_REMOVEのreason『移動の前に乾パンを一つ食べ』——原文は『l2「岬の小屋」へ移動し、乾パンを一つ食べた』で移動の後に食べる順序であり、前後関係が反転している"}]}
+{"id": "ex-0065", "labels": []}
+{"id": "ex-0066", "labels": []}
+{"id": "ex-0067", "labels": []}
+{"id": "ex-0068", "labels": []}
+{"id": "ex-0069", "labels": []}
+{"id": "ex-0070", "labels": []}
+{"id": "ex-0071", "labels": []}
+{"id": "ex-0072", "labels": []}
+{"id": "ex-0073", "labels": []}
+{"id": "ex-0074", "labels": []}
+{"id": "ex-0075", "labels": []}
+{"id": "ex-0076", "labels": []}
+{"id": "ex-0077", "labels": []}
+{"id": "ex-0078", "labels": []}
+{"id": "ex-0079", "labels": []}
+{"id": "ex-0080", "labels": []}
+{"id": "ex-0081", "labels": []}
+{"id": "ex-0082", "labels": []}
+{"id": "ex-0083", "labels": []}
+{"id": "ex-0084", "labels": []}
+{"id": "ex-0085", "labels": []}
+{"id": "ex-0086", "labels": []}
+{"id": "ex-0087", "labels": []}
+{"id": "ex-0088", "labels": []}
+{"id": "ex-0089", "labels": []}
+{"id": "ex-0090", "labels": []}
+{"id":"ex-0091","labels":[]}
+{"id":"ex-0092","labels":[]}
+{"id":"ex-0093","labels":[]}
+{"id":"ex-0094","labels":[]}
+{"id":"ex-0095","labels":[]}
+{"id":"ex-0096","labels":[]}
+{"id":"ex-0097","labels":[]}
+{"id":"ex-0098","labels":[]}
+{"id":"ex-0099","labels":[]}
+{"id":"ex-0100","labels":[]}
+{"id":"ex-0101","labels":[]}
+{"id":"ex-0102","labels":[]}
+{"id":"ex-0103","labels":[]}
+{"id":"ex-0104","labels":[]}
+{"id":"ex-0105","labels":[]}
+{"id":"ex-0106","labels":[]}
+{"id":"ex-0107","labels":[]}
+{"id":"ex-0108","labels":[]}
+{"id":"ex-0109","labels":[]}
+{"id":"ex-0110","labels":[]}
+{"id":"ex-0111","labels":[]}
+{"id":"ex-0112","labels":[]}
+{"id":"ex-0113","labels":[]}
+{"id":"ex-0114","labels":[]}
+{"id":"ex-0115","labels":[]}
+{"id":"ex-0116","labels":[]}
+{"id":"ex-0117","labels":[]}
+{"id":"ex-0118","labels":[]}
+{"id":"ex-0119","labels":[]}
+{"id":"ex-0120","labels":[]}
+{"id":"ex-0121","labels":[]}
+{"id":"ex-0122","labels":[]}
+{"id":"ex-0123","labels":[]}
+{"id":"ex-0124","labels":[]}
+{"id":"ex-0125","labels":[]}
+{"id":"ex-0126","labels":[]}
+{"id":"ex-0127","labels":[]}
+{"id":"ex-0128","labels":[]}
+{"id":"ex-0129","labels":[]}
+{"id":"ex-0130","labels":[]}
+{"id":"ex-0131","labels":[]}
+{"id":"ex-0132","labels":[]}
+{"id":"ex-0133","labels":[]}
+{"id":"ex-0134","labels":[]}
+{"id":"ex-0135","labels":[]}
+{"id":"ex-0136","labels":[]}
+{"id":"ex-0137","labels":[]}
+{"id":"ex-0138","labels":[{"category":"review","confidence":0.6,"evidence":"connections『南の難所への道』/『北の関門への道』——原文は『北の関門と南の難所が記されている』のみで、両者を結ぶ道は明示されていない（妥当な推測かどうか曖昧）"}]}
+{"id":"ex-0139","labels":[]}
+{"id":"ex-0140","labels":[]}
+{"id":"ex-0141","labels":[]}
+{"id":"ex-0142","labels":[]}
+{"id":"ex-0143","labels":[]}
+{"id":"ex-0144","labels":[]}
+{"id":"ex-0145","labels":[]}
+{"id":"ex-0146","labels":[]}
+{"id":"ex-0147","labels":[]}
+{"id":"ex-0148","labels":[]}
+{"id":"ex-0149","labels":[]}
+{"id":"ex-0150","labels":[]}

@@ -42,6 +42,21 @@ int g_n_ctx = 0;
 int g_n_batch = 512;
 bool g_backend_initialized = false;
 
+// Persistent KV cache for sequence 0. The context owns the actual KV tensors;
+// this structure only records which token prefix those tensors represent.
+// It survives between generations and is invalidated on model reload, when the
+// inference settings change, or when the native memory no longer matches.
+std::string g_model_cache_fingerprint;
+
+struct KvCacheState {
+    bool valid = false;
+    std::vector<llama_token> tokens;
+    std::string fingerprint;
+    std::string settings_key;
+};
+
+KvCacheState g_kv_cache;
+
 using ggml_threadpool_new_fn = ggml_threadpool_t (*)(ggml_threadpool_params *);
 using ggml_threadpool_free_fn = void (*)(ggml_threadpool_t);
 
@@ -130,8 +145,13 @@ std::string json_escape(const std::string & value) {
     return out;
 }
 
-std::string error_json(const std::string & message) {
-    return "{\"ok\":false,\"error\":\"" + json_escape(message) + "\"}";
+std::string error_json(const std::string & message, const std::string & kind = std::string()) {
+    std::string out = "{\"ok\":false,\"error\":\"" + json_escape(message) + "\"";
+    if (!kind.empty()) {
+        out += ",\"errorKind\":\"" + json_escape(kind) + "\"";
+    }
+    out += "}";
+    return out;
 }
 
 std::string chat_template_status() {
@@ -217,6 +237,51 @@ std::string token_to_piece(const llama_vocab * vocab, llama_token token) {
     return std::string(buffer.data(), static_cast<size_t>(n));
 }
 
+size_t common_token_prefix(
+    const std::vector<llama_token> & a,
+    const std::vector<llama_token> & b) {
+    const size_t limit = std::min(a.size(), b.size());
+    size_t i = 0;
+    while (i < limit && a[i] == b[i]) {
+        ++i;
+    }
+    return i;
+}
+
+std::string kv_settings_key(
+    int32_t max_tokens,
+    float temperature,
+    float top_p,
+    int32_t top_k,
+    float repeat_penalty) {
+    char buffer[256];
+    std::snprintf(
+        buffer,
+        sizeof(buffer),
+        "max=%d;temp=%.4f;top_p=%.4f;top_k=%d;rep=%.4f",
+        max_tokens,
+        temperature,
+        top_p,
+        top_k,
+        repeat_penalty);
+    return std::string(buffer);
+}
+
+// The cache is only meaningful while the native memory contains exactly the
+// token prefix recorded in g_kv_cache. Any mismatch is a hard invalidation:
+// reusing a wrong prefix would silently corrupt the model context.
+void invalidate_kv_cache_locked(const char * reason, bool clear_memory) {
+    const size_t cached_before = g_kv_cache.tokens.size();
+    g_kv_cache.valid = false;
+    g_kv_cache.tokens.clear();
+    g_kv_cache.fingerprint.clear();
+    g_kv_cache.settings_key.clear();
+    if (clear_memory && g_ctx != nullptr) {
+        llama_memory_clear(llama_get_memory(g_ctx), false);
+    }
+    LOGI("[KvCache] invalidate reason=%s cached_before=%zu", reason, cached_before);
+}
+
 std::string backend_name_for_reg(ggml_backend_reg_t reg) {
     const char * name = ggml_backend_reg_name(reg);
     return name == nullptr ? "unknown" : std::string(name);
@@ -272,34 +337,43 @@ std::string model_info_json() {
     return out.str();
 }
 
-std::vector<int> read_cpu_list(const std::string & path) {
-    std::ifstream input(path);
-    if (!input) {
-        return {};
-    }
-    std::string content;
-    std::getline(input, content);
+std::vector<int> parse_cpu_list(const std::string & content) {
     std::vector<int> cpus;
     std::size_t pos = 0;
     while (pos < content.size()) {
-        while (pos < content.size() && (content[pos] == ',' || content[pos] == ' ')) {
+        while (pos < content.size() &&
+               (content[pos] == ',' || content[pos] == ' ' || content[pos] == '\t')) {
             ++pos;
         }
         if (pos >= content.size()) {
             break;
         }
         int start = 0;
+        bool has_digit = false;
         while (pos < content.size() && content[pos] >= '0' && content[pos] <= '9') {
             start = start * 10 + (content[pos] - '0');
+            has_digit = true;
             ++pos;
+        }
+        if (!has_digit) {
+            // Skip unexpected characters instead of looping forever on malformed input.
+            while (pos < content.size() && content[pos] != ',') {
+                ++pos;
+            }
+            continue;
         }
         int end = start;
         if (pos < content.size() && content[pos] == '-') {
             ++pos;
             end = 0;
+            bool has_end = false;
             while (pos < content.size() && content[pos] >= '0' && content[pos] <= '9') {
                 end = end * 10 + (content[pos] - '0');
+                has_end = true;
                 ++pos;
+            }
+            if (!has_end) {
+                end = start;
             }
         }
         for (int cpu = start; cpu <= end; ++cpu) {
@@ -310,6 +384,35 @@ std::vector<int> read_cpu_list(const std::string & path) {
         }
     }
     return cpus;
+}
+
+std::vector<int> read_cpu_list(const std::string & path) {
+    std::ifstream input(path);
+    if (!input) {
+        return {};
+    }
+    std::string content;
+    std::getline(input, content);
+    return parse_cpu_list(content);
+}
+
+// Android restricts the process with a cpuset. When the app is in the background
+// this is often only cpu0-2, even though the device has more online CPUs. The
+// threadpool must never select a CPU outside this set: strict affinity would fail
+// and the context/threadpool thread counts would disagree.
+std::vector<int> read_allowed_cpu_list() {
+    std::ifstream input("/proc/self/status");
+    if (!input) {
+        return {};
+    }
+    static const std::string prefix = "Cpus_allowed_list:";
+    std::string line;
+    while (std::getline(input, line)) {
+        if (line.compare(0, prefix.size(), prefix) == 0) {
+            return parse_cpu_list(line.substr(prefix.size()));
+        }
+    }
+    return {};
 }
 
 int read_cpu_max_freq(int cpu) {
@@ -338,6 +441,18 @@ bool build_threadpool_params(
             }
         }
     }
+
+    const std::vector<int> allowed_cpus = read_allowed_cpu_list();
+    if (!allowed_cpus.empty()) {
+        std::vector<int> filtered;
+        for (int cpu : cpus) {
+            if (std::find(allowed_cpus.begin(), allowed_cpus.end(), cpu) != allowed_cpus.end()) {
+                filtered.push_back(cpu);
+            }
+        }
+        cpus = filtered.empty() ? allowed_cpus : filtered;
+    }
+
     if (cpus.empty()) {
         cpus.push_back(0);
     }
@@ -448,6 +563,15 @@ bool build_threadpool_params(
                 << " cpus=";
     bool first = true;
     for (int cpu : selected) {
+        if (!first) {
+            description << ",";
+        }
+        first = false;
+        description << cpu;
+    }
+    description << " allowed=";
+    first = true;
+    for (int cpu : allowed_cpus) {
         if (!first) {
             description << ",";
         }
@@ -585,6 +709,9 @@ void initialize_chat_templates_locked() {
 void free_model_locked() {
     g_cancel_generation_id.store(0, std::memory_order_release);
     g_active_generation_id.store(0, std::memory_order_release);
+
+    invalidate_kv_cache_locked("model_unload", false);
+    g_model_cache_fingerprint.clear();
 
     free_threadpool_locked();
     g_chat_templates.reset();
@@ -806,6 +933,7 @@ std::string run_generation_locked(
     int32_t top_k,
     float repeat_penalty,
     int32_t seed,
+    const std::string & grammar = std::string(),
     const TrpgGenerationTiming & timing = TrpgGenerationTiming{}) {
     const llama_vocab * vocab = llama_model_get_vocab(g_model);
     const int32_t n_prompt = static_cast<int32_t>(prompt_tokens.size());
@@ -816,7 +944,7 @@ std::string run_generation_locked(
                 << "）。コンテキストサイズを増やすか、記憶や履歴を減らしてください";
         LOGI("[TokenCounter] finish generation=%llu generated=0 maxTokens=%d budget=0 finishReason=error limitReached=0",
              static_cast<unsigned long long>(generation_id), max_tokens);
-        return error_json(message.str());
+        return error_json(message.str(), "context");
     }
 
     int32_t budget = max_tokens > 0 ? max_tokens : 512;
@@ -825,22 +953,114 @@ std::string run_generation_locked(
         budget = 16;
     }
 
-    const auto clear_memory = []() {
-        if (g_ctx != nullptr) {
-            llama_memory_clear(llama_get_memory(g_ctx), false);
-        }
-    };
+    // Set when the failure is a rejected request rather than an inference error
+    // (currently only an unapplicable grammar) so the UI can classify it.
+    const char * error_kind = "";
 
+    const std::string settings_key = kv_settings_key(
+        max_tokens, temperature, top_p, top_k, repeat_penalty);
+
+    // ---------------------------------------------------------------- KV cache
+    // Keep the KV of the previous generation and remove only the part that differs
+    // from the new prompt. The last prompt token is always recomputed so the
+    // sampler has fresh logits for the next token.
     const auto clear_start = std::chrono::steady_clock::now();
-    clear_memory();
+    std::string cache_reason = "no_cache";
+    size_t reused_tokens = 0;
+    bool invalidate_cache = false;
+    bool cache_dirty = false;
+    llama_memory_t memory = llama_get_memory(g_ctx);
+
+    if (!g_kv_cache.valid) {
+        cache_reason = "no_cache";
+        invalidate_cache = true;
+    } else if (g_kv_cache.fingerprint != g_model_cache_fingerprint) {
+        cache_reason = "model_changed";
+        invalidate_cache = true;
+    } else if (g_kv_cache.settings_key != settings_key) {
+        cache_reason = "settings_changed";
+        invalidate_cache = true;
+    } else {
+        const bool cache_empty = g_kv_cache.tokens.empty();
+        const llama_pos expected_min = cache_empty ? -1 : 0;
+        const llama_pos expected_max = cache_empty
+            ? -1
+            : static_cast<llama_pos>(g_kv_cache.tokens.size() - 1);
+        const llama_pos actual_min = llama_memory_seq_pos_min(memory, 0);
+        const llama_pos actual_max = llama_memory_seq_pos_max(memory, 0);
+        if (actual_min != expected_min || actual_max != expected_max) {
+            cache_reason = "memory_mismatch";
+            invalidate_cache = true;
+        } else {
+            size_t common = common_token_prefix(g_kv_cache.tokens, prompt_tokens);
+            // The last prompt token must be evaluated to produce logits, even if
+            // the whole prompt is already cached.
+            const size_t max_reuse = n_prompt > 0
+                ? static_cast<size_t>(n_prompt - 1)
+                : 0;
+            if (common > max_reuse) {
+                common = max_reuse;
+            }
+
+            if (common == 0) {
+                if (!llama_memory_seq_rm(memory, 0, 0, -1)) {
+                    cache_reason = "seq_rm_failed";
+                    invalidate_cache = true;
+                } else if (llama_memory_seq_pos_max(memory, 0) != -1) {
+                    cache_reason = "memory_mismatch";
+                    invalidate_cache = true;
+                } else {
+                    g_kv_cache.tokens.clear();
+                    cache_reason = "prefix_empty";
+                }
+            } else {
+                if (common < g_kv_cache.tokens.size()) {
+                    if (!llama_memory_seq_rm(
+                            memory, 0, static_cast<llama_pos>(common), -1)) {
+                        cache_reason = "seq_rm_failed";
+                        invalidate_cache = true;
+                    }
+                }
+                if (!invalidate_cache) {
+                    const llama_pos trimmed_min = llama_memory_seq_pos_min(memory, 0);
+                    const llama_pos trimmed_max = llama_memory_seq_pos_max(memory, 0);
+                    if (trimmed_min != 0 ||
+                        trimmed_max != static_cast<llama_pos>(common - 1)) {
+                        cache_reason = "memory_mismatch";
+                        invalidate_cache = true;
+                    } else {
+                        g_kv_cache.tokens.resize(common);
+                        reused_tokens = common;
+                        cache_reason = "prefix_reuse";
+                    }
+                }
+            }
+        }
+    }
+
+    if (invalidate_cache) {
+        invalidate_kv_cache_locked(cache_reason.c_str(), true);
+        reused_tokens = 0;
+    }
+    std::vector<llama_token> kv_tokens = g_kv_cache.tokens;
+    int32_t n_pos = static_cast<int32_t>(reused_tokens);
+    int32_t computed_prompt_tokens = 0;
+
     const auto clear_end = std::chrono::steady_clock::now();
     const auto clear_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
         clear_end - clear_start).count();
 
-    LOGI("generate start: prompt_tokens=%d budget=%d clear_ms=%lld temp=%.2f top_p=%.2f top_k=%d",
+    LOGI("generate start: prompt_tokens=%d budget=%d cache_ms=%lld reused=%zu temp=%.2f top_p=%.2f top_k=%d",
          n_prompt, budget,
-         static_cast<long long>(clear_ms),
+         static_cast<long long>(clear_ms), reused_tokens,
          temperature, top_p, top_k);
+    LOGI("[KvCache] prepare generation=%llu status=%s reused=%zu recompute=%d cached=%zu reason=%s",
+         static_cast<unsigned long long>(generation_id),
+         invalidate_cache ? "miss" : (reused_tokens > 0 ? "reuse" : "miss"),
+         reused_tokens,
+         n_prompt - static_cast<int32_t>(reused_tokens),
+         g_kv_cache.tokens.size(),
+         cache_reason.c_str());
     LOGI("[TokenCounter] start generation=%llu promptTokens=%d maxTokens=%d budget=%d",
          static_cast<unsigned long long>(generation_id),
          n_prompt, max_tokens, budget);
@@ -849,7 +1069,6 @@ std::string run_generation_locked(
     bool eos = false;
     bool context_limit = false;
     std::string failure;
-    int32_t n_pos = 0;
 
     const auto prompt_start = std::chrono::steady_clock::now();
     while (n_pos < n_prompt) {
@@ -857,6 +1076,7 @@ std::string run_generation_locked(
             cancelled = true;
             break;
         }
+        const int32_t chunk_start = n_pos;
         const int32_t chunk = std::min(g_n_batch, n_prompt - n_pos);
         llama_batch_ext_clear(g_batch);
         for (int32_t i = 0; i < chunk; ++i) {
@@ -877,6 +1097,9 @@ std::string run_generation_locked(
         }
         const int32_t rc = llama_process(g_ctx, LLAMA_PROCESS_TYPE_DECODE, g_batch);
         if (rc != 0) {
+            // The process may have written part of the chunk. Treat the cache as
+            // dirty and discard it rather than reusing an unknown prefix.
+            cache_dirty = true;
             if (cancel_requested_for(generation_id)) {
                 cancelled = true;
             } else {
@@ -885,7 +1108,11 @@ std::string run_generation_locked(
             }
             break;
         }
+        for (int32_t i = 0; i < chunk; ++i) {
+            kv_tokens.push_back(prompt_tokens[static_cast<size_t>(chunk_start + i)]);
+        }
         n_pos += chunk;
+        computed_prompt_tokens += chunk;
     }
     const auto prompt_end = std::chrono::steady_clock::now();
 
@@ -905,12 +1132,38 @@ std::string run_generation_locked(
         llama_sampler * sampler = llama_sampler_chain_init(sparams);
         if (sampler == nullptr) {
             failure = "サンプラーの初期化に失敗しました";
+            error_kind = "memory";
         } else {
             const int32_t n_vocab = llama_vocab_n_tokens(vocab);
+
+            // Optional JSON grammar. When a grammar is supplied the sampled tokens
+            // are constrained to it, so the reply is syntactically valid JSON by
+            // construction. A grammar that cannot be parsed is a hard failure: the
+            // generation must not fall back to an unconstrained reply.
+            llama_sampler * grammar_sampler = nullptr;
+            if (!grammar.empty()) {
+                grammar_sampler = llama_sampler_init_grammar(vocab, grammar.c_str(), "root");
+                if (grammar_sampler == nullptr) {
+                    failure = "JSON文法の初期化に失敗しました（文法を適用できません）";
+                    error_kind = "grammar";
+                    LOGE("[Grammar] failed to initialise grammar of %zu bytes", grammar.size());
+                }
+            }
+
             if (repeat_penalty > 1.0f) {
                 llama_sampler_chain_add(
                     sampler,
                     llama_sampler_init_penalties(n_vocab, 64, repeat_penalty, 0.0f, 0.0f));
+            }
+            if (grammar_sampler != nullptr) {
+                // The grammar sampler must run *before* top_k/top_p/temp: it masks
+                // every token that does not continue the grammar, and the later
+                // samplers then pick from the remaining candidates. Running it
+                // after them could leave only masked tokens and produce garbage.
+                // llama.cpp's own common sampler applies the grammar the same way
+                // (grammar_first = true).
+                llama_sampler_chain_add(sampler, grammar_sampler);
+                LOGI("[Grammar] applied grammar of %zu bytes", grammar.size());
             }
             llama_sampler_chain_add(sampler, llama_sampler_init_top_k(top_k > 0 ? top_k : 40));
             llama_sampler_chain_add(sampler, llama_sampler_init_top_p(top_p > 0.0f ? top_p : 0.9f, 1));
@@ -921,6 +1174,11 @@ std::string run_generation_locked(
             generated_raw.reserve(static_cast<size_t>(budget) * 6);
 
             for (int32_t generated = 0; generated < budget; ++generated) {
+                // A grammar/sampler setup failure must not fall through to an
+                // unconstrained decode loop: stop before the first token.
+                if (!failure.empty()) {
+                    break;
+                }
                 if (cancel_requested_for(generation_id)) {
                     cancelled = true;
                     break;
@@ -997,6 +1255,7 @@ std::string run_generation_locked(
 
                 const int32_t rc = llama_process(g_ctx, LLAMA_PROCESS_TYPE_DECODE, g_batch);
                 if (rc != 0) {
+                    cache_dirty = true;
                     if (cancel_requested_for(generation_id)) {
                         cancelled = true;
                     } else {
@@ -1004,6 +1263,7 @@ std::string run_generation_locked(
                     }
                     break;
                 }
+                kv_tokens.push_back(token);
                 n_pos += 1;
             }
 
@@ -1016,7 +1276,24 @@ std::string run_generation_locked(
         }
     }
 
-    clear_memory();
+    // Keep the KV only when every decoded position is accounted for in kv_tokens.
+    // A failed llama_process may have written a partial chunk, so it is discarded.
+    if (!failure.empty() || cache_dirty) {
+        cache_reason = cache_dirty ? "decode_error" : "generation_error";
+        invalidate_kv_cache_locked(cache_reason.c_str(), true);
+    } else {
+        g_kv_cache.tokens = std::move(kv_tokens);
+        g_kv_cache.valid = true;
+        g_kv_cache.fingerprint = g_model_cache_fingerprint;
+        g_kv_cache.settings_key = settings_key;
+    }
+    LOGI("[KvCache] finish generation=%llu valid=%d cached=%zu reused=%zu computed=%d reason=%s",
+         static_cast<unsigned long long>(generation_id),
+         g_kv_cache.valid ? 1 : 0,
+         g_kv_cache.tokens.size(),
+         reused_tokens,
+         computed_prompt_tokens,
+         cache_reason.c_str());
 
     const auto generation_end = std::chrono::steady_clock::now();
     auto elapsed_ms = [](auto from, auto to) {
@@ -1041,11 +1318,15 @@ std::string run_generation_locked(
     } else if (context_limit) {
         finish_reason = "context";
     } else if (generated_tokens >= budget) {
-        if (max_tokens > 0 && budget == max_tokens) {
+        // The generation ran into its token budget. Distinguish the two causes:
+        // the requested max_tokens was reached (length) or the context left less
+        // room than max_tokens asked for (context). A truncated reply must not be
+        // reported as a normal completion.
+        if (max_tokens > 0 && budget < max_tokens) {
+            finish_reason = "context";
+        } else {
             finish_reason = "length";
             limit_reached = true;
-        } else if (max_tokens > 0 && budget < max_tokens) {
-            finish_reason = "context";
         }
     }
     LOGI("generate: prompt_tokens=%d prompt_ms=%lld generated_tokens=%d gen_ms=%lld tok_per_sec=%.2f ttft_ms=%lld cancelled=%d failed=%d",
@@ -1063,6 +1344,13 @@ std::string run_generation_locked(
          generated_tokens, max_tokens, budget, finish_reason,
          limit_unknown ? -1 : (limit_reached ? 1 : 0));
 
+    if (error_kind[0] == '\0' && !failure.empty()) {
+        if (failure.find("メモリ") != std::string::npos ||
+            failure.find("alloc") != std::string::npos) {
+            error_kind = "memory";
+        }
+    }
+
     std::ostringstream out;
     out << "{\"ok\":" << (failure.empty() ? "true" : "false");
     out << ",\"cancelled\":" << (cancelled ? "true" : "false");
@@ -1072,6 +1360,7 @@ std::string run_generation_locked(
     out << ",\"maxTokens\":" << max_tokens;
     out << ",\"budget\":" << budget;
     out << ",\"finishReason\":\"" << finish_reason << "\"";
+    out << ",\"errorKind\":\"" << error_kind << "\"";
     out << ",\"limitReached\":";
     if (limit_unknown) {
         out << "null";
@@ -1080,6 +1369,14 @@ std::string run_generation_locked(
     }
     out << ",\"text\":\"" << json_escape(generated_raw) << "\"";
     out << ",\"error\":\"" << json_escape(failure) << "\"";
+    out << ",\"kvCache\":{";
+    out << "\"valid\":" << (g_kv_cache.valid ? "true" : "false");
+    out << ",\"hit\":" << ((reused_tokens > 0) ? "true" : "false");
+    out << ",\"reusedTokens\":" << reused_tokens;
+    out << ",\"computedPromptTokens\":" << computed_prompt_tokens;
+    out << ",\"cachedTokens\":" << g_kv_cache.tokens.size();
+    out << ",\"invalidationReason\":\"" << json_escape(cache_reason) << "\"";
+    out << "}";
     // DEBUG MODE (temporary) — measurement only. All values below are already
     // computed for the log line above; this adds no work to the inference path.
     int debug_threads = 0;
@@ -1099,6 +1396,12 @@ std::string run_generation_locked(
     out << ",\"budget\":" << budget;
     out << ",\"threads\":" << debug_threads;
     out << ",\"nBatch\":" << g_n_batch;
+    out << ",\"kvValid\":" << (g_kv_cache.valid ? "true" : "false");
+    out << ",\"kvHit\":" << ((reused_tokens > 0) ? "true" : "false");
+    out << ",\"kvReusedTokens\":" << reused_tokens;
+    out << ",\"kvComputedPromptTokens\":" << computed_prompt_tokens;
+    out << ",\"kvCachedTokens\":" << g_kv_cache.tokens.size();
+    out << ",\"kvInvalidationReason\":\"" << json_escape(cache_reason) << "\"";
     out << "}";
     out << "}";
     return out.str();
@@ -1167,7 +1470,7 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeLoadModel(
 
     const std::string model_path = jstring_to_string(env, path);
     if (model_path.empty()) {
-        return new_string_utf8(env, error_json("モデルパスが空です"));
+        return new_string_utf8(env, error_json("モデルパスが空です", "invalid_path"));
     }
 
     llama_model_params model_params = llama_model_default_params();
@@ -1178,30 +1481,49 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeLoadModel(
     llama_model * model = llama_model_load_from_file(model_path.c_str(), model_params);
     if (model == nullptr) {
         LOGE("Failed to load model: %s", model_path.c_str());
-        return new_string_utf8(env, error_json("GGUFモデルの読み込みに失敗しました。ファイル形式と空きメモリを確認してください"));
+        return new_string_utf8(env, error_json(
+            "GGUFモデルの読み込みに失敗しました。ファイル形式と空きメモリを確認してください",
+            "model_load"));
     }
 
     if (llama_model_has_encoder(model) && !llama_model_has_decoder(model)) {
         llama_model_free(model);
-        return new_string_utf8(env, error_json("エンコーダ専用モデルには対応していません"));
+        return new_string_utf8(env, error_json("エンコーダ専用モデルには対応していません", "encoder_only"));
     }
 
+    // Default matches ModelSettings.DEFAULT_N_CTX (8192) so the UI, the saved
+    // settings and the actual llama.cpp context never disagree.
     const int32_t ctx_size = n_ctx > 0 ? n_ctx : 8192;
     const int32_t batch_size = std::min<int32_t>(ctx_size, 1024);
     const int32_t thread_count = n_threads > 0 ? n_threads : 4;
+
+    // The cpuset may allow fewer cores than requested (for example while the app
+    // is in the background). Resolve the real threadpool size before creating the
+    // context: llama.cpp's cplan requires the context thread count to match the
+    // attached pool, otherwise decode can fail with "n_threads > pool size".
+    int32_t actual_threads = thread_count;
+    {
+        ggml_threadpool_params selected_params;
+        std::string selected_mask;
+        if (build_threadpool_params(thread_count, selected_params, selected_mask)) {
+            actual_threads = std::max(1, selected_params.n_threads);
+        }
+    }
 
     llama_context_params ctx_params = llama_context_default_params();
     ctx_params.n_ctx = static_cast<uint32_t>(ctx_size);
     ctx_params.n_batch = static_cast<uint32_t>(batch_size);
     ctx_params.n_ubatch = static_cast<uint32_t>(std::min<int32_t>(batch_size, 512));
-    ctx_params.n_threads = thread_count;
-    ctx_params.n_threads_batch = thread_count;
+    ctx_params.n_threads = actual_threads;
+    ctx_params.n_threads_batch = actual_threads;
 
     llama_context * ctx = llama_init_from_model(model, ctx_params);
     if (ctx == nullptr) {
         llama_model_free(model);
-        LOGE("Failed to create llama context (n_ctx=%d)", ctx_size);
-        return new_string_utf8(env, error_json("推論コンテキストの作成に失敗しました。コンテキストサイズを下げてください"));
+        LOGE("Failed to create llama context (n_ctx=%d threads=%d)", ctx_size, actual_threads);
+        return new_string_utf8(env, error_json(
+            "推論コンテキストの作成に失敗しました。コンテキストサイズを下げてください",
+            "context_alloc"));
     }
 
     llama_set_abort_callback(ctx, abort_callback, nullptr);
@@ -1212,6 +1534,22 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeLoadModel(
     g_ctx = ctx;
     g_n_ctx = ctx_size;
     g_n_batch = batch_size;
+
+    {
+        char desc[512] = {0};
+        llama_model_desc(model, desc, sizeof(desc));
+        std::ostringstream fingerprint;
+        fingerprint << model_path
+                    << "|desc=" << desc
+                    << "|params=" << llama_model_n_params(model)
+                    << "|size=" << llama_model_size(model)
+                    << "|ctx=" << ctx_size
+                    << "|batch=" << batch_size
+                    << "|threads=" << actual_threads
+                    << "|gpu=" << n_gpu_layers;
+        g_model_cache_fingerprint = fingerprint.str();
+    }
+    invalidate_kv_cache_locked("model_load", false);
 
     // DEBUG MODE (temporary) — record the actual values for the debug screen.
     // Reading getters after init does not change inference behaviour.
@@ -1228,8 +1566,8 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeLoadModel(
         g_trpg_debug.n_ubatch = static_cast<int>(llama_n_ubatch(ctx));
         g_trpg_debug.n_seq_max = static_cast<int>(llama_n_seq_max(ctx));
         g_trpg_debug.n_threads_requested = thread_count;
-        g_trpg_debug.n_threads = thread_count;
-        g_trpg_debug.n_threads_batch = thread_count;
+        g_trpg_debug.n_threads = actual_threads;
+        g_trpg_debug.n_threads_batch = actual_threads;
         g_trpg_debug.gpu_layers = n_gpu_layers;
         g_trpg_debug.flash_attn = llama_flash_attn_type_name(ctx_params.flash_attn_type);
         g_trpg_debug.type_k = ggml_type_name(ctx_params.type_k);
@@ -1250,8 +1588,9 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeLoadModel(
     }
 
     const auto pool_start = std::chrono::steady_clock::now();
-    const bool threadpool_ok = create_threadpool_locked(ctx, thread_count);
+    const bool threadpool_ok = create_threadpool_locked(ctx, actual_threads);
     const auto pool_end = std::chrono::steady_clock::now();
+    LOGI("threads requested=%d actual=%d", thread_count, actual_threads);
 
     std::string pool_desc;
     {
@@ -1278,7 +1617,9 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeLoadModel(
     llama_batch_ext * batch = llama_batch_ext_init(ctx);
     if (batch == nullptr) {
         free_model_locked();
-        return new_string_utf8(env, error_json("バッチの初期化に失敗しました"));
+        return new_string_utf8(env, error_json(
+            "推論バッチの初期化に失敗しました。空きメモリを増やし、コンテキストサイズを下げてください",
+            "batch_alloc"));
     }
 
     g_batch = batch;
@@ -1356,7 +1697,8 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeGenerateEx(
     jlong generation_id,
     jobject callback,
     jobjectArray stops,
-    jboolean add_special) {
+    jboolean add_special,
+    jstring grammar) {
     std::lock_guard<std::mutex> lock(g_model_mutex);
     if (g_model == nullptr || g_ctx == nullptr || g_batch == nullptr) {
         return new_string_utf8(env, error_json("モデルが読み込まれていません"));
@@ -1366,6 +1708,7 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeGenerateEx(
     if (prompt_text.empty()) {
         return new_string_utf8(env, error_json("プロンプトが空です"));
     }
+    const std::string grammar_text = jstring_to_string(env, grammar);
 
     uint64_t id = generation_id != 0
         ? static_cast<uint64_t>(generation_id)
@@ -1410,6 +1753,7 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeGenerateEx(
         top_k,
         repeat_penalty,
         seed,
+        grammar_text,
         TrpgGenerationTiming{0, static_cast<long long>(tokenize_ms)});
     return new_string_utf8(env, result);
 }
@@ -1428,11 +1772,13 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeGenerateChatEx(
     jfloat repeat_penalty,
     jint seed,
     jlong generation_id,
-    jobject callback) {
+    jobject callback,
+    jstring grammar) {
     std::lock_guard<std::mutex> lock(g_model_mutex);
     if (g_model == nullptr || g_ctx == nullptr || g_batch == nullptr) {
         return new_string_utf8(env, error_json("モデルが読み込まれていません"));
     }
+    const std::string grammar_text = jstring_to_string(env, grammar);
 
     std::string error;
     auto messages = parse_messages(env, roles, contents, error);
@@ -1503,6 +1849,7 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeGenerateChatEx(
         top_k,
         repeat_penalty,
         seed,
+        grammar_text,
         TrpgGenerationTiming{
             static_cast<long long>(apply_ms),
             static_cast<long long>(tokenize_ms)});
@@ -1534,7 +1881,8 @@ Java_io_github_shiokunn_trpg_ai_engine_LlamaCppNative_nativeGenerate(
         0,
         callback,
         nullptr,
-        JNI_TRUE);
+        JNI_TRUE,
+        nullptr);
 }
 
 JNIEXPORT void JNICALL

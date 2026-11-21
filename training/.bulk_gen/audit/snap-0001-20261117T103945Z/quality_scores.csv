@@ -1,0 +1,5 @@
+id,category,task,group,total,machine_score,quality_score_provisional,verdict,needs_human_review,red_flags,findings,content_hash,verifier_version
+pilot-0001,trpg_gm,gm_turn,scenario-lantern-archive,98,55,43,pass,0,,,7a8096394032909b2698792f8d6d557a92a10d932493acfcb65730e90a4afcc5,qa-1.0.0
+pilot-0002,trpg_gm,gm_turn,scenario-lantern-archive,98,55,43,pass,0,,,a87f3129a1c3eec039d12d9c9c96230438da56b468c443b48d70863bec9a23e7,qa-1.0.0
+pilot-0005,trpg_gm,gm_turn,scenario-quiet-bell,98,55,43,pass,0,,,54d64fcf6334e5e1f3fc866e7a9737c5a0c0ec5a7d56a268fa6f1bda2d98ad97,qa-1.0.0
+pilot-0006,trpg_gm,gm_turn,scenario-quiet-bell,98,55,43,pass,0,,,39d265d05691fa69ce6f48429c75f6fc4409289cefde1dd8065f09ed2f3e541e,qa-1.0.0

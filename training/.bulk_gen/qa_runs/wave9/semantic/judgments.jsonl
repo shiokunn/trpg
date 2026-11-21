@@ -1,0 +1,333 @@
+{"id": "gm-a-0001", "labels": []}
+{"id": "gm-a-0002", "labels": []}
+{"id": "gm-a-0003", "labels": []}
+{"id": "gm-a-0004", "labels": []}
+{"id": "gm-a-0005", "labels": []}
+{"id": "gm-a-0006", "labels": []}
+{"id": "gm-a-0007", "labels": []}
+{"id": "gm-a-0008", "labels": []}
+{"id": "gm-a-0009", "labels": []}
+{"id": "gm-a-0010", "labels": []}
+{"id": "gm-a-0011", "labels": []}
+{"id": "gm-a-0012", "labels": []}
+{"id": "gm-a-0013", "labels": []}
+{"id": "gm-a-0014", "labels": []}
+{"id": "gm-a-0015", "labels": []}
+{"id": "gm-a-0016", "labels": []}
+{"id": "gm-a-0017", "labels": []}
+{"id": "gm-a-0018", "labels": []}
+{"id": "gm-a-0019", "labels": [{"category": "review", "confidence": 0.72, "evidence": "生成文「甘い匂いをReadして順に並べるか」に英語トークン『Read』が混入（選択肢は『甘い匂いを強さで並べる』で、本来の日本語動詞が置換された generation artifact）"}]}
+{"id": "gm-a-0020", "labels": []}
+{"id": "gm-a-0021", "labels": []}
+{"id": "gm-a-0022", "labels": []}
+{"id": "gm-a-0023", "labels": []}
+{"id": "gm-a-0024", "labels": []}
+{"id": "gm-a-0025", "labels": []}
+{"id": "gm-a-0026", "labels": []}
+{"id": "gm-a-0027", "labels": [{"category": "review", "confidence": 0.72, "evidence": "生成文「食堂には再び、-readingできる味が並んでいる」に『-reading』が混入（『読める』相当の日本語が欠落した generation artifact）"}]}
+{"id": "gm-a-0028", "labels": []}
+{"id": "gm-a-0029", "labels": []}
+{"id": "gm-a-0030", "labels": [{"category": "contradiction", "confidence": 0.75, "evidence": "生成文「石は正しい向きに置かれている」は、前turn(0029)の『底を上に向け』（逆さ）状態と、本turn選択肢『石を正しく置き直す』と矛盾。本turnの行動は『注連縄を解こうとする』のみで石を正す動作は無い"}]}
+{"id": "gm-a-0031", "labels": []}
+{"id": "gm-a-0032", "labels": []}
+{"id": "gm-a-0033", "labels": []}
+{"id": "gm-a-0034", "labels": []}
+{"id": "gm-a-0035", "labels": []}
+{"id": "gm-a-0036", "labels": []}
+{"id": "gm-a-0037", "labels": []}
+{"id": "gm-a-0038", "labels": []}
+{"id": "gm-a-0039", "labels": []}
+{"id": "gm-a-0040", "labels": []}
+{"id": "gm-a-0041", "labels": []}
+{"id": "gm-a-0042", "labels": []}
+{"id": "gm-a-0043", "labels": []}
+{"id": "gm-a-0044", "labels": []}
+{"id": "gm-a-0045", "labels": []}
+{"id": "gm-a-0046", "labels": []}
+{"id": "gm-a-0047", "labels": []}
+{"id": "gm-a-0048", "labels": []}
+{"id": "gm-a-0049", "labels": []}
+{"id": "gm-a-0050", "labels": []}
+{"id": "gm-a-0051", "labels": []}
+{"id": "gm-a-0052", "labels": []}
+{"id": "gm-a-0053", "labels": []}
+{"id": "gm-a-0054", "labels": []}
+{"id": "gm-a-0055", "labels": []}
+{"id": "gm-a-0056", "labels": []}
+{"id": "gm-a-0057", "labels": []}
+{"id": "gm-a-0058", "labels": []}
+{"id": "gm-a-0059", "labels": [{"category": "review", "confidence": 0.7, "evidence": "蜂蜜을塗った — 韓国語助詞「을」が混入（日本語文脈では「蜂蜜を塗った」とすべき箇所）。前wave8 gm-a-0452の<P>混入と同種の文字列汚染"}]}
+{"id": "gm-a-0060", "labels": []}
+{"id": "gm-a-0061", "labels": []}
+{"id": "gm-a-0062", "labels": []}
+{"id": "gm-a-0063", "labels": []}
+{"id": "gm-a-0064", "labels": []}
+{"id": "gm-a-0065", "labels": []}
+{"id": "gm-a-0066", "labels": []}
+{"id": "gm-a-0067", "labels": []}
+{"id": "gm-a-0068", "labels": []}
+{"id": "gm-a-0069", "labels": []}
+{"id": "gm-a-0070", "labels": []}
+{"id": "gm-a-0071", "labels": []}
+{"id": "gm-a-0072", "labels": [{"category": "review", "confidence": 0.55, "evidence": "「元の帳面と違うことがひと目でわかった」「多かった分は誰も損しない」とした直後に「蛍の光が、帳面と同じ数字を静かに照らした」— 書き換えられた数字が元と違うのか同じのかが同一文内で食い違う"}]}
+{"id": "gm-a-0073", "labels": []}
+{"id": "gm-a-0074", "labels": []}
+{"id": "gm-a-0075", "labels": []}
+{"id": "gm-a-0076", "labels": []}
+{"id": "gm-a-0077", "labels": []}
+{"id": "gm-a-0078", "labels": []}
+{"id": "gm-a-0079", "labels": []}
+{"id": "gm-a-0080", "labels": []}
+{"id": "gm-a-0081", "labels": []}
+{"id": "gm-a-0082", "labels": []}
+{"id": "gm-a-0083", "labels": []}
+{"id": "gm-a-0084", "labels": []}
+{"id": "gm-a-0085", "labels": []}
+{"id": "gm-a-0086", "labels": []}
+{"id": "gm-a-0087", "labels": []}
+{"id": "gm-a-0088", "labels": []}
+{"id": "gm-a-0089", "labels": []}
+{"id": "gm-a-0090", "labels": []}
+{"id": "gm-a-0091", "labels": []}
+{"id": "gm-a-0092", "labels": []}
+{"id": "gm-a-0093", "labels": []}
+{"id": "gm-a-0094", "labels": []}
+{"id": "gm-a-0095", "labels": []}
+{"id": "gm-a-0096", "labels": []}
+{"id": "gm-a-0097", "labels": []}
+{"id": "gm-a-0098", "labels": []}
+{"id": "gm-a-0099", "labels": []}
+{"id": "gm-a-0100", "labels": []}
+{"id": "gm-a-0101", "labels": []}
+{"id": "gm-a-0102", "labels": []}
+{"id": "gm-a-0103", "labels": []}
+{"id": "gm-a-0104", "labels": []}
+{"id": "gm-a-0105", "labels": []}
+{"id": "gm-a-0106", "labels": []}
+{"id": "gm-a-0107", "labels": []}
+{"id": "gm-a-0108", "labels": []}
+{"id": "gm-a-0109", "labels": [{"category": "review", "confidence": 0.6, "evidence": "原文「過去の記録と並べて見る」に対し、生成は現在の三號室の帳面の観察と「ほかの帳面には同じシミがない」比較にとどまり、過去の記録との照合は「旧い納戸へ遡るか」という次の選択に留まって未実行"}]}
+{"id": "gm-a-0110", "labels": [{"category": "review", "confidence": 0.5, "evidence": "前turn(0109)は三號室に「毎朝四十度の文字」とし、本turnの過去の帳面は「同じ名前と三十九度の文字」。また舎監は梢の話を「聞いたことがない」とするが、次turn(0111)では当時この部屋の看病にあたっていたと示され食い違う"}]}
+{"id": "gm-a-0111", "labels": []}
+{"id": "gm-a-0112", "labels": []}
+{"id":"gm-a-0113","labels":[]}
+{"id":"gm-a-0114","labels":[]}
+{"id":"gm-a-0115","labels":[]}
+{"id":"gm-a-0116","labels":[]}
+{"id":"gm-a-0117","labels":[]}
+{"id":"gm-a-0118","labels":[]}
+{"id":"gm-a-0119","labels":[]}
+{"id":"gm-a-0120","labels":[]}
+{"id":"gm-a-0121","labels":[]}
+{"id":"gm-a-0122","labels":[]}
+{"id":"gm-a-0123","labels":[{"category":"review","confidence":0.55,"evidence":"『水晶が、初めて濁った』——直前0122で傷は『濁りを消すために裏から入れられた』とされ、以前から濁りがあったため、『初めて』という記述は内部矛盾の可能性"}]}
+{"id":"gm-a-0124","labels":[]}
+{"id":"gm-a-0125","labels":[{"category":"review","confidence":0.5,"evidence":"『ありがとうの三文字が綴られている』——ありがとうは5文字（あ・り・が・と・う）なのに三文字とされ文字数が不一致（有難うの3文字を指すなら矛盾ではないため曖昧）"}]}
+{"id":"gm-a-0126","labels":[]}
+{"id":"gm-a-0127","labels":[]}
+{"id":"gm-a-0128","labels":[]}
+{"id":"gm-a-0129","labels":[]}
+{"id":"gm-a-0130","labels":[]}
+{"id":"gm-a-0131","labels":[]}
+{"id":"gm-a-0132","labels":[]}
+{"id":"gm-a-0133","labels":[]}
+{"id":"gm-a-0134","labels":[]}
+{"id":"gm-a-0135","labels":[]}
+{"id":"gm-a-0136","labels":[]}
+{"id":"gm-a-0137","labels":[]}
+{"id":"gm-a-0138","labels":[]}
+{"id":"gm-a-0139","labels":[]}
+{"id":"gm-a-0140","labels":[]}
+{"id":"gm-a-0141","labels":[]}
+{"id":"gm-a-0142","labels":[]}
+{"id":"gm-a-0143","labels":[]}
+{"id":"gm-a-0144","labels":[]}
+{"id":"gm-a-0145","labels":[]}
+{"id":"gm-a-0146","labels":[]}
+{"id":"gm-a-0147","labels":[]}
+{"id":"gm-a-0148","labels":[]}
+{"id":"gm-a-0149","labels":[]}
+{"id":"gm-a-0150","labels":[]}
+{"id":"gm-a-0151","labels":[]}
+{"id":"gm-a-0152","labels":[]}
+{"id":"gm-a-0153","labels":[]}
+{"id":"gm-a-0154","labels":[]}
+{"id":"gm-a-0155","labels":[]}
+{"id":"gm-a-0156","labels":[]}
+{"id":"gm-a-0157","labels":[]}
+{"id":"gm-a-0158","labels":[]}
+{"id":"gm-a-0159","labels":[]}
+{"id":"gm-a-0160","labels":[]}
+{"id":"gm-a-0161","labels":[]}
+{"id":"gm-a-0162","labels":[]}
+{"id":"gm-a-0163","labels":[]}
+{"id":"gm-a-0164","labels":[{"category":"review","confidence":0.55,"evidence":"原文『穴の焦げから書き換えの方法を割り出す』に対し生成は『鋏の柄を観察』して焦げの癖から人物を割り出しており、手掛かり・手段が穴の焦げから鋏の柄へ異なる"}]}
+{"id":"gm-a-0165","labels":[]}
+{"id":"gm-a-0166","labels":[]}
+{"id":"gm-a-0167","labels":[]}
+{"id":"gm-a-0168","labels":[]}
+{"id":"gm-a-0169","labels":[]}
+{"id":"gm-a-0170","labels":[{"category":"review","confidence":0.6,"evidence":"蔵の大鏡の裏を調べ、膜をはがす／生成側は「膜がびっしり張られていた」と状態描写のみで、はがす動作が描かれていない"}]}
+{"id":"gm-a-0171","labels":[]}
+{"id":"gm-a-0172","labels":[]}
+{"id":"gm-a-0173","labels":[]}
+{"id":"gm-a-0174","labels":[]}
+{"id":"gm-a-0175","labels":[]}
+{"id":"gm-a-0176","labels":[]}
+{"id":"gm-a-0177","labels":[]}
+{"id":"gm-a-0178","labels":[]}
+{"id":"gm-a-0179","labels":[]}
+{"id":"gm-a-0180","labels":[]}
+{"id":"gm-a-0181","labels":[{"category":"review","confidence":0.5,"evidence":"黒く濁った蜜を匙で味わう／生成側は「古巣から取った蜜を舐める」だけで、匙で味わう手段が描写されていない"}]}
+{"id":"gm-a-0182","labels":[]}
+{"id":"gm-a-0183","labels":[]}
+{"id":"gm-a-0184","labels":[]}
+{"id":"gm-a-0185","labels":[]}
+{"id":"gm-a-0186","labels":[]}
+{"id":"gm-a-0187","labels":[{"category":"review","confidence":0.5,"evidence":"木から流れる油を壺に受け、眺める／生成側は「切口から出た油は…黒だ」と観察のみで、壺に受ける描写がない"}]}
+{"id":"gm-a-0188","labels":[]}
+{"id":"gm-a-0189","labels":[]}
+{"id":"gm-a-0190","labels":[]}
+{"id":"gm-a-0191","labels":[]}
+{"id":"gm-a-0192","labels":[]}
+{"id":"gm-a-0193","labels":[]}
+{"id":"gm-a-0194","labels":[]}
+{"id":"gm-a-0195","labels":[]}
+{"id":"gm-a-0196","labels":[]}
+{"id":"gm-a-0197","labels":[]}
+{"id":"gm-a-0198","labels":[]}
+{"id":"gm-a-0199","labels":[]}
+{"id":"gm-a-0200","labels":[]}
+{"id":"gm-a-0201","labels":[]}
+{"id":"gm-a-0202","labels":[]}
+{"id":"gm-a-0203","labels":[]}
+{"id":"gm-a-0204","labels":[]}
+{"id":"gm-a-0205","labels":[]}
+{"id":"gm-a-0206","labels":[]}
+{"id":"gm-a-0207","labels":[]}
+{"id":"gm-a-0208","labels":[]}
+{"id":"gm-a-0209","labels":[]}
+{"id":"gm-a-0210","labels":[]}
+{"id":"gm-a-0211","labels":[]}
+{"id":"gm-a-0212","labels":[]}
+{"id":"gm-a-0213","labels":[]}
+{"id":"gm-a-0214","labels":[]}
+{"id":"gm-a-0215","labels":[]}
+{"id":"gm-a-0216","labels":[]}
+{"id":"gm-a-0217","labels":[]}
+{"id":"gm-a-0218","labels":[]}
+{"id":"gm-a-0219","labels":[]}
+{"id":"gm-a-0220","labels":[]}
+{"id":"gm-a-0221","labels":[]}
+{"id":"gm-a-0222","labels":[]}
+{"id":"gm-a-0223","labels":[]}
+{"id":"gm-a-0224","labels":[]}
+{"id":"gm-a-0225","labels":[]}
+{"id":"gm-a-0226","labels":[]}
+{"id":"gm-a-0227","labels":[]}
+{"id":"gm-a-0228","labels":[]}
+{"id":"world-0001","labels":[]}
+{"id":"world-0002","labels":[]}
+{"id":"world-0003","labels":[]}
+{"id":"world-0004","labels":[]}
+{"id":"world-0005","labels":[]}
+{"id":"world-0006","labels":[]}
+{"id":"world-0007","labels":[]}
+{"id":"world-0008","labels":[]}
+{"id":"world-0009","labels":[]}
+{"id":"world-0010","labels":[]}
+{"id":"world-0011","labels":[]}
+{"id":"world-0012","labels":[]}
+{"id":"world-0013","labels":[]}
+{"id":"world-0014","labels":[]}
+{"id":"world-0015","labels":[]}
+{"id":"world-0016","labels":[]}
+{"id":"world-0017","labels":[]}
+{"id":"world-0018","labels":[]}
+{"id":"world-0019","labels":[]}
+{"id":"world-0020","labels":[]}
+{"id":"world-0021","labels":[]}
+{"id":"world-0022","labels":[]}
+{"id":"world-0023","labels":[]}
+{"id":"world-0024","labels":[]}
+{"id":"world-0025","labels":[]}
+{"id":"world-0026","labels":[]}
+{"id":"world-0027","labels":[]}
+{"id":"world-0028","labels":[]}
+{"id":"world-0029","labels":[]}
+{"id":"world-0030","labels":[]}
+{"id":"world-0031","labels":[]}
+{"id":"world-0032","labels":[{"category":"review","confidence":0.7,"evidence":"history『二度目の鐘が鳴らず、係が駅に立ちすくんでいる』— 舞台は中央の塔とその広場（geography/opening）のみで『駅』は世界に存在しない語"}]}
+{"id":"world-0033","labels":[]}
+{"id":"world-0034","labels":[]}
+{"id":"world-0035","labels":[]}
+{"id":"world-0036","labels":[]}
+{"id":"world-0037","labels":[]}
+{"id":"world-0038","labels":[]}
+{"id":"world-0039","labels":[]}
+{"id":"world-0040","labels":[]}
+{"id":"world-0041","labels":[]}
+{"id":"world-0042","labels":[{"category":"review","confidence":0.7,"evidence":"npc1 personality『음を数えるように話す』に韓国語『음』が混入（日本語文脈では『音を数える』）"}]}
+{"id":"world-0043","labels":[]}
+{"id":"world-0044","labels":[{"category":"review","confidence":0.65,"evidence":"scenario premise『税吏は事故を強張る』— 『主張する／言い張る』の誤記で、目的語を取れない語が使われている"}]}
+{"id":"world-0045","labels":[]}
+{"id":"world-0046","labels":[]}
+{"id":"world-0047","labels":[]}
+{"id":"world-0048","labels":[{"category":"review","confidence":0.7,"evidence":"techMagic『呪いを特别的な镜に映す』・npc3 description『的包帯を巻いた女性』に簡体字／中国語助詞（别・镜・的）が混入。他箇所は『鏡』"}]}
+{"id":"world-0049","labels":[{"category":"review","confidence":0.7,"evidence":"npc3 personality『损得を先に計算する』・problem『重要な約束の当晚』に簡体字『损』と中国語『当晚』が混入"}]}
+{"id":"world-0050","labels":[]}
+{"id":"world-0051","labels":[{"category":"review","confidence":0.7,"evidence":"objective『失われた年的历史を取り戻す』に中国語助詞『的』が混入（『失われた歴史』が正しい）"}]}
+{"id":"world-0052","labels":[]}
+{"id":"world-0053","labels":[]}
+{"id":"world-0054","labels":[]}
+{"id":"world-0055","labels":[]}
+{"id":"world-0056","labels":[]}
+{"id":"world-0057","labels":[]}
+{"id":"world-0058","labels":[]}
+{"id":"world-0059","labels":[]}
+{"id":"world-0060","labels":[]}
+{"id":"world-0061","labels":[{"category":"review","confidence":0.6,"evidence":"setting「糸師だけが糸を見て、結び直すことができる」は糸を視認できる者が糸師限定と述べる一方、techMagic「特別な眼鏡で糸が見え」・openingHook「眼鏡越しに、二人を繋ぐ糸が細く震えていた」は眼鏡があれば見えるとする。視認条件が食い違う"}]}
+{"id":"world-0062","labels":[{"category":"review","confidence":0.6,"evidence":"setting「夜が明けるたびに少しずつ描き直される」・techMagic「壁画は夜の間に化学的に色を変え」は変化が夜間～明け方と述べる一方、同じsetting「朝見た絵と夕方の絵は違う」は日中にも変化が起きるとする。壁画が書き換わる timing が食い違う"}]}
+{"id":"world-0063","labels":[]}
+{"id":"world-0064","labels":[]}
+{"id":"world-0065","labels":[]}
+{"id":"world-0066","labels":[]}
+{"id":"world-0067","labels":[]}
+{"id":"world-0068","labels":[]}
+{"id":"world-0069","labels":[]}
+{"id":"world-0070","labels":[]}
+{"id":"world-0071","labels":[{"category":"contradiction","confidence":0.7,"evidence":"history「誰のものでもない無臭の汗が湧き出し」・specialSettings「無臭の汗が湧き出す」とopeningHook「その匂い、誰のものでもないんです。でも、私の子の匂いがする」が矛盾。無臭と定義された汗に「その匂い」「私の子の匂い」という嗅覚がある"}]}
+{"id":"world-0072","labels":[]}
+{"id":"world-0073","labels":[]}
+{"id":"world-0074","labels":[{"category":"review","confidence":0.5,"evidence":"setting「先月から影が全く出ない日が続き」とscenario premise「三日連続で影が出ず」で、影が出ない期間が先月から継続しているのか三日間なのかが食い違う"}]}
+{"id":"world-0075","labels":[]}
+{"id":"world-0076","labels":[]}
+{"id":"world-0077","labels":[]}
+{"id":"world-0078","labels":[]}
+{"id":"world-0079","labels":[]}
+{"id":"world-0080","labels":[]}
+{"id":"world-0081","labels":[]}
+{"id":"world-0082","labels":[]}
+{"id":"world-0083","labels":[]}
+{"id":"world-0084","labels":[]}
+{"id":"world-0085","labels":[]}
+{"id":"world-0086","labels":[]}
+{"id":"world-0087","labels":[]}
+{"id":"world-0088","labels":[]}
+{"id":"world-0089","labels":[]}
+{"id":"world-0090","labels":[]}
+{"id":"world-0091","labels":[]}
+{"id":"world-0092","labels":[]}
+{"id":"world-0093","labels":[]}
+{"id":"world-0094","labels":[]}
+{"id":"world-0095","labels":[]}
+{"id":"world-0096","labels":[]}
+{"id":"world-0097","labels":[]}
+{"id":"world-0098","labels":[]}
+{"id":"world-0099","labels":[]}
+{"id":"world-0100","labels":[]}
+{"id":"world-0101","labels":[]}
+{"id":"world-0102","labels":[]}
+{"id":"world-0103","labels":[]}
+{"id":"world-0104","labels":[]}
+{"id":"world-0105","labels":[]}

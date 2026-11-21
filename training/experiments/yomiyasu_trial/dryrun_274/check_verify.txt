@@ -1,0 +1,4 @@
+この最終稿に必要な検査（lint、diff）を実行した記録があり、最終稿のハッシュが記録と合いました。合格の判定ではありません。完了報告を付けるときは、この出力の2行目を写してください。
+yomiyasu-check: executed via=verify run=20261117T075353Z-8b77f53a attempt=4 final=sha256:9d618a8fe7ac mode=rewrite checks=lint,diff meaning_risk=0 replay=skipped
+記録: /data/data/com.termux/files/home/trpg/training/experiments/yomiyasu_trial/.yomiyasu/runs/20261117T075353Z-8b77f53a/attempt-4.json
+記録の中身: 見直し候補 最終稿 2件、直した箇所 13か所（原文の件数と元と後は run の出力にあります）

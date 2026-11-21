@@ -1,0 +1,8 @@
+{
+  "training/sft_synthetic_json.jsonl": "6c2879dbb562d6dc2438dddf80d7015155a2658d310beee049664d8283c55cf5",
+  "training/sft_synthetic_extraction.jsonl": "af42297a487d6b2411f33dfa8fb21acb612178743411a254bc87efe4f84c4cb9",
+  "training/splits/train.jsonl": "344fdcedf13ae3b521d9083326a74da144f2f0bb609310c1e7924173b1594fc0",
+  "training/splits/validation.jsonl": "7472aa3d7c7b64eacd788f95ac0949d4135919d6abf74f86cdb4839f22b7fee8",
+  "training/splits/test.jsonl": "7d314cb451e5c8df233d67619bfff08a985b1305568d2d0f948b448dea4e6ddd",
+  "training/metadata/dataset_info.json": "83a24944751ac1c31692aae1217942551a37ffead8d5f0015b02ab779c3c948a"
+}

@@ -1,5 +1,7 @@
 package io.github.shiokunn.trpg.ui.models
 
+import android.app.ActivityManager
+import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -42,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -51,6 +54,8 @@ import io.github.shiokunn.trpg.ai.engine.ModelInfo
 import io.github.shiokunn.trpg.ai.model.ModelFileManager
 import io.github.shiokunn.trpg.ai.model.formatFileSize
 import io.github.shiokunn.trpg.core.domain.ModelSettings
+import io.github.shiokunn.trpg.core.inference.ContextAdvice
+import io.github.shiokunn.trpg.core.inference.MemoryAdvisor
 import io.github.shiokunn.trpg.ui.ImportProgress
 import io.github.shiokunn.trpg.ui.ModelsViewModel
 import io.github.shiokunn.trpg.ui.components.ConfirmDialog
@@ -71,6 +76,28 @@ fun ModelsScreen(viewModel: ModelsViewModel, onBack: () -> Unit) {
     var pendingDelete by remember { mutableStateOf<ModelFileManager.ModelFile?>(null) }
     var draft by remember(settings?.updatedAt) {
         mutableStateOf((settings ?: ModelSettings()).normalized())
+    }
+
+    val context = LocalContext.current
+    val totalRamBytes = remember(context) {
+        val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val info = ActivityManager.MemoryInfo()
+        manager.getMemoryInfo(info)
+        info.totalMem
+    }
+    val selectedModelSize = models.firstOrNull { it.fileName == draft.modelFileName }?.sizeBytes ?: 0L
+    val readyInfo = (status as? EngineStatus.Ready)
+        ?.takeIf { it.modelFileName == draft.modelFileName }
+        ?.info
+    val advice = if (selectedModelSize > 0L) {
+        MemoryAdvisor.advise(
+            modelSizeBytes = selectedModelSize,
+            totalRamBytes = totalRamBytes,
+            requestedNCtx = draft.nCtx,
+            nCtxTrain = readyInfo?.nCtxTrain ?: ModelSettings.MAX_N_CTX,
+        )
+    } else {
+        null
     }
 
     val picker = rememberLauncherForActivityResult(
@@ -166,7 +193,11 @@ fun ModelsScreen(viewModel: ModelsViewModel, onBack: () -> Unit) {
             item {
                 ParamCard(
                     draft = draft,
+                    advice = advice,
                     onChange = { draft = it },
+                    onApplyRecommended = { recommended ->
+                        draft = draft.copy(nCtx = recommended)
+                    },
                     onSave = { viewModel.saveParams(draft) },
                 )
             }
@@ -444,7 +475,9 @@ private fun ModelRow(
 @Composable
 private fun ParamCard(
     draft: ModelSettings,
+    advice: ContextAdvice?,
     onChange: (ModelSettings) -> Unit,
+    onApplyRecommended: (Int) -> Unit,
     onSave: () -> Unit,
 ) {
     Card(
@@ -474,13 +507,62 @@ private fun ParamCard(
                     onChange(draft.copy(nCtx = stepped))
                 },
             )
+            advice?.let { current ->
+                Text(
+                    "推奨: ${current.recommendedNCtx} トークン" +
+                        "（端末RAM ${formatFileSize(current.totalRamBytes)} / " +
+                        "モデル ${formatFileSize(current.modelSizeBytes)}）",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (current.warning != null) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                )
+                current.warning?.let { warning ->
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                        ),
+                    ) {
+                        Column(
+                            Modifier.fillMaxWidth().padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    Icons.Default.Warning,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                    tint = MaterialTheme.colorScheme.onErrorContainer,
+                                )
+                                Spacer(Modifier.width(6.dp))
+                                Text(
+                                    "メモリ不足の可能性",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
+                                )
+                            }
+                            Text(
+                                warning,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                            )
+                            TextButton(onClick = { onApplyRecommended(current.recommendedNCtx) }) {
+                                Text("推奨値（${current.recommendedNCtx}）を使う")
+                            }
+                        }
+                    }
+                }
+            }
             SliderRow(
                 label = "最大生成トークン",
                 valueText = "${draft.maxTokens}",
                 value = draft.maxTokens.toFloat(),
-                range = 64f..4096f,
+                range = ModelSettings.MIN_MAX_TOKENS.toFloat()..ModelSettings.MAX_MAX_TOKENS.toFloat(),
                 onChange = { raw ->
-                    val stepped = (raw / 64f).roundToInt().coerceAtLeast(1) * 64
+                    val stepped = ((raw / 64f).roundToInt().coerceAtLeast(1) * 64)
+                        .coerceIn(ModelSettings.MIN_MAX_TOKENS, ModelSettings.MAX_MAX_TOKENS)
                     onChange(draft.copy(maxTokens = stepped))
                 },
             )

@@ -1,0 +1,30 @@
+{
+  "files": {
+    "sft_synthetic_json.jsonl": {
+      "rows": 525,
+      "unique": 525,
+      "role_shapes": {
+        "system;user;assistant;user;assistant": 106,
+        "system;user;assistant;user;assistant;user;assistant": 108,
+        "system;user;assistant": 311
+      },
+      "bytes": 3689059
+    },
+    "sft_synthetic_extraction.jsonl": {
+      "rows": 512,
+      "unique": 508,
+      "role_shapes": {
+        "system;user;assistant": 512
+      },
+      "bytes": 1101235
+    }
+  },
+  "total_rows": 1037,
+  "errors": 4,
+  "error_samples": [
+    "sft_synthetic_extraction.jsonl:338: 完全一致重複",
+    "sft_synthetic_extraction.jsonl:344: 完全一致重複",
+    "sft_synthetic_extraction.jsonl:355: 完全一致重複",
+    "sft_synthetic_extraction.jsonl:494: 完全一致重複"
+  ]
+}

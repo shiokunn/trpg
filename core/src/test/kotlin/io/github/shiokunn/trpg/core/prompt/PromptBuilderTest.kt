@@ -135,6 +135,25 @@ class PromptBuilderTest {
     }
 
     @Test
+    fun longTermMemoriesKeepSelectorOrder() = runBlocking {
+        val bundle = PromptBuilder().build(
+            context().copy(
+                memories = listOf(
+                    StoryMemory("hit", MemoryCategory.DISCOVERY, "関連する記憶", importance = 1),
+                    StoryMemory("high", MemoryCategory.EVENT, "無関係な記憶", importance = 5),
+                ),
+            ),
+            largeBudget,
+        )
+
+        val hitIndex = bundle.system.indexOf("関連する記憶")
+        val highIndex = bundle.system.indexOf("無関係な記憶")
+        assertTrue(hitIndex >= 0)
+        assertTrue(highIndex >= 0)
+        assertTrue(hitIndex < highIndex)
+    }
+
+    @Test
     fun stateSectionExposesEntityIdsForStateChanges() = runBlocking {
         val bundle = PromptBuilder().build(context(), largeBudget)
         // The GM must be able to reference exact IDs when emitting stateChanges.
