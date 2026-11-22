@@ -248,23 +248,13 @@ size_t common_token_prefix(
     return i;
 }
 
-std::string kv_settings_key(
-    int32_t max_tokens,
-    float temperature,
-    float top_p,
-    int32_t top_k,
-    float repeat_penalty) {
-    char buffer[256];
-    std::snprintf(
-        buffer,
-        sizeof(buffer),
-        "max=%d;temp=%.4f;top_p=%.4f;top_k=%d;rep=%.4f",
-        max_tokens,
-        temperature,
-        top_p,
-        top_k,
-        repeat_penalty);
-    return std::string(buffer);
+// Sampling parameters do not affect the KV tensors: only the model and the token
+// prefix do (both are covered by g_model_cache_fingerprint / memory sequence positions).
+// Keeping this key constant lets the cache survive changes to temperature, top_p,
+// top_k, repeat_penalty and max_tokens, which is the common case when the player
+// tweaks sampling between turns.
+std::string kv_settings_key() {
+    return "kv-v1";
 }
 
 // The cache is only meaningful while the native memory contains exactly the
@@ -957,8 +947,7 @@ std::string run_generation_locked(
     // (currently only an unapplicable grammar) so the UI can classify it.
     const char * error_kind = "";
 
-    const std::string settings_key = kv_settings_key(
-        max_tokens, temperature, top_p, top_k, repeat_penalty);
+    const std::string settings_key = kv_settings_key();
 
     // ---------------------------------------------------------------- KV cache
     // Keep the KV of the previous generation and remove only the part that differs
