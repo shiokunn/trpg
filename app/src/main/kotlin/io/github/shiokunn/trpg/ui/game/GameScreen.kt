@@ -2,19 +2,13 @@ package io.github.shiokunn.trpg.ui.game
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,12 +18,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -41,6 +32,8 @@ import androidx.compose.material.icons.filled.Public
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -519,39 +512,8 @@ private fun String.withoutCheckPrefix(): String {
     return action.ifBlank { this }
 }
 
-/** Three dots rotating around a circle. Used for every generation. */
-@Composable
-private fun RotatingDots() {
-    val transition = rememberInfiniteTransition(label = "rotatingDots")
-    val angle by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart,
-        ),
-        label = "angle",
-    )
-
-    Box(
-        modifier = Modifier.size(40.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        repeat(3) { index ->
-            val radians = Math.toRadians((angle + index * 120f).toDouble())
-            val x = (kotlin.math.cos(radians) * 12f).toFloat().dp
-            val y = (kotlin.math.sin(radians) * 12f).toFloat().dp
-            Box(
-                modifier = Modifier
-                    .offset(x = x, y = y)
-                    .size(8.dp)
-                    .background(MaterialTheme.colorScheme.primary, CircleShape),
-            )
-        }
-    }
-}
-
 /** Loading state for both the first and every later answer: no card or background. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun GeneratingIndicator(
     phase: GmTurnPhase?,
@@ -565,7 +527,10 @@ private fun GeneratingIndicator(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        RotatingDots()
+        ContainedLoadingIndicator(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            indicatorColor = MaterialTheme.colorScheme.primary,
+        )
         Spacer(Modifier.height(16.dp))
         Text(
             text = when (phase) {
