@@ -22,7 +22,11 @@ val debugKeystoreFile = file(
 
 android {
     namespace = "io.github.shiokunn.trpg"
-    compileSdk = 37
+    compileSdk {
+        version = release(37) {
+            minorApiLevel = 1
+        }
+    }
     ndkVersion = "29.0.13113456"
 
     signingConfigs {
