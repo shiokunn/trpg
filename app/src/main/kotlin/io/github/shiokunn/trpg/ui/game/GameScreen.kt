@@ -26,8 +26,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -170,11 +172,12 @@ private fun GameContent(
         onDispose { view.keepScreenOn = false }
     }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
+    Box(Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
         item {
             StatusCard(
                 locationName = location?.name ?: "未知の場所",
@@ -264,12 +267,21 @@ private fun GameContent(
 
         if (busy) {
             item {
-                StreamingCard(
-                    phase = turn.phase,
-                    generatedTokens = turn.generatedTokens,
-                    cancelling = turn.cancelling,
-                    onCancel = onCancel,
-                )
+                if (!hasNarrative) {
+                    // Very first turn: dots only, no card or explanatory copy.
+                    InitialGenerating(
+                        phase = turn.phase,
+                        cancelling = turn.cancelling,
+                        onCancel = onCancel,
+                    )
+                } else {
+                    StreamingCard(
+                        phase = turn.phase,
+                        generatedTokens = turn.generatedTokens,
+                        cancelling = turn.cancelling,
+                        onCancel = onCancel,
+                    )
+                }
             }
         }
 
@@ -319,6 +331,19 @@ private fun GameContent(
             }
         }
 
+        }
+        // Initial generation has no narrative card to host the counter, so pin it to
+        // the bottom-right of the screen. Normal turns keep it inside the shimmer card.
+        if (busy && !hasNarrative) {
+            Text(
+                text = "生成トークン: ${turn.generatedTokens}",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(20.dp),
+            )
+        }
     }
 }
 
@@ -479,6 +504,66 @@ private fun String.withoutCheckPrefix(): String {
     if (!startsWith("【判定:")) return this
     val action = substringAfter('\n', "")
     return action.ifBlank { this }
+}
+
+/** Five dots pulsing from left to right. Only composed during the first generation. */
+@Composable
+private fun PulseDots() {
+    val transition = rememberInfiniteTransition(label = "dots")
+    val phase by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1860, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart,
+        ),
+        label = "phase",
+    )
+
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        repeat(5) { index ->
+            val shifted = (phase + index * (217f / 1860)) % 1f
+            val pulse = 0.7f + 0.3f * kotlin.math.sin(shifted * Math.PI).toFloat()
+            Box(
+                modifier = Modifier
+                    .size((8.0f * pulse).dp)
+                    .background(MaterialTheme.colorScheme.primary, CircleShape),
+            )
+        }
+    }
+}
+
+/** First-turn loading state: no card, no background, no explanatory paragraph. */
+@Composable
+private fun InitialGenerating(
+    phase: GmTurnPhase?,
+    cancelling: Boolean,
+    onCancel: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(240.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        PulseDots()
+        Spacer(Modifier.height(16.dp))
+        Text(
+            text = when (phase) {
+                is GmTurnPhase.Repairing -> "応答を修正しています"
+                is GmTurnPhase.Committing -> "ターンを保存しています"
+                else -> if (cancelling) "生成を中止しています" else "生成中"
+            },
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(12.dp))
+        TextButton(
+            onClick = onCancel,
+            enabled = !cancelling,
+        ) { Text(if (cancelling) "中止中" else "生成を中止") }
+    }
 }
 
 /** Fades newly generated content in once per message. Older messages stay in place. */
