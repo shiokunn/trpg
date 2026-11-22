@@ -64,6 +64,10 @@ private fun unexpectedFailureMessage(error: Throwable): String {
 class HomeViewModel(private val container: AppContainer) : ViewModel() {
     val recent: StateFlow<List<RecentSessionRow>> = container.sessions.observeRecentDetails(8)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    fun delete(sessionId: String) {
+        viewModelScope.launch { container.sessions.delete(sessionId) }
+    }
 }
 
 class SavesViewModel(private val container: AppContainer) : ViewModel() {
