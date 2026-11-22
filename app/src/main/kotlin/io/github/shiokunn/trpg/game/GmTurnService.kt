@@ -7,8 +7,12 @@ import io.github.shiokunn.trpg.ai.engine.GenerationRequest
 import io.github.shiokunn.trpg.ai.engine.InferenceEngine
 import io.github.shiokunn.trpg.ai.engine.PromptMessage
 import io.github.shiokunn.trpg.ai.engine.SamplingParams
+import android.util.Log
 import io.github.shiokunn.trpg.core.ai.AiParseResult
 import io.github.shiokunn.trpg.core.ai.CheckRequest
+import io.github.shiokunn.trpg.core.ai.GmErrorCategory
+import io.github.shiokunn.trpg.core.ai.GmRepair
+import io.github.shiokunn.trpg.core.ai.GmRepairIssue
 import io.github.shiokunn.trpg.core.ai.GmResponse
 import io.github.shiokunn.trpg.core.ai.GmResponseParser
 import io.github.shiokunn.trpg.core.ai.GmResponseRules
@@ -62,6 +66,8 @@ interface GmTurnListener {
 data class PlayerTurnAction(
     val text: String,
     val check: CheckRequest? = null,
+    /** Already resolved by the app on an earlier attempt; retry must reuse it. */
+    val resolvedCheck: DiceResult? = null,
 )
 
 sealed interface GmTurnResult {
@@ -75,6 +81,8 @@ sealed interface GmTurnResult {
     data class Failed(
         val message: String,
         val errors: List<String> = emptyList(),
+        val errorKind: GmErrorCategory? = null,
+        val dice: DiceResult? = null,
     ) : GmTurnResult
 }
 
@@ -123,12 +131,18 @@ class GmTurnService(
         val newTurn = bundle.session.turnCount + 1
         val now = System.currentTimeMillis()
 
-        val checkResult = action.check?.let { request ->
+        val checkResult = action.resolvedCheck ?: action.check?.let { request ->
             resolveCheck(bundle, request, newTurn, now)
                 ?: return GmTurnResult.Failed(
                     "選択肢の技能ID「${request.skillId}」がキャラクターに存在しません。",
                 )
         }
+
+        fun failure(
+            message: String,
+            errors: List<String> = emptyList(),
+            kind: GmErrorCategory? = null,
+        ) = GmTurnResult.Failed(message, errors, kind, checkResult)
 
         val recentChat = memories.recentChat(sessionId, MAX_HISTORY_MESSAGES)
         val longTerm = MemorySelector.select(
@@ -170,7 +184,7 @@ class GmTurnService(
         val prompt = runCatching {
             PromptBuilder(MemoTokenCounter(EngineTokenCounter(engine))).build(context, budget)
         }.getOrElse { error ->
-            return GmTurnResult.Failed(error.message ?: "プロンプトの組み立てに失敗しました。")
+            return failure(error.message ?: "プロンプトの組み立てに失敗しました。")
         }
 
         val messages = prompt.toMessages()
@@ -179,44 +193,57 @@ class GmTurnService(
         val first = generate(messages, settings, listener)
         val firstText = when (first) {
             is GenerationOutcome.Cancelled -> return GmTurnResult.Cancelled
-            is GenerationOutcome.Failure -> return GmTurnResult.Failed(first.message)
+            is GenerationOutcome.Failure -> return failure(first.message)
             is GenerationOutcome.Success -> first.text
         }
 
         val snapshot = bundle.toSnapshot()
-        var attempt = evaluate(firstText, snapshot, bundle)
+        val firstEvaluation = evaluateTurn(firstText, snapshot, bundle, allowLocalRepair = true)
+        var attempt = firstEvaluation.attempt
+        var localRepairApplied = firstEvaluation.localRepairApplied
 
         if (attempt is Attempt.Rejected) {
             listener.onPhase(GmTurnPhase.Repairing(attempt.errors))
-            // A repair retry must not repeat the bad JSON or the whole conversation.
-            // Give the model only the violation location, the narrative text that was
-            // still valid, and the original scenario.
-            val repairMessages = listOf(
-                PromptMessage("system", PromptBuilder.repairSystemPrompt()),
-                PromptMessage(
-                    "user",
-                    buildRepairUserMessage(
-                        errors = attempt.errors,
-                        invalidRaw = firstText,
-                        scenario = initialScenarioFrom(bundle.world, bundle.session.summary),
-                        previousChat = previousChatFrom(recentChat),
-                    ),
-                ),
-            )
+            val repairStarted = System.currentTimeMillis()
+            val mode = if (attempt.issues.any { it.category == GmErrorCategory.GAME_RULE }) {
+                RepairMode.CONTENT
+            } else {
+                RepairMode.STRUCTURE
+            }
+            val repairMessages = buildRepairMessages(mode, attempt, bundle, recentChat, snapshot)
             when (val second = generate(repairMessages, settings, listener)) {
                 is GenerationOutcome.Cancelled -> return GmTurnResult.Cancelled
-                is GenerationOutcome.Failure -> return GmTurnResult.Failed(second.message)
+                is GenerationOutcome.Failure -> return failure(second.message)
                 is GenerationOutcome.Success -> {
-                    attempt = evaluate(second.text, snapshot, bundle)
+                    val secondEvaluation = evaluateTurn(second.text, snapshot, bundle, allowLocalRepair = true)
+                    attempt = secondEvaluation.attempt
+                    localRepairApplied = localRepairApplied || secondEvaluation.localRepairApplied
                     if (attempt is Attempt.Rejected) {
-                        return GmTurnResult.Failed(
+                        logRepair(
+                            mode = mode,
+                            issues = attempt.issues,
+                            localRepairApplied = localRepairApplied,
+                            success = false,
+                            elapsedMs = System.currentTimeMillis() - repairStarted,
+                            modelFileName = status.modelFileName,
+                        )
+                        return failure(
                             "ゲームマスターの応答が規定のJSON契約を満たしませんでした。" +
                                 "ターンは保存されていません。",
                             errors = attempt.errors,
+                            kind = primaryKind(attempt.issues),
                         )
                     }
                 }
             }
+            logRepair(
+                mode = mode,
+                issues = attempt.issues,
+                localRepairApplied = localRepairApplied,
+                success = true,
+                elapsedMs = System.currentTimeMillis() - repairStarted,
+                modelFileName = status.modelFileName,
+            )
         }
 
         val accepted = attempt as Attempt.Accepted
@@ -236,7 +263,7 @@ class GmTurnService(
             GmTurnResult.Success(accepted.response, checkResult)
         }.getOrElse { error ->
             if (error is CancellationException) throw error
-            GmTurnResult.Failed(error.message ?: "ターンの保存に失敗しました。")
+            failure(error.message ?: "ターンの保存に失敗しました。")
         }
     }
 
@@ -263,21 +290,70 @@ class GmTurnService(
 
     // ---------------------------------------------------------------- validation
 
+    private enum class RepairMode { STRUCTURE, CONTENT }
+
     private sealed interface Attempt {
         data class Accepted(
             val response: GmResponse,
             val snapshot: GameSnapshot,
         ) : Attempt
 
-        data class Rejected(val errors: List<String>) : Attempt
+        data class Rejected(
+            val errors: List<String>,
+            val issues: List<GmRepairIssue> = emptyList(),
+            val raw: String = "",
+        ) : Attempt
     }
 
-    private fun evaluate(raw: String, snapshot: GameSnapshot, bundle: SessionBundle): Attempt {
-        val response = when (val parsed = GmResponseParser.parse(raw)) {
-            is AiParseResult.Failure -> return Attempt.Rejected(parsed.errors.map { it.message })
-            is AiParseResult.Success -> parsed.value
+    private data class Evaluation(
+        val attempt: Attempt,
+        val localRepairApplied: Boolean = false,
+    )
+
+    /**
+     * Strict validation with an optional deterministic pre-pass. Local repair is never
+     * counted as an LLM retry and is used only when the repaired JSON passes the exact
+     * same validation as a normal response.
+     */
+    private fun evaluateTurn(
+        raw: String,
+        snapshot: GameSnapshot,
+        bundle: SessionBundle,
+        allowLocalRepair: Boolean,
+    ): Evaluation {
+        val parsed = GmResponseParser.parse(raw)
+        if (parsed is AiParseResult.Success) {
+            return Evaluation(validateSemantics(parsed.value, snapshot))
         }
 
+        val failure = parsed as AiParseResult.Failure
+        val issues = GmRepair.analyze(failure.errors)
+        if (allowLocalRepair) {
+            val repaired = GmRepair.repairTopLevelUnknownKeys(raw)
+            if (repaired != null) {
+                val reparsed = GmResponseParser.parse(repaired)
+                if (reparsed is AiParseResult.Success) {
+                    val result = validateSemantics(reparsed.value, snapshot)
+                    if (result is Attempt.Accepted) {
+                        return Evaluation(result, localRepairApplied = true)
+                    }
+                }
+            }
+        }
+        return Evaluation(
+            Attempt.Rejected(
+                errors = failure.errors.map { it.message },
+                issues = issues,
+                raw = raw.take(MAX_REPAIR_JSON_CHARS),
+            ),
+        )
+    }
+
+    /** Game-specific validation that cannot be expressed in the JSON schema alone. */
+    private fun validateSemantics(
+        response: GmResponse,
+        snapshot: GameSnapshot,
+    ): Attempt {
         val referenceErrors = validateReferences(response, snapshot)
         if (referenceErrors.isNotEmpty()) return Attempt.Rejected(referenceErrors)
 
@@ -485,31 +561,82 @@ class GmTurnService(
             "$label: ${message.content}"
         }
 
-    /** Minimal context for the single repair retry after a contract violation. */
-    private fun buildRepairUserMessage(
-        errors: List<String>,
-        invalidRaw: String,
-        scenario: String,
-        previousChat: String,
-    ): String = buildString {
-        append("前回の応答は次の場所で契約に違反しました。\n")
-        errors.take(10).forEach { error -> append("- ").append(error).append('\n') }
+    /**
+     * Structure repairs only need the broken JSON and the error list. Content repairs
+     * additionally need the scenario, the previous exchange and the current game state.
+     */
+    private fun buildRepairMessages(
+        mode: RepairMode,
+        rejected: Attempt.Rejected,
+        bundle: SessionBundle,
+        recentChat: List<ChatMessage>,
+        snapshot: GameSnapshot,
+    ): List<PromptMessage> {
+        val userMessage = buildString {
+            if (mode == RepairMode.STRUCTURE) {
+                append("失敗したJSON:\n").append(rejected.raw)
+                append("\n\n")
+            } else {
+                append("最初のシナリオ（冒険開始時に生成された世界情報）:\n")
+                append(initialScenarioFrom(bundle.world, bundle.session.summary))
+                append("\n\n")
+                val previousChat = previousChatFrom(recentChat)
+                if (previousChat.isNotBlank()) {
+                    append("一つ前の会話履歴:\n").append(previousChat).append("\n\n")
+                }
+                append("現在のゲーム状態:\n").append(currentStateFrom(snapshot)).append("\n\n")
+            }
 
-        if (scenario.isNotBlank()) {
-            append("\n最初のシナリオ（冒険開始時に生成された世界情報）:\n").append(scenario)
-        }
-        if (previousChat.isNotBlank()) {
-            append("\n\n一つ前の会話履歴:\n").append(previousChat)
-        }
+            val narrative = validNarrativeFrom(rejected.raw)
+                .take(GmResponseRules.MAX_NARRATIVE_CHARS)
+            if (narrative.isNotBlank()) {
+                append("契約違反がなかった情景描写（変更しないでください）:\n").append(narrative).append("\n\n")
+            }
 
-        val narrative = validNarrativeFrom(invalidRaw)
-            .take(GmResponseRules.MAX_NARRATIVE_CHARS)
-        if (narrative.isNotBlank()) {
-            append("\n\n契約違反がなかった情景描写（変更しないでください）:\n").append(narrative)
+            append(
+                if (mode == RepairMode.STRUCTURE) {
+                    GmRepair.structuralInstruction(rejected.issues)
+                } else {
+                    GmRepair.contentInstruction(rejected.issues)
+                },
+            )
         }
+        return listOf(
+            PromptMessage("system", PromptBuilder.repairSystemPrompt()),
+            PromptMessage("user", userMessage),
+        )
+    }
 
-        append("\n\nこの文章の続きを作成してください。")
-        append("説明・コードフェンス・JSON以外の文字を含めず、同じJSON契約で1つだけ出力してください。")
+    /** Compact snapshot summary for content repairs; no private conversation is logged. */
+    private fun currentStateFrom(snapshot: GameSnapshot): String = buildString {
+        append("ターン: ").append(snapshot.turn + 1)
+        val location = snapshot.locations.firstOrNull { it.id == snapshot.currentLocationId }
+        if (location != null) append("\n現在地: ").append(location.name)
+        append("\nHP: ").append(snapshot.character.hp).append('/').append(snapshot.character.maxHp)
+        append("\nレベル: ").append(io.github.shiokunn.trpg.core.rules.CharacterRules.levelForXp(snapshot.character.experience))
+        if (snapshot.activeCombat != null) append("\n戦闘中: はい")
+    }
+
+    private fun primaryKind(issues: List<GmRepairIssue>): GmErrorCategory =
+        issues.firstOrNull()?.category ?: GmErrorCategory.OTHER
+
+    /** Structured repair telemetry without narrative text or personal data. */
+    private fun logRepair(
+        mode: RepairMode,
+        issues: List<GmRepairIssue>,
+        localRepairApplied: Boolean,
+        success: Boolean,
+        elapsedMs: Long,
+        modelFileName: String,
+    ) {
+        val first = issues.firstOrNull()
+        Log.i(
+            TAG,
+            "repair mode=${mode.name} kind=${first?.category?.name ?: "NONE"} " +
+                "key=${first?.key ?: "-"} path=${first?.path ?: "-"} " +
+                "localRepair=$localRepairApplied success=$success elapsedMs=$elapsedMs " +
+                "model=$modelFileName issues=${issues.size}",
+        )
     }
 
     /** Keeps only the narrative text; drops every other (possibly invalid) JSON field. */
@@ -538,6 +665,8 @@ class GmTurnService(
         const val MAX_HISTORY_MESSAGES = 40
         const val MAX_LONG_TERM_MEMORIES = MemorySelector.DEFAULT_LIMIT
         const val SUMMARY_CHARS = 600
+        const val MAX_REPAIR_JSON_CHARS = 4_000
+        private const val TAG = "TrpgRepair"
 
         private val NARRATIVE_REGEX = Regex("\"narrative\"\\s*:\\s*\"((?:\\\\.|[^\"\\\\])*)\"")
     }

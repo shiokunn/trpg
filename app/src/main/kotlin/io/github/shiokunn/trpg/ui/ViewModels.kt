@@ -15,6 +15,7 @@ import io.github.shiokunn.trpg.BuildConfig
 import io.github.shiokunn.trpg.ai.model.ModelFileManager
 import io.github.shiokunn.trpg.core.ai.CharacterDraft
 import io.github.shiokunn.trpg.core.ai.GmChoice
+import io.github.shiokunn.trpg.core.ai.GmErrorCategory
 import io.github.shiokunn.trpg.core.ai.TurnChoices
 import io.github.shiokunn.trpg.core.ai.WorldDraft
 import io.github.shiokunn.trpg.creation.AdventureAssembler
@@ -88,6 +89,7 @@ data class GameTurnUiState(
     val generatedTokens: Int = 0,
     val error: String? = null,
     val errorDetails: List<String> = emptyList(),
+    val errorKind: GmErrorCategory? = null,
     val lastCheck: DiceResult? = null,
     val cancelling: Boolean = false,
 )
@@ -123,6 +125,7 @@ class GameViewModel(
     val turn: StateFlow<GameTurnUiState> = _turn.asStateFlow()
 
     private var turnJob: Job? = null
+    private var lastAction: PlayerTurnAction? = null
 
     fun beginAdventure() {
         startTurn(PlayerTurnAction("冒険を開始する"))
@@ -157,12 +160,19 @@ class GameViewModel(
     }
 
     fun clearError() {
-        _turn.update { it.copy(error = null, errorDetails = emptyList()) }
+        _turn.update { it.copy(error = null, errorDetails = emptyList(), errorKind = null) }
+    }
+
+    /** Re-runs exactly the action that failed, from the same turn-start state. */
+    fun regenerate() {
+        val action = lastAction ?: return
+        startTurn(action)
     }
 
     private fun startTurn(action: PlayerTurnAction) {
         if (turnJob?.isActive == true) return
         if (action.text.isBlank()) return
+        lastAction = action
         _turn.value = GameTurnUiState(running = true, phase = GmTurnPhase.Preparing)
         turnJob = viewModelScope.launch {
             val listener = object : GmTurnListener {
@@ -204,15 +214,21 @@ class GameViewModel(
                         cancelling = false,
                         error = "生成をキャンセルしました。このターンは保存されていません。",
                     )
-                    is GmTurnResult.Failed -> previous.copy(
-                        running = false,
-                        phase = null,
-                        streamedText = "",
-                        generatedTokens = 0,
-                        cancelling = false,
-                        error = result.message,
-                        errorDetails = result.errors,
-                    )
+                    is GmTurnResult.Failed -> {
+                        // Keep the exact action and the already resolved dice so a manual
+                        // retry cannot re-roll or change a confirmed check.
+                        lastAction = action.copy(resolvedCheck = result.dice)
+                        previous.copy(
+                            running = false,
+                            phase = null,
+                            streamedText = "",
+                            generatedTokens = 0,
+                            cancelling = false,
+                            error = result.message,
+                            errorDetails = result.errors,
+                            errorKind = result.errorKind,
+                        )
+                    }
                 }
             }
         }

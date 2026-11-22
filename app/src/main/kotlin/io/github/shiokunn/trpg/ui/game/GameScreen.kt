@@ -67,6 +67,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.shiokunn.trpg.ai.engine.EngineStatus
 import io.github.shiokunn.trpg.core.ai.GmChoice
+import io.github.shiokunn.trpg.core.ai.GmErrorCategory
 import io.github.shiokunn.trpg.core.domain.ChatMessage
 import io.github.shiokunn.trpg.core.domain.ChatRole
 import io.github.shiokunn.trpg.core.domain.CombatState
@@ -140,6 +141,7 @@ fun GameScreen(
                     onAttack = viewModel::attack,
                     onCancel = viewModel::cancelGeneration,
                     onDismissError = viewModel::clearError,
+                    onRetry = viewModel::regenerate,
                 )
             }
         }
@@ -159,6 +161,7 @@ private fun GameContent(
     onAttack: (Boolean) -> Unit,
     onCancel: () -> Unit,
     onDismissError: () -> Unit,
+    onRetry: () -> Unit,
 ) {
     val current = bundle
     val location = current.locations.firstOrNull { it.id == current.session.currentLocationId }
@@ -200,8 +203,10 @@ private fun GameContent(
             cancelling = turn.cancelling,
             error = turn.error,
             errorDetails = turn.errorDetails,
+            errorKind = turn.errorKind,
             onCancel = onCancel,
             onDismissError = onDismissError,
+            onRetry = onRetry,
             onAttack = onAttack,
         )
 
@@ -257,8 +262,10 @@ private fun AiMessageArea(
     cancelling: Boolean,
     error: String?,
     errorDetails: List<String>,
+    errorKind: GmErrorCategory?,
     onCancel: () -> Unit,
     onDismissError: () -> Unit,
+    onRetry: () -> Unit,
     onAttack: (Boolean) -> Unit,
 ) {
     Box(
@@ -331,7 +338,13 @@ private fun AiMessageArea(
             }
 
             if (error != null) {
-                ErrorCard(message = error, details = errorDetails, onDismiss = onDismissError)
+                ErrorCard(
+                    message = error,
+                    details = errorDetails,
+                    errorKind = errorKind,
+                    onDismiss = onDismissError,
+                    onRetry = onRetry,
+                )
                 Spacer(Modifier.height(16.dp))
             }
         }
@@ -633,7 +646,13 @@ private fun FreeActionRow(onSend: (String) -> Unit, modifier: Modifier = Modifie
 }
 
 @Composable
-private fun ErrorCard(message: String, details: List<String>, onDismiss: () -> Unit) {
+private fun ErrorCard(
+    message: String,
+    details: List<String>,
+    errorKind: GmErrorCategory?,
+    onDismiss: () -> Unit,
+    onRetry: () -> Unit,
+) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
         modifier = Modifier.fillMaxWidth(),
@@ -644,6 +663,19 @@ private fun ErrorCard(message: String, details: List<String>, onDismiss: () -> U
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onErrorContainer,
             )
+            if (errorKind != null) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "エラー種別: ${errorKind.name}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                )
+                Text(
+                    text = "直前の行動から再度シナリオを生成できます。",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                )
+            }
             if (details.isNotEmpty()) {
                 Spacer(Modifier.height(8.dp))
                 details.take(5).forEach { detail ->
@@ -654,8 +686,13 @@ private fun ErrorCard(message: String, details: List<String>, onDismiss: () -> U
                     )
                 }
             }
-            TextButton(onClick = onDismiss) {
-                Text("閉じる", color = MaterialTheme.colorScheme.onErrorContainer)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = onRetry) {
+                    Text("同じ行動で再生成", color = MaterialTheme.colorScheme.onErrorContainer)
+                }
+                TextButton(onClick = onDismiss) {
+                    Text("閉じる", color = MaterialTheme.colorScheme.onErrorContainer)
+                }
             }
         }
     }
