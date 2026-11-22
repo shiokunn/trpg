@@ -285,6 +285,7 @@ private fun GameContent(
                 // Same background-free indicator for the first and every later answer.
                 GeneratingIndicator(
                     phase = turn.phase,
+                    generatedTokens = turn.generatedTokens,
                     cancelling = turn.cancelling,
                     onCancel = onCancel,
                 )
@@ -517,6 +518,7 @@ private fun String.withoutCheckPrefix(): String {
 @Composable
 private fun GeneratingIndicator(
     phase: GmTurnPhase?,
+    generatedTokens: Int,
     cancelling: Boolean,
     onCancel: () -> Unit,
 ) {
@@ -533,10 +535,12 @@ private fun GeneratingIndicator(
         )
         Spacer(Modifier.height(16.dp))
         Text(
-            text = when (phase) {
-                is GmTurnPhase.Repairing -> "応答を修正しています"
-                is GmTurnPhase.Committing -> "ターンを保存しています"
-                else -> if (cancelling) "生成を中止しています" else "生成中"
+            text = when {
+                cancelling -> "生成を中止しています"
+                phase is GmTurnPhase.Repairing -> "応答を修正しています"
+                phase is GmTurnPhase.Committing -> "ターンを保存しています"
+                generatedTokens <= 0 -> "読み込み中"
+                else -> "作成中"
             },
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
