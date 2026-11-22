@@ -11,6 +11,7 @@ import io.github.shiokunn.trpg.core.ai.AiParseResult
 import io.github.shiokunn.trpg.core.ai.CheckRequest
 import io.github.shiokunn.trpg.core.ai.GmResponse
 import io.github.shiokunn.trpg.core.ai.GmResponseParser
+import io.github.shiokunn.trpg.core.ai.GmResponseRules
 import io.github.shiokunn.trpg.core.ai.TurnChoices
 import io.github.shiokunn.trpg.core.domain.ChatMessage
 import io.github.shiokunn.trpg.core.domain.ChatRole
@@ -19,13 +20,13 @@ import io.github.shiokunn.trpg.core.domain.GameEvent
 import io.github.shiokunn.trpg.core.domain.ModelSettings
 import io.github.shiokunn.trpg.core.domain.NpcMemory
 import io.github.shiokunn.trpg.core.domain.StoryMemory
+import io.github.shiokunn.trpg.core.domain.World
 import io.github.shiokunn.trpg.core.memory.MemorySelector
 import io.github.shiokunn.trpg.core.prompt.PromptBudget
 import io.github.shiokunn.trpg.core.prompt.PromptBuilder
 import io.github.shiokunn.trpg.core.prompt.PromptBundle
 import io.github.shiokunn.trpg.core.prompt.PromptContext
 import io.github.shiokunn.trpg.core.prompt.PromptTokenCounter
-import io.github.shiokunn.trpg.core.prompt.PromptTurn
 import io.github.shiokunn.trpg.core.rules.DiceEngine
 import io.github.shiokunn.trpg.core.state.GameSnapshot
 import io.github.shiokunn.trpg.core.state.MutationResult
@@ -187,8 +188,21 @@ class GmTurnService(
 
         if (attempt is Attempt.Rejected) {
             listener.onPhase(GmTurnPhase.Repairing(attempt.errors))
-            val repairMessages = messages + PromptMessage("assistant", firstText) +
-                PromptMessage("user", GmResponseParser.repairInstruction(attempt.errors))
+            // A repair retry must not repeat the bad JSON or the whole conversation.
+            // Give the model only the violation location, the narrative text that was
+            // still valid, and the original scenario.
+            val repairMessages = listOf(
+                PromptMessage("system", PromptBuilder.repairSystemPrompt()),
+                PromptMessage(
+                    "user",
+                    buildRepairUserMessage(
+                        errors = attempt.errors,
+                        invalidRaw = firstText,
+                        scenario = initialScenarioFrom(bundle.world, bundle.session.summary),
+                        previousChat = previousChatFrom(recentChat),
+                    ),
+                ),
+            )
             when (val second = generate(repairMessages, settings, listener)) {
                 is GenerationOutcome.Cancelled -> return GmTurnResult.Cancelled
                 is GenerationOutcome.Failure -> return GmTurnResult.Failed(second.message)
@@ -446,6 +460,68 @@ class GmTurnService(
         add(PromptMessage("user", user))
     }
 
+    /** World information the AI produced when the adventure was created. */
+    private fun initialScenarioFrom(world: World, summary: String): String = buildString {
+        append("世界名: ").append(world.name)
+        if (world.genre.isNotBlank()) append(" / ジャンル: ").append(world.genre)
+        if (world.era.isNotBlank()) append(" / 時代: ").append(world.era)
+        if (world.setting.isNotBlank()) append("\n設定: ").append(world.setting)
+        if (world.atmosphere.isNotBlank()) append("\n雰囲気: ").append(world.atmosphere)
+        if (world.history.isNotBlank()) append("\n歴史: ").append(world.history)
+        if (world.objective.isNotBlank()) append("\n目的: ").append(world.objective)
+        if (world.problem.isNotBlank()) append("\n問題: ").append(world.problem)
+        if (world.scenarioPremise.isNotBlank()) append("\nシナリオ前提: ").append(world.scenarioPremise)
+        if (summary.isNotBlank()) append("\n冒険のあらすじ: ").append(summary)
+    }
+
+    /** The exchange immediately before the current turn. */
+    private fun previousChatFrom(chat: List<ChatMessage>): String = chat.takeLast(2)
+        .joinToString("\n") { message ->
+            val label = when (message.role) {
+                ChatRole.PLAYER -> "プレイヤー"
+                ChatRole.GM -> "GM"
+                ChatRole.SYSTEM -> "システム"
+            }
+            "$label: ${message.content}"
+        }
+
+    /** Minimal context for the single repair retry after a contract violation. */
+    private fun buildRepairUserMessage(
+        errors: List<String>,
+        invalidRaw: String,
+        scenario: String,
+        previousChat: String,
+    ): String = buildString {
+        append("前回の応答は次の場所で契約に違反しました。\n")
+        errors.take(10).forEach { error -> append("- ").append(error).append('\n') }
+
+        if (scenario.isNotBlank()) {
+            append("\n最初のシナリオ（冒険開始時に生成された世界情報）:\n").append(scenario)
+        }
+        if (previousChat.isNotBlank()) {
+            append("\n\n一つ前の会話履歴:\n").append(previousChat)
+        }
+
+        val narrative = validNarrativeFrom(invalidRaw)
+            .take(GmResponseRules.MAX_NARRATIVE_CHARS)
+        if (narrative.isNotBlank()) {
+            append("\n\n契約違反がなかった情景描写（変更しないでください）:\n").append(narrative)
+        }
+
+        append("\n\nこの文章の続きを作成してください。")
+        append("説明・コードフェンス・JSON以外の文字を含めず、同じJSON契約で1つだけ出力してください。")
+    }
+
+    /** Keeps only the narrative text; drops every other (possibly invalid) JSON field. */
+    private fun validNarrativeFrom(raw: String): String {
+        val parsed = GmResponseParser.parse(raw)
+        if (parsed is AiParseResult.Success) return parsed.value.narrative
+        val match = NARRATIVE_REGEX.find(raw) ?: return ""
+        val escaped = match.groupValues[1]
+        return runCatching { Json.decodeFromString<String>("\"$escaped\"") }
+            .getOrDefault(escaped)
+    }
+
     /** Per-turn memoisation: tokenizer calls are expensive and repeat during truncation. */
     private class MemoTokenCounter(private val delegate: PromptTokenCounter) : PromptTokenCounter {
         private val cache = HashMap<String, Int>(128)
@@ -462,6 +538,8 @@ class GmTurnService(
         const val MAX_HISTORY_MESSAGES = 40
         const val MAX_LONG_TERM_MEMORIES = MemorySelector.DEFAULT_LIMIT
         const val SUMMARY_CHARS = 600
+
+        private val NARRATIVE_REGEX = Regex("\"narrative\"\\s*:\\s*\"((?:\\\\.|[^\"\\\\])*)\"")
     }
 }
 

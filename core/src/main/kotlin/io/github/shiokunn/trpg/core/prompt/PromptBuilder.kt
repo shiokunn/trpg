@@ -357,12 +357,12 @@ class PromptBuilder(
         val title: String get() = "【$name】"
     }
 
-    private companion object {
+    companion object {
         const val MAX_MEMORIES = MemorySelector.DEFAULT_LIMIT
         const val MAX_HISTORY_MESSAGES = 8
-        const val MIN_TRUNCATED_CHARS = 40
+        private const val MIN_TRUNCATED_CHARS = 40
 
-        val SYSTEM_RULES = """
+        private val SYSTEM_RULES = """
             あなたは完全オフラインのAndroid TRPGアプリで動作するゲームマスター（GM）です。
             日本語で、プレイヤーの選択に基づく情景描写と次の選択肢を生成してください。
 
@@ -377,7 +377,7 @@ class PromptBuilder(
             - 出力はJSONオブジェクト1つだけ。前後に説明文やコードフェンスを付けない。
         """.trimIndent()
 
-        val JSON_CONTRACT = """
+        private val JSON_CONTRACT = """
             【出力JSON契約】
             {
               "narrative": "情景描写（必須・日本語）",
@@ -411,5 +411,8 @@ class PromptBuilder(
             }
             stateChanges が不要なら空配列にする。存在しないIDを創作しない。
         """.trimIndent()
+
+        /** Rules + JSON contract only, used when a repair retry must drop all history. */
+        fun repairSystemPrompt(): String = SYSTEM_RULES + "\n\n" + JSON_CONTRACT
     }
 }
