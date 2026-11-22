@@ -29,6 +29,8 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -108,11 +110,11 @@ fun ModelsScreen(viewModel: ModelsViewModel, onBack: () -> Unit) {
     val openPicker = { picker.launch(arrayOf("*/*")) }
 
     TrpgScaffold(
-        title = "Models",
+        title = "モデル管理",
         onBack = onBack,
         actions = {
             if (status is EngineStatus.Ready) {
-                TextButton(onClick = viewModel::unloadModel) { Text("Unload") }
+                TextButton(onClick = viewModel::unloadModel) { Text("解放") }
             }
         },
     ) { padding ->
@@ -134,12 +136,12 @@ fun ModelsScreen(viewModel: ModelsViewModel, onBack: () -> Unit) {
                 ) {
                     Column(Modifier.weight(1f)) {
                         Text(
-                            text = "Model Files",
+                            text = "モデルファイル",
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.primary,
                         )
                         Text(
-                            text = "GGUF only (stored in the app's private storage)",
+                            text = "GGUF形式のみ対応（アプリ専用領域に保存）",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -148,7 +150,7 @@ fun ModelsScreen(viewModel: ModelsViewModel, onBack: () -> Unit) {
                     Button(onClick = openPicker, enabled = progress == null) {
                         Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text("Import")
+                        Text("取り込む")
                     }
                 }
             }
@@ -161,9 +163,9 @@ fun ModelsScreen(viewModel: ModelsViewModel, onBack: () -> Unit) {
                 item {
                     EmptyState(
                         icon = Icons.Default.SmartToy,
-                        title = "No models yet",
-                        message = "Import a GGUF file from your device to run the GM fully offline.",
-                        actionLabel = "Import GGUF file",
+                        title = "モデルがまだありません",
+                        message = "端末内のGGUFファイルを取り込むと、完全オフラインでGMを動かせます。",
+                        actionLabel = "GGUFファイルを取り込む",
                         onAction = openPicker,
                     )
                 }
@@ -183,7 +185,7 @@ fun ModelsScreen(viewModel: ModelsViewModel, onBack: () -> Unit) {
 
             item {
                 Text(
-                    text = "Inference Settings",
+                    text = "推論設定",
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(top = 12.dp),
@@ -208,8 +210,8 @@ fun ModelsScreen(viewModel: ModelsViewModel, onBack: () -> Unit) {
 
     pendingDelete?.let { model ->
         ConfirmDialog(
-            title = "Delete Model",
-            message = "Delete \"${model.displayName}\" from this device. This cannot be undone.",
+            title = "モデルを削除",
+            message = "「${model.displayName}」を端末から削除します。この操作は取り消せません。",
             onConfirm = { viewModel.deleteModel(model) },
             onDismiss = { pendingDelete = null },
         )
@@ -236,7 +238,7 @@ private fun MessageCard(text: String, onDismiss: () -> Unit) {
             IconButton(onClick = onDismiss) {
                 Icon(
                     Icons.Default.Close,
-                    contentDescription = "Close",
+                    contentDescription = "閉じる",
                     tint = MaterialTheme.colorScheme.onSecondaryContainer,
                 )
             }
@@ -244,6 +246,7 @@ private fun MessageCard(text: String, onDismiss: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun EngineStatusCard(status: EngineStatus, backend: BackendInfo) {
     Card(
@@ -260,13 +263,13 @@ private fun EngineStatusCard(status: EngineStatus, backend: BackendInfo) {
                     tint = MaterialTheme.colorScheme.primary,
                 )
                 Spacer(Modifier.width(8.dp))
-                Text("Inference Engine", style = MaterialTheme.typography.titleSmall)
+                Text("推論エンジン", style = MaterialTheme.typography.titleSmall)
             }
 
             when (status) {
                 is EngineStatus.Unloaded -> {
                     Text(
-                        "Not loaded. Press \"Load\" on the model you want to use.",
+                        "未読み込み。使用するモデルの「読み込む」を押してください。",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -274,10 +277,13 @@ private fun EngineStatusCard(status: EngineStatus, backend: BackendInfo) {
 
                 is EngineStatus.Loading -> {
                     Text(
-                        "Loading \"${status.modelFileName}\"...",
+                        "「${status.modelFileName}」を読み込み中…",
                         style = MaterialTheme.typography.bodyMedium,
                     )
-                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    ContainedLoadingIndicator(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        indicatorColor = MaterialTheme.colorScheme.primary,
+                    )
                 }
 
                 is EngineStatus.Ready -> {
@@ -296,8 +302,8 @@ private fun EngineStatusCard(status: EngineStatus, backend: BackendInfo) {
                         )
                     }
                     Text(
-                        "Context ${status.info.nCtx} / Trained ${status.info.nCtxTrain} - " +
-                            "Chat template ${templateStatusLabel(status.info)}",
+                        "コンテキスト ${status.info.nCtx} / 学習時 ${status.info.nCtxTrain}・" +
+                            "チャットテンプレート ${templateStatusLabel(status.info)}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -305,7 +311,7 @@ private fun EngineStatusCard(status: EngineStatus, backend: BackendInfo) {
 
                 is EngineStatus.Failed -> {
                     Text(
-                        "Failed to load",
+                        "読み込みに失敗しました",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.error,
                     )
@@ -321,9 +327,9 @@ private fun EngineStatusCard(status: EngineStatus, backend: BackendInfo) {
                 HorizontalDivider(Modifier.padding(vertical = 4.dp))
                 Text(
                     text = if (backend.available) {
-                        "Backend: ${backend.backends.joinToString(", ").ifBlank { "CPU" }}"
+                        "バックエンド: ${backend.backends.joinToString(", ").ifBlank { "CPU" }}"
                     } else {
-                        "Unable to get backend info"
+                        "バックエンド情報を取得できません"
                     },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -337,7 +343,7 @@ private fun EngineStatusCard(status: EngineStatus, backend: BackendInfo) {
                 )
                 if (backend.gpuOffload) {
                     Text(
-                        "GPU offload build (GPU layers enabled)",
+                        "GPUオフロード対応ビルドです（GPUレイヤー設定が有効）",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -347,6 +353,7 @@ private fun EngineStatusCard(status: EngineStatus, backend: BackendInfo) {
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ImportCard(progress: ImportProgress, onCancel: () -> Unit) {
     Card(
@@ -357,12 +364,12 @@ private fun ImportCard(progress: ImportProgress, onCancel: () -> Unit) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    "Importing model...",
+                    "モデルを取り込み中…",
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onTertiaryContainer,
                     modifier = Modifier.weight(1f),
                 )
-                TextButton(onClick = onCancel) { Text("Cancel") }
+                TextButton(onClick = onCancel) { Text("キャンセル") }
             }
             val fraction = progress.fraction
             if (fraction != null) {
@@ -371,14 +378,17 @@ private fun ImportCard(progress: ImportProgress, onCancel: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                 )
             } else {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                ContainedLoadingIndicator(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    indicatorColor = MaterialTheme.colorScheme.primary,
+                )
             }
             Text(
                 text = if (progress.total > 0L) {
                     "${formatFileSize(progress.copied)} / ${formatFileSize(progress.total)}" +
                         "（${(fraction!! * 100).roundToInt()}%）"
                 } else {
-                    "${formatFileSize(progress.copied)} copied"
+                    "${formatFileSize(progress.copied)} をコピーしました"
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onTertiaryContainer,
@@ -443,7 +453,7 @@ private fun ModelRow(
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        "Selected",
+                        "選択中",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
                     )
@@ -451,19 +461,19 @@ private fun ModelRow(
                 Spacer(Modifier.weight(1f))
                 if (loading) {
                     Text(
-                        "Loading...",
+                        "読み込み中…",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 } else {
                     TextButton(onClick = onLoad, enabled = !loaded) {
-                        Text(if (loaded) "Loaded" else "Load")
+                        Text(if (loaded) "読み込み済み" else "読み込む")
                     }
                 }
                 IconButton(onClick = onDelete) {
                     Icon(
                         Icons.Default.Delete,
-                        contentDescription = "Delete ${model.displayName}",
+                        contentDescription = "「${model.displayName}」を削除",
                         tint = MaterialTheme.colorScheme.error,
                     )
                 }
@@ -487,18 +497,18 @@ private fun ParamCard(
     ) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
-                "Generation Parameters",
+                "生成パラメータ",
                 style = MaterialTheme.typography.titleSmall,
             )
             Text(
-                "Adjust the balance between stability and creativity.",
+                "会話の安定性と創造性のバランスを調整します。",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
             SliderRow(
-                label = "Context Size",
-                valueText = "${draft.nCtx} tokens",
+                label = "コンテキストサイズ",
+                valueText = "${draft.nCtx} トークン",
                 value = draft.nCtx.toFloat(),
                 range = ModelSettings.MIN_N_CTX.toFloat()..ModelSettings.MAX_N_CTX.toFloat(),
                 onChange = { raw ->
@@ -509,9 +519,9 @@ private fun ParamCard(
             )
             advice?.let { current ->
                 Text(
-                    "Recommended: ${current.recommendedNCtx} tokens " +
-                        "(Device RAM ${formatFileSize(current.totalRamBytes)} / " +
-                        "Model ${formatFileSize(current.modelSizeBytes)})",
+                    "推奨: ${current.recommendedNCtx} トークン" +
+                        "（端末RAM ${formatFileSize(current.totalRamBytes)} / " +
+                        "モデル ${formatFileSize(current.modelSizeBytes)}）",
                     style = MaterialTheme.typography.bodySmall,
                     color = if (current.warning != null) {
                         MaterialTheme.colorScheme.error
@@ -538,7 +548,7 @@ private fun ParamCard(
                                 )
                                 Spacer(Modifier.width(6.dp))
                                 Text(
-                                    "Possible memory shortage",
+                                    "メモリ不足の可能性",
                                     style = MaterialTheme.typography.labelLarge,
                                     color = MaterialTheme.colorScheme.onErrorContainer,
                                 )
@@ -549,14 +559,14 @@ private fun ParamCard(
                                 color = MaterialTheme.colorScheme.onErrorContainer,
                             )
                             TextButton(onClick = { onApplyRecommended(current.recommendedNCtx) }) {
-                                Text("Use recommended (${current.recommendedNCtx})")
+                                Text("推奨値（${current.recommendedNCtx}）を使う")
                             }
                         }
                     }
                 }
             }
             SliderRow(
-                label = "Max Output Tokens",
+                label = "最大生成トークン",
                 valueText = "${draft.maxTokens}",
                 value = draft.maxTokens.toFloat(),
                 range = ModelSettings.MIN_MAX_TOKENS.toFloat()..ModelSettings.MAX_MAX_TOKENS.toFloat(),
@@ -601,7 +611,7 @@ private fun ParamCard(
                 },
             )
             SliderRow(
-                label = "GPU Layers (0 = CPU only)",
+                label = "GPUレイヤー（0でCPUのみ）",
                 valueText = "${draft.gpuLayers}",
                 value = draft.gpuLayers.toFloat(),
                 range = 0f..99f,
@@ -610,7 +620,7 @@ private fun ParamCard(
 
             Spacer(Modifier.height(8.dp))
             Button(onClick = onSave, modifier = Modifier.fillMaxWidth()) {
-                Text("Save Settings")
+                Text("設定を保存")
             }
         }
     }
@@ -660,11 +670,11 @@ private fun MemoryNoteCard() {
             )
             Spacer(Modifier.width(10.dp))
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("Memory Guidelines", style = MaterialTheme.typography.titleSmall)
+                Text("メモリの目安", style = MaterialTheme.typography.titleSmall)
                 Text(
-                    "Keep about 6-8 GB of free memory for the model and context. " +
-                        "If it is slow, use a quantized model such as Q4_K_M or lower the context size. " +
-                        "Models are stored in the app's private area and never leave the device.",
+                    "モデルとコンテキストを合わせて6〜8GB程度の空きが必要です。" +
+                        "動作が重い場合はQ4_K_Mなどの量子化モデルを使うか、" +
+                        "コンテキストサイズを下げてください。モデルは端末内のアプリ専用領域に保存され、外部通信は行いません。",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -675,13 +685,13 @@ private fun MemoryNoteCard() {
 
 private fun templateStatusLabel(info: ModelInfo): String {
     if (info.chatTemplateError.isNotBlank() && info.chatTemplateStatus == "unsupported") {
-        return "Yes (unsupported)"
+        return "あり（未対応）"
     }
     return when (info.chatTemplateStatus) {
-        "applied" -> "Yes (applied)"
-        "none" -> if (info.hasChatTemplate) "Yes" else "No (ChatML fallback)"
-        "unsupported" -> "Yes (unsupported)"
-        else -> if (info.hasChatTemplate) "Yes" else "No"
+        "applied" -> "あり（対応済み）"
+        "none" -> if (info.hasChatTemplate) "あり" else "なし（ChatMLフォールバック）"
+        "unsupported" -> "あり（未対応）"
+        else -> if (info.hasChatTemplate) "あり" else "なし"
     }
 }
 

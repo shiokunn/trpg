@@ -16,7 +16,8 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -88,6 +89,7 @@ fun NewAdventureScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun FormContent(
     state: NewAdventureUiState,
@@ -226,7 +228,10 @@ private fun FormContent(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
-                            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                            ContainedLoadingIndicator(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                indicatorColor = MaterialTheme.colorScheme.primary,
+                            )
                             Text(state.statusText.ifBlank { "生成しています…" }, style = MaterialTheme.typography.bodyMedium)
                         }
                         state.generation?.let { progress ->
