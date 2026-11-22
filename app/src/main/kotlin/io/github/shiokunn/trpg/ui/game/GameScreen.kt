@@ -234,14 +234,10 @@ private fun GameContent(
             }
         }
 
-        if (!busy && modelReady && current.session.activeCombat == null &&
-            (hasNarrative || choices.isNotEmpty())
-        ) {
-            FreeActionRow(
-                onSend = onAct,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
+        FreeActionRow(
+            onSend = onAct,
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
 
