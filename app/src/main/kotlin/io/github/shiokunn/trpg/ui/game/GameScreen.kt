@@ -5,9 +5,11 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.StartOffset
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -25,6 +27,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -95,6 +98,7 @@ fun GameScreen(
     onCharacter: () -> Unit,
     onWorld: () -> Unit,
     onJournal: () -> Unit,
+    onOpenModels: () -> Unit,
 ) {
     val bundle by viewModel.bundle.collectAsStateWithLifecycle()
     val missing by viewModel.missing.collectAsStateWithLifecycle()
@@ -105,6 +109,18 @@ fun GameScreen(
 
     val session = bundle?.session
     val modelReady = engineStatus is EngineStatus.Ready
+
+    // Roleplay cannot start without a model. On entry, send the player to the existing
+    // model screen instead of starting a generation that would only fail. The guard
+    // prevents a navigation loop if the player comes back before loading a model.
+    val navigatedToModels = rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(engineStatus) {
+        val needsModel = engineStatus is EngineStatus.Unloaded || engineStatus is EngineStatus.Failed
+        if (!navigatedToModels.value && needsModel) {
+            navigatedToModels.value = true
+            onOpenModels()
+        }
+    }
 
     TrpgScaffold(
         title = session?.title ?: "冒険",
@@ -128,9 +144,13 @@ fun GameScreen(
                     sceneTitle = choices?.sceneTitle.orEmpty(),
                     turn = turn,
                     modelReady = modelReady,
-                    onBegin = viewModel::beginAdventure,
-                    onChoose = viewModel::choose,
-                    onAct = { text -> viewModel.act(text) },
+                    onBegin = { if (modelReady) viewModel.beginAdventure() else onOpenModels() },
+                    onChoose = { choice ->
+                        if (modelReady) viewModel.choose(choice) else onOpenModels()
+                    },
+                    onAct = { text ->
+                        if (modelReady) viewModel.act(text) else onOpenModels()
+                    },
                     onAttack = viewModel::attack,
                     onCancel = viewModel::cancelGeneration,
                     onDismissError = viewModel::clearError,
@@ -248,8 +268,8 @@ private fun GameContent(
                     } else {
                         "先にモデルを読み込んでください。"
                     },
-                    actionLabel = if (modelReady) "冒険を始める" else null,
-                    onAction = if (modelReady) onBegin else null,
+                    actionLabel = "冒険を始める",
+                    onAction = onBegin,
                 )
             }
         }
@@ -506,27 +526,34 @@ private fun String.withoutCheckPrefix(): String {
     return action.ifBlank { this }
 }
 
-/** Five dots pulsing from left to right. Only composed during the first generation. */
+/** Five dots falling from above one after another and bouncing. First turn only. */
 @Composable
-private fun PulseDots() {
-    val transition = rememberInfiniteTransition(label = "dots")
-    val phase by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1860, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart,
-        ),
-        label = "phase",
-    )
+private fun FallBounceDots() {
+    val transition = rememberInfiniteTransition(label = "fallBounce")
 
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         repeat(5) { index ->
-            val shifted = (phase + index * (217f / 1860)) % 1f
-            val pulse = 0.7f + 0.3f * kotlin.math.sin(shifted * Math.PI).toFloat()
+            val offsetY by transition.animateFloat(
+                initialValue = -24f,
+                targetValue = 0f,
+                animationSpec = infiniteRepeatable(
+                    animation = keyframes {
+                        durationMillis = 1200
+                        -24f at 0
+                        0f at 520 using FastOutSlowInEasing
+                        -10f at 760
+                        0f at 1000 using FastOutSlowInEasing
+                        0f at 1200
+                    },
+                    repeatMode = RepeatMode.Restart,
+                    initialStartOffset = StartOffset(index * 140),
+                ),
+                label = "dot$index",
+            )
             Box(
                 modifier = Modifier
-                    .size((8.0f * pulse).dp)
+                    .offset(y = offsetY.dp)
+                    .size(8.dp)
                     .background(MaterialTheme.colorScheme.primary, CircleShape),
             )
         }
@@ -547,7 +574,7 @@ private fun InitialGenerating(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        PulseDots()
+        FallBounceDots()
         Spacer(Modifier.height(16.dp))
         Text(
             text = when (phase) {

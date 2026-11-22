@@ -130,6 +130,7 @@ fun TrpgNavHost(container: AppContainer) {
                     onCharacter = { navController.navigate(Routes.character(sessionId)) },
                     onWorld = { navController.navigate(Routes.world(sessionId)) },
                     onJournal = { navController.navigate(Routes.journal(sessionId)) },
+                    onOpenModels = { navController.navigate(Routes.MODELS) },
                 )
             }
         }
