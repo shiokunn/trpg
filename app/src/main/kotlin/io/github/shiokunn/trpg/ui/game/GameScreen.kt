@@ -15,19 +15,21 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -71,7 +73,6 @@ import io.github.shiokunn.trpg.core.domain.CombatState
 import io.github.shiokunn.trpg.game.GmTurnPhase
 import io.github.shiokunn.trpg.ui.GameTurnUiState
 import io.github.shiokunn.trpg.ui.GameViewModel
-import io.github.shiokunn.trpg.ui.components.EmptyState
 import io.github.shiokunn.trpg.ui.components.LoadingPane
 import io.github.shiokunn.trpg.ui.components.NarrativeText
 import io.github.shiokunn.trpg.ui.components.SessionMissingState
@@ -130,7 +131,6 @@ fun GameScreen(
                     sceneTitle = choices?.sceneTitle.orEmpty(),
                     turn = turn,
                     modelReady = modelReady,
-                    onBegin = { if (modelReady) viewModel.beginAdventure() else onOpenModels() },
                     onChoose = { choice ->
                         if (modelReady) viewModel.choose(choice) else onOpenModels()
                     },
@@ -154,7 +154,6 @@ private fun GameContent(
     sceneTitle: String,
     turn: GameTurnUiState,
     modelReady: Boolean,
-    onBegin: () -> Unit,
     onChoose: (GmChoice) -> Unit,
     onAct: (String) -> Unit,
     onAttack: (Boolean) -> Unit,
@@ -164,13 +163,12 @@ private fun GameContent(
     val current = bundle
     val location = current.locations.firstOrNull { it.id == current.session.currentLocationId }
     val character = current.character
-    val hasNarrative = chat.any { it.role == ChatRole.GM }
-    val latestGmId = chat.lastOrNull { it.role == ChatRole.GM }?.id
-    val gmOrdinals = chat.asSequence()
-        .filter { it.role == ChatRole.GM }
+    val gmMessages = chat.filter { it.role == ChatRole.GM }
+    val hasNarrative = gmMessages.isNotEmpty()
+    val latestGmId = gmMessages.lastOrNull()?.id
+    val gmOrdinals = gmMessages
         .mapIndexed { index, message -> message.id to index }
         .toMap()
-    val recent = chat.takeLast(6)
     val busy = turn.running
     val view = LocalView.current
 
@@ -182,27 +180,98 @@ private fun GameContent(
         onDispose { view.keepScreenOn = false }
     }
 
-    Box(Modifier.fillMaxSize()) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .imePadding()
+            .padding(20.dp),
+    ) {
+        AiMessageArea(
+            modifier = Modifier.weight(1f),
+            sceneTitle = sceneTitle,
+            messages = gmMessages,
+            latestGmId = latestGmId,
+            gmOrdinals = gmOrdinals,
+            combat = current.session.activeCombat,
+            modelReady = modelReady,
+            busy = busy,
+            phase = turn.phase,
+            generatedTokens = turn.generatedTokens,
+            cancelling = turn.cancelling,
+            error = turn.error,
+            errorDetails = turn.errorDetails,
+            onCancel = onCancel,
+            onDismissError = onDismissError,
+            onAttack = onAttack,
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(0.35f),
         ) {
-        item {
-            StatusCard(
-                locationName = location?.name ?: "未知の場所",
-                chapter = current.session.currentChapter,
-                turnCount = current.session.turnCount,
-                characterName = character.name,
-                species = character.species,
-                occupation = character.occupation,
-                hp = character.hp,
-                maxHp = character.maxHp,
-            )
+            Box(Modifier.weight(0.4f).fillMaxHeight()) {
+                StatusCard(
+                    locationName = location?.name ?: "未知の場所",
+                    chapter = current.session.currentChapter,
+                    turnCount = current.session.turnCount,
+                    characterName = character.name,
+                    species = character.species,
+                    occupation = character.occupation,
+                    hp = character.hp,
+                    maxHp = character.maxHp,
+                )
+            }
+            Spacer(Modifier.width(12.dp))
+            Box(Modifier.weight(0.6f).fillMaxHeight()) {
+                ChoicePanel(
+                    choices = choices,
+                    visible = !busy && hasNarrative && turn.error == null &&
+                        current.session.activeCombat == null,
+                    enabled = modelReady && !busy,
+                    onChoose = onChoose,
+                )
+            }
         }
 
-        if (!modelReady) {
-            item {
+        if (!busy && modelReady && current.session.activeCombat == null &&
+            (hasNarrative || choices.isNotEmpty())
+        ) {
+            FreeActionRow(
+                onSend = onAct,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+/** Top area: the GM narrative plus scene title. Empty until the first answer arrives. */
+@Composable
+private fun AiMessageArea(
+    modifier: Modifier,
+    sceneTitle: String,
+    messages: List<ChatMessage>,
+    latestGmId: String?,
+    gmOrdinals: Map<String, Int>,
+    combat: CombatState?,
+    modelReady: Boolean,
+    busy: Boolean,
+    phase: GmTurnPhase?,
+    generatedTokens: Int,
+    cancelling: Boolean,
+    error: String?,
+    errorDetails: List<String>,
+    onCancel: () -> Unit,
+    onDismissError: () -> Unit,
+    onAttack: (Boolean) -> Unit,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState()),
+    ) {
+        Column(Modifier.fillMaxWidth()) {
+            if (!modelReady) {
                 Card(
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.errorContainer,
@@ -223,21 +292,10 @@ private fun GameContent(
                         )
                     }
                 }
+                Spacer(Modifier.height(16.dp))
             }
-        }
 
-        current.session.activeCombat?.let { combat ->
-            item {
-                CombatCard(
-                    combat = combat,
-                    enabled = !busy,
-                    onAttack = onAttack,
-                )
-            }
-        }
-
-        if (sceneTitle.isNotBlank()) {
-            item {
+            if (sceneTitle.isNotBlank()) {
                 Text(
                     text = "― $sceneTitle ―",
                     style = MaterialTheme.typography.labelLarge,
@@ -245,111 +303,90 @@ private fun GameContent(
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.fillMaxWidth(),
                 )
+                Spacer(Modifier.height(16.dp))
             }
-        }
 
-        if (!hasNarrative && !busy && turn.error == null) {
-            item {
-                EmptyState(
-                    icon = Icons.Default.PlayArrow,
-                    title = "物語を始めましょう",
-                    message = if (modelReady) {
-                        "最初の情景と選択肢をゲームマスターが生成します。"
-                    } else {
-                        "先にモデルを読み込んでください。"
-                    },
-                    actionLabel = "冒険を始める",
-                    onAction = onBegin,
-                )
-            }
-        }
-
-        if (hasNarrative) {
-            items(recent, key = { it.id }) { message ->
-                // Only the freshly generated GM message animates; older messages stay put.
-                if (message.role == ChatRole.GM && message.id == latestGmId) {
+            messages.takeLast(6).forEach { message ->
+                if (message.id == latestGmId) {
                     if (gmOrdinals[message.id] == 0) {
-                        FadeInContent { ChatMessageRow(message) }
+                        FadeInContent { NarrativeText(message.content) }
                     } else {
-                        // Second and later answers unfold below the previous one.
-                        ExpandRevealContent { ChatMessageRow(message) }
+                        ExpandRevealContent { NarrativeText(message.content) }
                     }
                 } else {
-                    ChatMessageRow(message)
+                    NarrativeText(message.content)
                 }
+                Spacer(Modifier.height(12.dp))
             }
-        }
 
-        if (busy) {
-            item {
-                // Same background-free indicator for the first and every later answer.
+            combat?.let {
+                CombatCard(combat = it, enabled = !busy, onAttack = onAttack)
+                Spacer(Modifier.height(16.dp))
+            }
+
+            if (busy) {
                 GeneratingIndicator(
-                    phase = turn.phase,
-                    generatedTokens = turn.generatedTokens,
-                    cancelling = turn.cancelling,
+                    phase = phase,
+                    generatedTokens = generatedTokens,
+                    cancelling = cancelling,
                     onCancel = onCancel,
                 )
+                Spacer(Modifier.height(16.dp))
+            }
+
+            if (error != null) {
+                ErrorCard(message = error, details = errorDetails, onDismiss = onDismissError)
+                Spacer(Modifier.height(16.dp))
             }
         }
 
-        if (turn.error != null) {
-            item {
-                ErrorCard(
-                    message = turn.error,
-                    details = turn.errorDetails,
-                    onDismiss = onDismissError,
-                )
-            }
-        }
-
-        val showChoices = !busy && hasNarrative && turn.error == null && choices.isNotEmpty() &&
-            current.session.activeCombat == null
-        val choicesKey = sceneTitle + "|" + choices.joinToString { it.id + ":" + it.text }
-        item {
-            key(choicesKey) {
-                AnimatedVisibility(
-                    visible = showChoices,
-                    enter = expandVertically(
-                        animationSpec = tween(
-                            durationMillis = 698,
-                            easing = FastOutSlowInEasing,
-                        ),
-                    ) + fadeIn(animationSpec = tween(durationMillis = 698, easing = FastOutSlowInEasing)),
-                    exit = shrinkVertically() + fadeOut(),
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        choices.forEach { choice ->
-                            ChoiceButton(
-                                choice = choice,
-                                enabled = modelReady && !busy,
-                                onClick = { onChoose(choice) },
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        if (!busy && modelReady && current.session.activeCombat == null &&
-            (hasNarrative || choices.isNotEmpty())
-        ) {
-            item {
-                FreeActionRow(onSend = onAct)
-            }
-        }
-
-        }
-        // The indicator has no card, so pin the live token count to the bottom-right
-        // for both the first and every later answer.
         if (busy) {
             Text(
-                text = "生成トークン: ${turn.generatedTokens}",
+                text = "生成トークン: $generatedTokens",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(20.dp),
+                    .padding(4.dp),
             )
+        }
+    }
+}
+
+/** Bottom-right area: fixed panel, its contents animate but the panel stays in place. */
+@Composable
+private fun ChoicePanel(
+    choices: List<GmChoice>,
+    visible: Boolean,
+    enabled: Boolean,
+    onChoose: (GmChoice) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val choicesKey = choices.joinToString { it.id + ":" + it.text }
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+    ) {
+        key(choicesKey) {
+            AnimatedVisibility(
+                visible = visible,
+                enter = expandVertically(
+                    animationSpec = tween(durationMillis = 698, easing = FastOutSlowInEasing),
+                ) + fadeIn(animationSpec = tween(durationMillis = 698, easing = FastOutSlowInEasing)),
+                exit = shrinkVertically() + fadeOut(),
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    choices.forEachIndexed { index, choice ->
+                        ChoiceButton(
+                            choice = choice,
+                            number = index + 1,
+                            enabled = enabled,
+                            onClick = { onChoose(choice) },
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -477,42 +514,6 @@ private fun CombatCard(
     }
 }
 
-@Composable
-private fun ChatMessageRow(message: ChatMessage) {
-    when (message.role) {
-        ChatRole.GM -> NarrativeText(message.content)
-        ChatRole.PLAYER -> Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-        ) {
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                ),
-            ) {
-                Text(
-                    text = message.content.withoutCheckPrefix(),
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                )
-            }
-        }
-        ChatRole.SYSTEM -> Text(
-            text = message.content,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.outline,
-        )
-    }
-}
-
-/** Keeps the stored game log intact while hiding the check prefix on screen. */
-private fun String.withoutCheckPrefix(): String {
-    if (!startsWith("【判定:")) return this
-    val action = substringAfter('\n', "")
-    return action.ifBlank { this }
-}
-
 /** Loading state for both the first and every later answer: no card or background. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -584,7 +585,12 @@ private fun ExpandRevealContent(content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun ChoiceButton(choice: GmChoice, enabled: Boolean, onClick: () -> Unit) {
+private fun ChoiceButton(
+    choice: GmChoice,
+    number: Int,
+    enabled: Boolean,
+    onClick: () -> Unit,
+) {
     OutlinedButton(
         onClick = onClick,
         enabled = enabled,
@@ -592,13 +598,13 @@ private fun ChoiceButton(choice: GmChoice, enabled: Boolean, onClick: () -> Unit
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
     ) {
         Column(Modifier.fillMaxWidth()) {
-            Text(choice.text, style = MaterialTheme.typography.bodyMedium)
+            Text("$number. ${choice.text}", style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
 
 @Composable
-private fun FreeActionRow(onSend: (String) -> Unit) {
+private fun FreeActionRow(onSend: (String) -> Unit, modifier: Modifier = Modifier) {
     var input by rememberSaveable { mutableStateOf("") }
     val focus = LocalFocusManager.current
     val submit = {
@@ -610,7 +616,7 @@ private fun FreeActionRow(onSend: (String) -> Unit) {
         }
     }
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
