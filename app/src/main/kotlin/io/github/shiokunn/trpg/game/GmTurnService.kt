@@ -205,7 +205,8 @@ class GmTurnService(
         if (attempt is Attempt.Rejected) {
             listener.onPhase(GmTurnPhase.Repairing(attempt.errors))
             val repairStarted = System.currentTimeMillis()
-            val mode = if (attempt.issues.any { it.category == GmErrorCategory.GAME_RULE }) {
+            val repairIssues = attempt.issues
+            val mode = if (repairIssues.any { it.category == GmErrorCategory.GAME_RULE }) {
                 RepairMode.CONTENT
             } else {
                 RepairMode.STRUCTURE
@@ -231,14 +232,14 @@ class GmTurnService(
                             "ゲームマスターの応答が規定のJSON契約を満たしませんでした。" +
                                 "ターンは保存されていません。",
                             errors = attempt.errors,
-                            kind = primaryKind(attempt.issues),
+                            kind = primaryKind(repairIssues),
                         )
                     }
                 }
             }
             logRepair(
                 mode = mode,
-                issues = attempt.issues,
+                issues = repairIssues,
                 localRepairApplied = localRepairApplied,
                 success = true,
                 elapsedMs = System.currentTimeMillis() - repairStarted,
