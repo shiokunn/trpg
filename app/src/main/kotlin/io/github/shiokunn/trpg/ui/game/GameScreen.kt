@@ -5,11 +5,9 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.StartOffset
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -19,7 +17,6 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -33,7 +30,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -65,9 +61,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.contentDescription
@@ -180,6 +173,10 @@ private fun GameContent(
     val character = current.character
     val hasNarrative = chat.any { it.role == ChatRole.GM }
     val latestGmId = chat.lastOrNull { it.role == ChatRole.GM }?.id
+    val gmOrdinals = chat.asSequence()
+        .filter { it.role == ChatRole.GM }
+        .mapIndexed { index, message -> message.id to index }
+        .toMap()
     val recent = chat.takeLast(6)
     val busy = turn.running
     val view = LocalView.current
@@ -276,9 +273,14 @@ private fun GameContent(
 
         if (hasNarrative) {
             items(recent, key = { it.id }) { message ->
-                // Only the freshly generated GM message fades in; older messages stay put.
+                // Only the freshly generated GM message animates; older messages stay put.
                 if (message.role == ChatRole.GM && message.id == latestGmId) {
-                    FadeInContent { ChatMessageRow(message) }
+                    if (gmOrdinals[message.id] == 0) {
+                        FadeInContent { ChatMessageRow(message) }
+                    } else {
+                        // Second and later answers unfold below the previous one.
+                        ExpandRevealContent { ChatMessageRow(message) }
+                    }
                 } else {
                     ChatMessageRow(message)
                 }
@@ -287,21 +289,12 @@ private fun GameContent(
 
         if (busy) {
             item {
-                if (!hasNarrative) {
-                    // Very first turn: dots only, no card or explanatory copy.
-                    InitialGenerating(
-                        phase = turn.phase,
-                        cancelling = turn.cancelling,
-                        onCancel = onCancel,
-                    )
-                } else {
-                    StreamingCard(
-                        phase = turn.phase,
-                        generatedTokens = turn.generatedTokens,
-                        cancelling = turn.cancelling,
-                        onCancel = onCancel,
-                    )
-                }
+                // Same background-free indicator for the first and every later answer.
+                GeneratingIndicator(
+                    phase = turn.phase,
+                    cancelling = turn.cancelling,
+                    onCancel = onCancel,
+                )
             }
         }
 
@@ -352,9 +345,9 @@ private fun GameContent(
         }
 
         }
-        // Initial generation has no narrative card to host the counter, so pin it to
-        // the bottom-right of the screen. Normal turns keep it inside the shimmer card.
-        if (busy && !hasNarrative) {
+        // The indicator has no card, so pin the live token count to the bottom-right
+        // for both the first and every later answer.
+        if (busy) {
             Text(
                 text = "生成トークン: ${turn.generatedTokens}",
                 style = MaterialTheme.typography.labelSmall,
@@ -526,33 +519,31 @@ private fun String.withoutCheckPrefix(): String {
     return action.ifBlank { this }
 }
 
-/** Five dots falling from above one after another and bouncing. First turn only. */
+/** Three dots rotating around a circle. Used for every generation. */
 @Composable
-private fun FallBounceDots() {
-    val transition = rememberInfiniteTransition(label = "fallBounce")
+private fun RotatingDots() {
+    val transition = rememberInfiniteTransition(label = "rotatingDots")
+    val angle by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart,
+        ),
+        label = "angle",
+    )
 
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        repeat(5) { index ->
-            val offsetY by transition.animateFloat(
-                initialValue = -24f,
-                targetValue = 0f,
-                animationSpec = infiniteRepeatable(
-                    animation = keyframes {
-                        durationMillis = 1200
-                        -24f at 0
-                        0f at 520 using FastOutSlowInEasing
-                        -10f at 760
-                        0f at 1000 using FastOutSlowInEasing
-                        0f at 1200
-                    },
-                    repeatMode = RepeatMode.Restart,
-                    initialStartOffset = StartOffset(index * 140),
-                ),
-                label = "dot$index",
-            )
+    Box(
+        modifier = Modifier.size(40.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        repeat(3) { index ->
+            val radians = Math.toRadians((angle + index * 120f).toDouble())
+            val x = (kotlin.math.cos(radians) * 12f).toFloat().dp
+            val y = (kotlin.math.sin(radians) * 12f).toFloat().dp
             Box(
                 modifier = Modifier
-                    .offset(y = offsetY.dp)
+                    .offset(x = x, y = y)
                     .size(8.dp)
                     .background(MaterialTheme.colorScheme.primary, CircleShape),
             )
@@ -560,9 +551,9 @@ private fun FallBounceDots() {
     }
 }
 
-/** First-turn loading state: no card, no background, no explanatory paragraph. */
+/** Loading state for both the first and every later answer: no card or background. */
 @Composable
-private fun InitialGenerating(
+private fun GeneratingIndicator(
     phase: GmTurnPhase?,
     cancelling: Boolean,
     onCancel: () -> Unit,
@@ -574,7 +565,7 @@ private fun InitialGenerating(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        FallBounceDots()
+        RotatingDots()
         Spacer(Modifier.height(16.dp))
         Text(
             text = when (phase) {
@@ -606,88 +597,20 @@ private fun FadeInContent(content: @Composable () -> Unit) {
     Box(Modifier.fillMaxWidth().alpha(alpha)) { content() }
 }
 
+/** Unfolds later GM answers downward from just below the previous answer. */
 @Composable
-private fun StreamingCard(
-    phase: GmTurnPhase?,
-    generatedTokens: Int,
-    cancelling: Boolean,
-    onCancel: () -> Unit,
-) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        modifier = Modifier.fillMaxWidth(),
+private fun ExpandRevealContent(content: @Composable () -> Unit) {
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { visible = true }
+    AnimatedVisibility(
+        visible = visible,
+        enter = expandVertically(
+            animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+            expandFrom = Alignment.Top,
+        ) + fadeIn(animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)),
+        exit = shrinkVertically() + fadeOut(),
     ) {
-        Column(Modifier.padding(16.dp)) {
-            Shimmer(
-                modifier = Modifier.semantics { contentDescription = "ゲームマスターが生成中" },
-            )
-            Spacer(Modifier.height(12.dp))
-            Text(
-                text = when (phase) {
-                    is GmTurnPhase.Repairing -> "応答を修正しています（再試行 1/1）"
-                    is GmTurnPhase.Committing -> "ターンを保存しています"
-                    else -> if (cancelling) "生成を中止しています" else "ゲームマスターが応答を生成しています"
-                },
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                "画面を消さないでください（背景では推論が遅くなります）。",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            TextButton(
-                onClick = onCancel,
-                enabled = !cancelling,
-            ) { Text(if (cancelling) "中止中" else "生成を中止") }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-            ) {
-                Text(
-                    text = "生成トークン: $generatedTokens",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-    }
-}
-
-/** Light sweep from left to right. Only composed while generation is running. */
-@Composable
-private fun Shimmer(modifier: Modifier = Modifier) {
-    val transition = rememberInfiniteTransition(label = "shimmer")
-    val progress by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(952, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart,
-        ),
-        label = "shimmer",
-    )
-
-    BoxWithConstraints(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(120.dp)
-            .clip(RoundedCornerShape(24.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant),
-    ) {
-        val width = constraints.maxWidth.toFloat()
-        val start = (progress * (width + width * 0.32f)) - width * 0.32f
-        val brush = Brush.linearGradient(
-            colors = listOf(
-                MaterialTheme.colorScheme.surfaceVariant,
-                MaterialTheme.colorScheme.surface,
-                MaterialTheme.colorScheme.surfaceVariant,
-            ),
-            start = Offset(start, 0f),
-            end = Offset(start + width * 0.32f, width * 0.31111112f),
-        )
-        Box(Modifier.fillMaxSize().background(brush))
+        Box(Modifier.fillMaxWidth()) { content() }
     }
 }
 
