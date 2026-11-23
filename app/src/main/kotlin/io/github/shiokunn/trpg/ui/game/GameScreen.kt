@@ -109,6 +109,14 @@ fun GameScreen(
         }
     }
 
+    // An empty adventure should open with the GM's first message instead of a blank screen.
+    val hasGmMessage = chat.any { it.role == ChatRole.GM }
+    LaunchedEffect(modelReady, hasGmMessage, bundle != null) {
+        if (modelReady && bundle != null && !hasGmMessage) {
+            viewModel.beginAdventureOnce()
+        }
+    }
+
     TrpgScaffold(
         title = session?.title ?: "冒険",
         onBack = onBack,
@@ -192,7 +200,6 @@ private fun GameContent(
             locationName = location?.name ?: "未知の場所",
             chapter = current.session.currentChapter,
             turnCount = current.session.turnCount,
-            characterName = character.name,
             hp = character.hp,
             maxHp = character.maxHp,
         )
@@ -395,7 +402,6 @@ private fun StatusHeader(
     locationName: String,
     chapter: Int,
     turnCount: Int,
-    characterName: String,
     hp: Int,
     maxHp: Int,
 ) {
@@ -436,19 +442,10 @@ private fun StatusHeader(
                 LinearProgressIndicator(
                     progress = { if (maxHp <= 0) 0f else hp.toFloat() / maxHp },
                     modifier = Modifier
-                        .weight(0.35f)
+                        .weight(1f)
                         .semantics { contentDescription = "HP $hp / $maxHp" },
                     color = MaterialTheme.colorScheme.tertiary,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                )
-                Spacer(Modifier.width(12.dp))
-                Text(
-                    text = characterName,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(0.65f),
                 )
             }
         }

@@ -85,6 +85,9 @@ interface ChatDao {
     @Query("SELECT * FROM chat_turns WHERE characterId = :characterId ORDER BY createdAt ASC")
     fun observeTurns(characterId: String): Flow<List<ChatTurnEntity>>
 
+    @Query("SELECT COUNT(*) FROM chat_turns WHERE characterId = :characterId")
+    suspend fun countTurns(characterId: String): Int
+
     @Query("DELETE FROM chat_turns WHERE characterId = :characterId")
     suspend fun clearTurns(characterId: String)
 }

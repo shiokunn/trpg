@@ -127,8 +127,18 @@ class GameViewModel(
     private var turnJob: Job? = null
     private var lastAction: PlayerTurnAction? = null
 
+    private var openingStarted = false
+
     fun beginAdventure() {
         startTurn(PlayerTurnAction("冒険を開始する"))
+    }
+
+    /** Creates the GM's first message once, when an empty session is opened with a model. */
+    fun beginAdventureOnce() {
+        if (openingStarted || turnJob?.isActive == true) return
+        if (container.engine.status.value !is EngineStatus.Ready) return
+        openingStarted = true
+        beginAdventure()
     }
 
     fun act(text: String) {

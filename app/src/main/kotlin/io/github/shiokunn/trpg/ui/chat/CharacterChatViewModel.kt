@@ -2,6 +2,7 @@ package io.github.shiokunn.trpg.ui.chat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.github.shiokunn.trpg.ai.engine.EngineStatus
 import io.github.shiokunn.trpg.ai.engine.GenerationOutcome
 import io.github.shiokunn.trpg.ai.engine.GenerationRequest
 import io.github.shiokunn.trpg.ai.engine.InferenceEngine
@@ -47,6 +48,9 @@ class CharacterChatViewModel(
     private val _creating = MutableStateFlow(false)
     val creating: StateFlow<Boolean> = _creating
 
+    /** One opening attempt per character, even if the first generation fails. */
+    private val openedCharacters = mutableSetOf<String>()
+
     init {
         viewModelScope.launch {
             chats.observeCharacters().collect { _characters.value = it }
@@ -61,6 +65,9 @@ class CharacterChatViewModel(
     fun select(id: String?) {
         _selectedId.value = id
         _message.value = null
+        if (id != null) {
+            _characters.value.firstOrNull { it.id == id }?.let { ensureOpening(it) }
+        }
     }
 
     fun dismissMessage() {
@@ -75,6 +82,7 @@ class CharacterChatViewModel(
             } else {
                 _selectedId.value = character.id
                 _message.value = "「${character.name}」を追加しました。"
+                ensureOpening(character)
             }
         }
     }
@@ -93,6 +101,7 @@ class CharacterChatViewModel(
                     val saved = chats.saveCharacter(card)
                     _selectedId.value = saved.id
                     _message.value = "「${saved.name}」を作成しました。"
+                    ensureOpening(saved)
                 }
                 .onFailure { error ->
                     _message.value = error.message ?: "キャラクターを生成できませんでした。"
@@ -123,6 +132,7 @@ class CharacterChatViewModel(
             val saved = chats.saveCharacter(card)
             _selectedId.value = saved.id
             _message.value = "「${saved.name}」を作成しました。"
+            ensureOpening(saved)
         }
     }
 
@@ -136,6 +146,44 @@ class CharacterChatViewModel(
     fun clearChat() {
         val id = _selectedId.value ?: return
         viewModelScope.launch { chats.clearTurns(id) }
+    }
+
+    /**
+     * Starting a chat with no saved turns produces the character's first line. Cards
+     * with `first_mes` already have a turn, so nothing is generated for them.
+     */
+    private fun ensureOpening(character: ChatCharacter) {
+        if (character.id in openedCharacters) return
+        openedCharacters += character.id
+        viewModelScope.launch {
+            if (engine.status.value !is EngineStatus.Ready) return@launch
+            if (chats.countTurns(character.id) != 0) return@launch
+
+            _busy.value = true
+            val settings = (models.settings() ?: ModelSettings()).normalized()
+            val openingPrompt = character.systemPrompt +
+                "\n\n会話の冒頭として、キャラクターの最初の発言を1〜3文で書いてください。" +
+                "説明や地の文は不要です。"
+            val result = try {
+                engine.generate(
+                    GenerationRequest(
+                        messages = listOf(PromptMessage("system", openingPrompt)),
+                        params = SamplingParams.from(settings),
+                    ),
+                    onToken = {},
+                    onProgress = {},
+                )
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
+            } catch (error: Throwable) {
+                GenerationOutcome.Failure(error.message ?: "冒頭の生成に失敗しました")
+            }
+            if (result is GenerationOutcome.Success) {
+                val text = result.text.trim()
+                if (text.isNotBlank()) chats.addTurn(character.id, "assistant", text)
+            }
+            _busy.value = false
+        }
     }
 
     fun send(text: String) {

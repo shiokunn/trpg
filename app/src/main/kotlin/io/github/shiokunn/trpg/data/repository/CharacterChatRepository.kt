@@ -126,6 +126,8 @@ class CharacterChatRepository(
         return ChatTurn(turn.id, turn.characterId, turn.role, turn.content, turn.createdAt)
     }
 
+    suspend fun countTurns(characterId: String): Int = dao.countTurns(characterId)
+
     suspend fun clearTurns(characterId: String) = dao.clearTurns(characterId)
 
     suspend fun deleteCharacter(character: ChatCharacter) {
