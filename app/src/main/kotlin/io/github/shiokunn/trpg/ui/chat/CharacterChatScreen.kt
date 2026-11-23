@@ -65,7 +65,6 @@ fun CharacterChatScreen(viewModel: CharacterChatViewModel, onBack: () -> Unit) {
     val selected = characters.firstOrNull { it.id == selectedId }
 
     var input by remember { mutableStateOf("") }
-    var showCreate by remember { mutableStateOf(false) }
     var keywords by remember { mutableStateOf("") }
     var wish by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
@@ -138,59 +137,50 @@ fun CharacterChatScreen(viewModel: CharacterChatViewModel, onBack: () -> Unit) {
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Spacer(Modifier.size(8.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(onClick = openPicker, modifier = Modifier.weight(1f)) {
-                                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-                                Spacer(Modifier.width(6.dp))
-                                Text("カードを取り込む")
-                            }
-                            Button(onClick = { showCreate = !showCreate }, modifier = Modifier.weight(1f)) {
-                                Text(if (showCreate) "作成フォームを閉じる" else "新規作成")
-                            }
+                        Button(onClick = openPicker) {
+                            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text("カードを取り込む")
                         }
                     }
-                    if (showCreate) {
-                        item {
-                            CreateCharacterCard(
-                                creating = creating,
-                                keywords = keywords,
-                                onKeywords = { keywords = it },
-                                wish = wish,
-                                onWish = { wish = it },
-                                name = name,
-                                onName = { name = it },
-                                description = description,
-                                onDescription = { description = it },
-                                personality = personality,
-                                onPersonality = { personality = it },
-                                scenario = scenario,
-                                onScenario = { scenario = it },
-                                firstMessage = firstMessage,
-                                onFirstMessage = { firstMessage = it },
-                                onAi = {
-                                    val seed = if (
-                                        name.isBlank() && description.isBlank() && personality.isBlank() &&
-                                        scenario.isBlank() && firstMessage.isBlank()
-                                    ) {
-                                        null
-                                    } else {
-                                        CharacterCard.Parsed(
-                                            name = name,
-                                            description = description,
-                                            personality = personality,
-                                            scenario = scenario,
-                                            firstMessage = firstMessage,
-                                        )
-                                    }
-                                    viewModel.createWithAi(keywords, wish, seed)
-                                    showCreate = false
-                                },
-                                onManual = {
-                                    viewModel.createManual(name, description, personality, scenario, firstMessage)
-                                    showCreate = false
-                                },
-                            )
-                        }
+                    item {
+                        CreateCharacterCard(
+                            creating = creating,
+                            keywords = keywords,
+                            onKeywords = { keywords = it },
+                            wish = wish,
+                            onWish = { wish = it },
+                            name = name,
+                            onName = { name = it },
+                            description = description,
+                            onDescription = { description = it },
+                            personality = personality,
+                            onPersonality = { personality = it },
+                            scenario = scenario,
+                            onScenario = { scenario = it },
+                            firstMessage = firstMessage,
+                            onFirstMessage = { firstMessage = it },
+                            onAi = {
+                                val seed = if (
+                                    name.isBlank() && description.isBlank() && personality.isBlank() &&
+                                    scenario.isBlank() && firstMessage.isBlank()
+                                ) {
+                                    null
+                                } else {
+                                    CharacterCard.Parsed(
+                                        name = name,
+                                        description = description,
+                                        personality = personality,
+                                        scenario = scenario,
+                                        firstMessage = firstMessage,
+                                    )
+                                }
+                                viewModel.createWithAi(keywords, wish, seed)
+                            },
+                            onManual = {
+                                viewModel.createManual(name, description, personality, scenario, firstMessage)
+                            },
+                        )
                     }
                     if (characters.isEmpty()) {
                         item {
