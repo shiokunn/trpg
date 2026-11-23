@@ -157,4 +157,62 @@ class GmRepairTest {
         assertTrue(text.contains("選択肢"))
         assertFalse(text.contains("id\""))
     }
+
+    @Test
+    fun analyzeClassifiesTruncatedJsonAsTruncated() {
+        val issues = GmRepair.analyze(
+            listOf(AiError(AiErrorKind.JSON_TRUNCATED, "JSONが途中で終わっています")),
+        )
+
+        assertEquals(GmErrorCategory.TRUNCATED, issues.single().category)
+    }
+
+    @Test
+    fun analyzeGameRuleClassifiesSemanticErrorsAndExtractsPath() {
+        val issues = GmRepair.analyzeGameRule(
+            listOf("choices[0].check.skillId「x」は所持スキルに存在しません"),
+        )
+
+        val issue = issues.single()
+        assertEquals(GmErrorCategory.GAME_RULE, issue.category)
+        assertEquals("choices[0].check.skillId", issue.path)
+    }
+
+    @Test
+    fun truncationIssueKeepsItsMessage() {
+        val issue = GmRepair.analyzeTruncation("応答がトークン上限で途中に切れました。")
+
+        assertEquals(GmErrorCategory.TRUNCATED, issue.category)
+        assertEquals("応答がトークン上限で途中に切れました。", issue.message)
+    }
+
+    @Test
+    fun structuralInstructionFixesStructureFromTheSameRawJson() {
+        val text = GmRepair.structuralInstruction(
+            GmRepair.analyze(listOf(AiError(AiErrorKind.JSON_SCHEMA, "unknown key 'id'"))),
+        )
+
+        assertTrue(text.contains("構造"))
+        assertTrue(text.contains("値そのものは変更しない"))
+        assertTrue(text.contains("前回の応答（JSON）"))
+        assertTrue(text.contains("完全なJSON"))
+        assertTrue(text.contains("narrative"))
+    }
+
+    @Test
+    fun contentInstructionAllowsFixingTheReportedField() {
+        val text = GmRepair.contentInstruction(
+            GmRepair.analyzeGameRule(
+                listOf("choices[0].check.difficultyは4/6/8/10/12/14のいずれか"),
+            ),
+        )
+
+        assertTrue(text.contains("違反している値だけ"))
+        assertTrue(text.contains("difficulty"))
+        assertTrue(text.contains("選択肢の個数・id・text"))
+        assertTrue(text.contains("stateChanges"))
+        assertTrue(text.contains("narrative 自体が違反"))
+        assertTrue(text.contains("前回の応答（JSON）"))
+        assertTrue(text.contains("完全なJSON"))
+    }
 }

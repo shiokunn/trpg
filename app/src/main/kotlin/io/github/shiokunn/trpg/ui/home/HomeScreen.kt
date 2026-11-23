@@ -174,7 +174,10 @@ private fun DismissibleSessionCard(
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.error)
+                    .background(
+                        MaterialTheme.colorScheme.error,
+                        shape = MaterialTheme.shapes.medium
+                    )
                     .padding(horizontal = 20.dp),
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically,
