@@ -85,14 +85,14 @@ class CharacterCreator(
     }
 
     companion object {
-        private const val SYSTEM_PROMPT = """
+        private val SYSTEM_PROMPT = """
             あなたはTRPG用のキャラクターカードを作成します。
             説明やコードフェンスを含めず、次のJSONオブジェクト1つだけを出力してください。
             {"name":"名前","description":"外見と背景の説明","personality":"性格","scenario":"登場 situation","first_mes":"最初の発言"}
             すべて日本語で、first_mes はキャラクターの声として自然な1文にしてください。
         """.trimIndent()
 
-        private const val REPAIR_PROMPT = """
+        private val REPAIR_PROMPT = """
             出力がキャラクターカードのJSONとして読み取れませんでした。
             name / description / personality / scenario / first_mes を含むJSONオブジェクト1つだけを、
             説明なしで再度出力してください。

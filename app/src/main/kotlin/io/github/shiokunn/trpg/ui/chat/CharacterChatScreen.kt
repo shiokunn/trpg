@@ -327,6 +327,7 @@ private fun ChatBubble(turn: ChatTurn) {
 }
 
 /** One form for both paths: AI fills blanks, or the entered values are saved as-is. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun CreateCharacterCard(
     creating: Boolean,
