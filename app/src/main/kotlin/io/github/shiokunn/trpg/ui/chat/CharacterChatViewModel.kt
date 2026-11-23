@@ -7,6 +7,8 @@ import io.github.shiokunn.trpg.ai.engine.GenerationRequest
 import io.github.shiokunn.trpg.ai.engine.InferenceEngine
 import io.github.shiokunn.trpg.ai.engine.PromptMessage
 import io.github.shiokunn.trpg.ai.engine.SamplingParams
+import io.github.shiokunn.trpg.chat.CharacterCreator
+import io.github.shiokunn.trpg.core.card.CharacterCard
 import io.github.shiokunn.trpg.core.domain.ModelSettings
 import io.github.shiokunn.trpg.data.repository.ChatCharacter
 import io.github.shiokunn.trpg.data.repository.ChatTurn
@@ -24,6 +26,7 @@ class CharacterChatViewModel(
     private val chats: CharacterChatRepository,
     private val models: ModelRepository,
     private val engine: InferenceEngine,
+    private val creator: CharacterCreator,
 ) : ViewModel() {
 
     private val _characters = MutableStateFlow<List<ChatCharacter>>(emptyList())
@@ -40,6 +43,9 @@ class CharacterChatViewModel(
 
     private val _message = MutableStateFlow<String?>(null)
     val message: StateFlow<String?> = _message
+
+    private val _creating = MutableStateFlow(false)
+    val creating: StateFlow<Boolean> = _creating
 
     init {
         viewModelScope.launch {
@@ -70,6 +76,53 @@ class CharacterChatViewModel(
                 _selectedId.value = character.id
                 _message.value = "「${character.name}」を追加しました。"
             }
+        }
+    }
+
+    /** AI creation. A seed card lets hand-written fields be mixed into the result. */
+    fun createWithAi(
+        keywords: String,
+        wish: String,
+        seed: CharacterCard.Parsed? = null,
+    ) {
+        if (_creating.value) return
+        _creating.value = true
+        viewModelScope.launch {
+            creator.create(keywords, wish, seed)
+                .onSuccess { card ->
+                    val saved = chats.saveCharacter(card)
+                    _selectedId.value = saved.id
+                    _message.value = "「${saved.name}」を作成しました。"
+                }
+                .onFailure { error ->
+                    _message.value = error.message ?: "キャラクターを生成できませんでした。"
+                }
+            _creating.value = false
+        }
+    }
+
+    fun createManual(
+        name: String,
+        description: String,
+        personality: String,
+        scenario: String,
+        firstMessage: String,
+    ) {
+        if (name.isBlank()) {
+            _message.value = "名前を入力してください。"
+            return
+        }
+        viewModelScope.launch {
+            val card = CharacterCard.Parsed(
+                name = name.trim(),
+                description = description.trim(),
+                personality = personality.trim(),
+                scenario = scenario.trim(),
+                firstMessage = firstMessage.trim(),
+            )
+            val saved = chats.saveCharacter(card)
+            _selectedId.value = saved.id
+            _message.value = "「${saved.name}」を作成しました。"
         }
     }
 

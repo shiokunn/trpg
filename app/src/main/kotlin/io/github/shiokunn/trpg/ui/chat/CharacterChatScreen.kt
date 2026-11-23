@@ -46,6 +46,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.shiokunn.trpg.core.card.CharacterCard
 import io.github.shiokunn.trpg.data.repository.ChatCharacter
 import io.github.shiokunn.trpg.data.repository.ChatTurn
 import io.github.shiokunn.trpg.ui.components.EmptyState
@@ -60,9 +61,18 @@ fun CharacterChatScreen(viewModel: CharacterChatViewModel, onBack: () -> Unit) {
     val turns by viewModel.turns.collectAsStateWithLifecycle()
     val busy by viewModel.busy.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
+    val creating by viewModel.creating.collectAsStateWithLifecycle()
     val selected = characters.firstOrNull { it.id == selectedId }
 
     var input by remember { mutableStateOf("") }
+    var showCreate by remember { mutableStateOf(false) }
+    var keywords by remember { mutableStateOf("") }
+    var wish by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
+    var personality by remember { mutableStateOf("") }
+    var scenario by remember { mutableStateOf("") }
+    var firstMessage by remember { mutableStateOf("") }
     val context = LocalContext.current
     val picker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument(),
@@ -123,15 +133,63 @@ fun CharacterChatScreen(viewModel: CharacterChatViewModel, onBack: () -> Unit) {
                 ) {
                     item {
                         Text(
-                            text = "キャラクターカード（JSON / PNG）からキャラクターを追加できます。",
+                            text = "キャラクターカード（JSON / PNG）の取り込みか、新規作成ができます。",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Spacer(Modifier.size(8.dp))
-                        Button(onClick = openPicker) {
-                            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(6.dp))
-                            Text("カードを取り込む")
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(onClick = openPicker, modifier = Modifier.weight(1f)) {
+                                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(6.dp))
+                                Text("カードを取り込む")
+                            }
+                            Button(onClick = { showCreate = !showCreate }, modifier = Modifier.weight(1f)) {
+                                Text(if (showCreate) "作成フォームを閉じる" else "新規作成")
+                            }
+                        }
+                    }
+                    if (showCreate) {
+                        item {
+                            CreateCharacterCard(
+                                creating = creating,
+                                keywords = keywords,
+                                onKeywords = { keywords = it },
+                                wish = wish,
+                                onWish = { wish = it },
+                                name = name,
+                                onName = { name = it },
+                                description = description,
+                                onDescription = { description = it },
+                                personality = personality,
+                                onPersonality = { personality = it },
+                                scenario = scenario,
+                                onScenario = { scenario = it },
+                                firstMessage = firstMessage,
+                                onFirstMessage = { firstMessage = it },
+                                onAi = {
+                                    val seed = if (
+                                        name.isBlank() && description.isBlank() && personality.isBlank() &&
+                                        scenario.isBlank() && firstMessage.isBlank()
+                                    ) {
+                                        null
+                                    } else {
+                                        CharacterCard.Parsed(
+                                            name = name,
+                                            description = description,
+                                            personality = personality,
+                                            scenario = scenario,
+                                            firstMessage = firstMessage,
+                                        )
+                                    }
+                                    viewModel.createWithAi(keywords, wish, seed)
+                                    showCreate = false
+                                },
+                                onManual = {
+                                    viewModel.createManual(name, description, personality, scenario, firstMessage)
+                                    showCreate = false
+                                },
+                            )
                         }
                     }
                     if (characters.isEmpty()) {
@@ -264,6 +322,108 @@ private fun ChatBubble(turn: ChatTurn) {
             )
             Spacer(Modifier.size(4.dp))
             Text(text = turn.content, style = MaterialTheme.typography.bodyMedium)
+        }
+    }
+}
+
+/** One form for both paths: AI fills blanks, or the entered values are saved as-is. */
+@Composable
+private fun CreateCharacterCard(
+    creating: Boolean,
+    keywords: String,
+    onKeywords: (String) -> Unit,
+    wish: String,
+    onWish: (String) -> Unit,
+    name: String,
+    onName: (String) -> Unit,
+    description: String,
+    onDescription: (String) -> Unit,
+    personality: String,
+    onPersonality: (String) -> Unit,
+    scenario: String,
+    onScenario: (String) -> Unit,
+    firstMessage: String,
+    onFirstMessage: (String) -> Unit,
+    onAi: () -> Unit,
+    onManual: () -> Unit,
+) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(
+            Modifier.fillMaxWidth().padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text("キャラクターを作る", style = MaterialTheme.typography.titleSmall)
+            OutlinedTextField(
+                value = keywords,
+                onValueChange = onKeywords,
+                label = { Text("キーワード") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+            )
+            OutlinedTextField(
+                value = wish,
+                onValueChange = onWish,
+                label = { Text("どんなキャラクターが欲しいか") },
+                modifier = Modifier.fillMaxWidth(),
+                maxLines = 2,
+            )
+            Text(
+                text = "以下の項目は任意です。入力した項目は残し、空欄をAIが補完します。",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            OutlinedTextField(
+                value = name,
+                onValueChange = onName,
+                label = { Text("名前") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+            )
+            OutlinedTextField(
+                value = description,
+                onValueChange = onDescription,
+                label = { Text("設定・外見") },
+                modifier = Modifier.fillMaxWidth(),
+                maxLines = 3,
+            )
+            OutlinedTextField(
+                value = personality,
+                onValueChange = onPersonality,
+                label = { Text("性格") },
+                modifier = Modifier.fillMaxWidth(),
+                maxLines = 3,
+            )
+            OutlinedTextField(
+                value = scenario,
+                onValueChange = onScenario,
+                label = { Text("状況") },
+                modifier = Modifier.fillMaxWidth(),
+                maxLines = 2,
+            )
+            OutlinedTextField(
+                value = firstMessage,
+                onValueChange = onFirstMessage,
+                label = { Text("最初の発言") },
+                modifier = Modifier.fillMaxWidth(),
+                maxLines = 2,
+            )
+            if (creating) {
+                ContainedLoadingIndicator(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    indicatorColor = MaterialTheme.colorScheme.primary,
+                )
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(onClick = onAi, enabled = !creating, modifier = Modifier.weight(1f)) {
+                    Text("AIに作ってもらう")
+                }
+                Button(onClick = onManual, enabled = !creating, modifier = Modifier.weight(1f)) {
+                    Text("この内容で保存")
+                }
+            }
         }
     }
 }

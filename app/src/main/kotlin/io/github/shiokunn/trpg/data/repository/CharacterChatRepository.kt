@@ -74,14 +74,24 @@ class CharacterChatRepository(
             CharacterCard.parseJson(bytes.decodeToString())
         } ?: return null
 
+        val avatar = (card.avatarBytes ?: if (png) bytes else null)
+        return saveCharacter(card, avatar, displayName.substringBeforeLast('.'))
+    }
+
+    /** Saves an AI-generated or hand-written card (no image required). */
+    suspend fun saveCharacter(
+        card: CharacterCard.Parsed,
+        avatarBytes: ByteArray? = null,
+        fallbackName: String = "",
+    ): ChatCharacter {
         val id = UUID.randomUUID().toString()
-        val avatarPath = (card.avatarBytes ?: if (png) bytes else null)?.let { image ->
+        val avatarPath = avatarBytes?.let { image ->
             val file = File(avatarDir, "$id.png")
             runCatching { file.writeBytes(image); file.absolutePath }.getOrNull()
         }
         val entity = ChatCharacterEntity(
             id = id,
-            name = card.name.ifBlank { displayName.substringBeforeLast('.') }.take(200),
+            name = card.name.ifBlank { fallbackName }.take(200),
             description = card.description,
             personality = card.personality,
             scenario = card.scenario,

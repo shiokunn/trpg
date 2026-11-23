@@ -15,6 +15,7 @@ import io.github.shiokunn.trpg.data.repository.ModelRepository
 import io.github.shiokunn.trpg.data.repository.SessionRepository
 import io.github.shiokunn.trpg.data.repository.SettingsRepository
 import io.github.shiokunn.trpg.data.repository.WorldRepository
+import io.github.shiokunn.trpg.chat.CharacterCreator
 import io.github.shiokunn.trpg.creation.AdventureCreator
 import io.github.shiokunn.trpg.game.CombatService
 import io.github.shiokunn.trpg.game.GmTurnService
@@ -44,6 +45,7 @@ class AppContainer(context: Context) {
     val adventureCreator: AdventureCreator by lazy {
         AdventureCreator(models, engine, File(context.filesDir, "debug/raw"))
     }
+    val characterCreator: CharacterCreator by lazy { CharacterCreator(engine, models) }
     val combat: CombatService by lazy { CombatService(sessions) }
     val backups = BackupRepository(database)
     val backupFiles = BackupFileManager(context)

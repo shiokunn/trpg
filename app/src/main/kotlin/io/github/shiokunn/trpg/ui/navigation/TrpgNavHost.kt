@@ -113,7 +113,12 @@ fun TrpgNavHost(container: AppContainer) {
         composable(Routes.CHAT) {
             val vm: CharacterChatViewModel = viewModel(
                 factory = io.github.shiokunn.trpg.ui.createFactory {
-                    CharacterChatViewModel(container.characterChats, container.models, container.engine)
+                    CharacterChatViewModel(
+                        container.characterChats,
+                        container.models,
+                        container.engine,
+                        container.characterCreator,
+                    )
                 },
             )
             CharacterChatScreen(viewModel = vm, onBack = { navController.popBackStack() })
