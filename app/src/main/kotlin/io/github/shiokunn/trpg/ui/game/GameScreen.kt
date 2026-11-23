@@ -193,8 +193,6 @@ private fun GameContent(
             chapter = current.session.currentChapter,
             turnCount = current.session.turnCount,
             characterName = character.name,
-            species = character.species,
-            occupation = character.occupation,
             hp = character.hp,
             maxHp = character.maxHp,
         )
@@ -398,8 +396,6 @@ private fun StatusHeader(
     chapter: Int,
     turnCount: Int,
     characterName: String,
-    species: String,
-    occupation: String,
     hp: Int,
     maxHp: Int,
 ) {
@@ -447,7 +443,7 @@ private fun StatusHeader(
                 )
                 Spacer(Modifier.width(12.dp))
                 Text(
-                    text = listOf(characterName, species, occupation).filter { it.isNotBlank() }.joinToString(" ／ "),
+                    text = characterName,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,

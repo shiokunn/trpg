@@ -6,7 +6,9 @@ import io.github.shiokunn.trpg.ai.engine.LlamaCppEngine
 import io.github.shiokunn.trpg.ai.model.ModelFileManager
 import io.github.shiokunn.trpg.backup.BackupFileManager
 import io.github.shiokunn.trpg.data.db.AppDatabase
+import io.github.shiokunn.trpg.data.db.ChatDatabase
 import io.github.shiokunn.trpg.data.repository.BackupRepository
+import io.github.shiokunn.trpg.data.repository.CharacterChatRepository
 import io.github.shiokunn.trpg.data.repository.CharacterRepository
 import io.github.shiokunn.trpg.data.repository.MemoryRepository
 import io.github.shiokunn.trpg.data.repository.ModelRepository
@@ -24,6 +26,8 @@ import java.io.File
  */
 class AppContainer(context: Context) {
     val database: AppDatabase = AppDatabase.build(context)
+    val chatDatabase: ChatDatabase = ChatDatabase.build(context)
+    val characterChats = CharacterChatRepository(chatDatabase, context.filesDir)
     val worlds = WorldRepository(database)
     val characters = CharacterRepository(database)
     val sessions = SessionRepository(database)

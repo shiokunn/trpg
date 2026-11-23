@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Public
@@ -60,6 +61,7 @@ fun HomeScreen(
     onSaves: () -> Unit,
     onModels: () -> Unit,
     onSettings: () -> Unit,
+    onChat: () -> Unit,
 ) {
     val recent by viewModel.recent.collectAsStateWithLifecycle()
     var pendingDelete by remember { mutableStateOf<RecentSessionRow?>(null) }
@@ -113,6 +115,7 @@ fun HomeScreen(
             ) {
                 HomeQuickAction("セーブ", Icons.Default.MenuBook, Modifier.weight(1f), onSaves)
                 HomeQuickAction("モデル", Icons.Default.SmartToy, Modifier.weight(1f), onModels)
+                HomeQuickAction("Chat", Icons.Default.Chat, Modifier.weight(1f), onChat)
                 HomeQuickAction("設定", Icons.Default.Settings, Modifier.weight(1f), onSettings)
             }
         }
