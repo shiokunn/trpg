@@ -11,6 +11,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -189,52 +190,59 @@ private fun GameContent(
             .imePadding()
             .padding(20.dp),
     ) {
-        AiMessageArea(
-            modifier = Modifier.weight(1f),
-            sceneTitle = sceneTitle,
-            messages = gmMessages,
-            latestGmId = latestGmId,
-            gmOrdinals = gmOrdinals,
-            combat = current.session.activeCombat,
-            modelReady = modelReady,
-            busy = busy,
-            phase = turn.phase,
-            generatedTokens = turn.generatedTokens,
-            cancelling = turn.cancelling,
-            error = turn.error,
-            errorDetails = turn.errorDetails,
-            errorKind = turn.errorKind,
-            onCancel = onCancel,
-            onDismissError = onDismissError,
-            onRetry = onRetry,
-            onAttack = onAttack,
+        StatusHeader(
+            locationName = location?.name ?: "未知の場所",
+            chapter = current.session.currentChapter,
+            turnCount = current.session.turnCount,
+            characterName = character.name,
+            species = character.species,
+            occupation = character.occupation,
+            hp = character.hp,
+            maxHp = character.maxHp,
         )
 
-        Row(
+        Spacer(Modifier.height(12.dp))
+
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(0.35f),
+                .weight(1f),
         ) {
-            Box(Modifier.weight(0.4f).fillMaxHeight()) {
-                StatusCard(
-                    locationName = location?.name ?: "未知の場所",
-                    chapter = current.session.currentChapter,
-                    turnCount = current.session.turnCount,
-                    characterName = character.name,
-                    species = character.species,
-                    occupation = character.occupation,
-                    hp = character.hp,
-                    maxHp = character.maxHp,
+            // 65:35 is the baseline. Wider screens may give the narrative a little more room.
+            val narrativeWeight = if (maxWidth >= 600.dp) 0.70f else 0.65f
+            val choiceWeight = 1f - narrativeWeight
+
+            Row(Modifier.fillMaxSize()) {
+                AiMessageArea(
+                    modifier = Modifier.weight(narrativeWeight).fillMaxHeight(),
+                    sceneTitle = sceneTitle,
+                    messages = gmMessages,
+                    latestGmId = latestGmId,
+                    gmOrdinals = gmOrdinals,
+                    combat = current.session.activeCombat,
+                    modelReady = modelReady,
+                    busy = busy,
+                    phase = turn.phase,
+                    generatedTokens = turn.generatedTokens,
+                    cancelling = turn.cancelling,
+                    error = turn.error,
+                    errorDetails = turn.errorDetails,
+                    errorKind = turn.errorKind,
+                    onCancel = onCancel,
+                    onDismissError = onDismissError,
+                    onRetry = onRetry,
+                    onAttack = onAttack,
                 )
-            }
-            Spacer(Modifier.width(12.dp))
-            Box(Modifier.weight(0.6f).fillMaxHeight()) {
+
+                Spacer(Modifier.width(12.dp))
+
                 ChoicePanel(
                     choices = choices,
                     visible = !busy && hasNarrative && turn.error == null &&
                         current.session.activeCombat == null,
                     enabled = modelReady && !busy,
                     onChoose = onChoose,
+                    modifier = Modifier.weight(choiceWeight).fillMaxHeight(),
                 )
             }
         }
@@ -401,7 +409,7 @@ private fun ChoicePanel(
 }
 
 @Composable
-private fun StatusCard(
+private fun StatusHeader(
     locationName: String,
     chapter: Int,
     turnCount: Int,
@@ -415,39 +423,54 @@ private fun StatusCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Column(Modifier.padding(16.dp)) {
+        Column(
+            Modifier.fillMaxWidth().padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text(text = locationName, style = MaterialTheme.typography.titleMedium)
-                    Text(
-                        text = "第${chapter}章 ・ ターン $turnCount",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+                Text(
+                    text = locationName,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    text = "第${chapter}章 ・ ターン $turnCount",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "$hp / $maxHp",
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.tertiary,
+                    maxLines = 1,
+                )
+                Spacer(Modifier.width(8.dp))
+                LinearProgressIndicator(
+                    progress = { if (maxHp <= 0) 0f else hp.toFloat() / maxHp },
+                    modifier = Modifier
+                        .weight(0.35f)
+                        .semantics { contentDescription = "HP $hp / $maxHp" },
+                    color = MaterialTheme.colorScheme.tertiary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                )
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    text = listOf(characterName, species, occupation).filter { it.isNotBlank() }.joinToString(" ／ "),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(0.65f),
                 )
             }
-            Spacer(Modifier.height(8.dp))
-            LinearProgressIndicator(
-                progress = { if (maxHp <= 0) 0f else hp.toFloat() / maxHp },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .semantics { contentDescription = "HP $hp / $maxHp" },
-                color = MaterialTheme.colorScheme.tertiary,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant,
-            )
-            Spacer(Modifier.height(6.dp))
-            Text(
-                text = listOf(characterName, species, occupation).filter { it.isNotBlank() }.joinToString(" ／ "),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
         }
     }
 }
