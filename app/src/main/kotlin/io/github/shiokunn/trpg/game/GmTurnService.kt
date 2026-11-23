@@ -209,8 +209,7 @@ class GmTurnService(
             bundle = bundle,
             allowLocalRepair = true,
             truncated = firstTruncated,
-            truncationDetail = (first as? GenerationOutcome.Success)
-                ?.let { GmTurnRepair.truncationMessage(it) },
+            truncationDetail = GmTurnRepair.truncationMessage(first).takeIf { firstTruncated },
         )
         var attempt = firstEvaluation.attempt
         var localRepairApplied = firstEvaluation.localRepairApplied
