@@ -623,6 +623,7 @@ class ModelsViewModel(private val container: AppContainer) : ViewModel() {
     val message: StateFlow<String?> = _message.asStateFlow()
 
     private var importJob: Job? = null
+    private var saveParamsJob: Job? = null
 
     init {
         viewModelScope.launch { _backend.value = container.engine.backendInfo() }
@@ -650,7 +651,7 @@ class ModelsViewModel(private val container: AppContainer) : ViewModel() {
                             ),
                         )
                         container.settings.setLastModel(file.fileName)
-                        _message.value = "「${file.displayName}」を取り込みました。「読み込む」で使用できます。"
+                        _message.value = "「${file.displayName}」を取り込みました。モデルをタップして読み込んでください。"
                     },
                     onFailure = { error ->
                         _message.value = error.message ?: "モデルの取り込みに失敗しました"
@@ -708,10 +709,13 @@ class ModelsViewModel(private val container: AppContainer) : ViewModel() {
         }
     }
 
-    fun saveParams(modelSettings: ModelSettings) {
-        viewModelScope.launch {
+    fun saveParams(modelSettings: ModelSettings, notify: Boolean = true) {
+        saveParamsJob?.cancel()
+        saveParamsJob = viewModelScope.launch {
             container.models.save(modelSettings.normalized())
-            _message.value = "推論設定を保存しました。コンテキストサイズとGPUレイヤーは再読み込みで反映されます。"
+            if (notify) {
+                _message.value = "推論設定を保存しました。コンテキストサイズとGPUレイヤーは再読み込みで反映されます。"
+            }
         }
     }
 

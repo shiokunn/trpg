@@ -121,26 +121,6 @@ fun SettingsScreen(
                     }
                 }
 
-                item { SectionTitle("オフラインとプライバシー") }
-                item {
-                    Card(
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text(
-                                "このアプリは外部API・クラウド・ネットワークを使用しません。",
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                            Text(
-                                "モデル、セーブデータ、設定、会話はすべて端末内に保存されます。INTERNET権限は付与されていません。",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
-                }
-
                 item { SectionTitle("データ管理") }
                 item {
                     BackupCard(

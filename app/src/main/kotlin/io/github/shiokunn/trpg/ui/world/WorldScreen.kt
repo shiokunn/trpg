@@ -67,15 +67,9 @@ fun WorldScreen(viewModel: WorldViewModel, onBack: () -> Unit) {
                 ) {
                     item {
                         Text(world.name, style = MaterialTheme.typography.headlineMedium)
-                        Text(
-                            listOf(world.genre, world.era).filter { it.isNotBlank() }.joinToString(" ／ "),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
                     }
 
                     item { WorldSection("世界の雰囲気", world.atmosphere) }
-                    item { WorldSection("世界設定", world.setting) }
                     if (world.history.isNotBlank()) item { WorldSection("歴史", world.history) }
                     if (world.geography.isNotBlank()) item { WorldSection("地理", world.geography) }
                     if (world.socialStructure.isNotBlank()) item { WorldSection("社会構造", world.socialStructure) }

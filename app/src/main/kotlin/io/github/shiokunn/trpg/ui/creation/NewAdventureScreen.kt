@@ -19,7 +19,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -112,16 +111,6 @@ private fun FormContent(
         contentPadding = androidx.compose.foundation.layout.PaddingValues(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        item {
-            Text("冒険の作り方", style = MaterialTheme.typography.headlineSmall)
-            Spacer(Modifier.height(6.dp))
-            Text(
-                "世界とシナリオ、主人公をAIが提案します。内容を確認してから開始できます。",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-
         if (!modelReady) {
             item {
                 Card(
@@ -323,10 +312,6 @@ private fun PreviewContent(
             )
         }
 
-        state.generation?.takeIf { it.finishReason != null }?.let { progress ->
-            item { TokenCounterSummary(progress) }
-        }
-
         state.error?.let { message ->
             item {
                 ErrorCard(message = message, details = state.details, onDismiss = onDismissError)
@@ -411,45 +396,11 @@ private fun WorldSummaryCard(world: WorldDraft) {
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(Modifier.padding(16.dp)) {
-            Text(world.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Text(
-                listOf(world.genre, world.era).filter { it.isNotBlank() }.joinToString(" ／ "),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            if (world.setting.isNotBlank()) {
-                Spacer(Modifier.height(8.dp))
-                Text(world.setting, style = MaterialTheme.typography.bodyMedium)
-            }
-            if (world.atmosphere.isNotBlank()) {
-                Spacer(Modifier.height(6.dp))
-                Text("雰囲気: ${world.atmosphere}", style = MaterialTheme.typography.bodySmall)
-            }
-            if (world.objective.isNotBlank()) {
-                Spacer(Modifier.height(6.dp))
-                Text("目的: ${world.objective}", style = MaterialTheme.typography.bodySmall)
-            }
-            if (world.problem.isNotBlank()) {
-                Text("問題: ${world.problem}", style = MaterialTheme.typography.bodySmall)
-            }
-            if (world.factions.isNotEmpty()) {
-                Spacer(Modifier.height(6.dp))
-                Text("勢力: ${world.factions.joinToString("、")}", style = MaterialTheme.typography.bodySmall)
-            }
-            Spacer(Modifier.height(12.dp))
-            HorizontalDivider()
-            Spacer(Modifier.height(12.dp))
             Text("シナリオ", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
             Text(world.scenario.title, style = MaterialTheme.typography.titleSmall)
             if (world.scenario.premise.isNotBlank()) {
                 Spacer(Modifier.height(4.dp))
                 Text(world.scenario.premise, style = MaterialTheme.typography.bodyMedium)
-            }
-            val meta = listOf(world.scenario.length, world.scenario.difficulty)
-                .filter { it.isNotBlank() }.joinToString(" ／ ")
-            if (meta.isNotBlank()) {
-                Spacer(Modifier.height(4.dp))
-                Text(meta, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
