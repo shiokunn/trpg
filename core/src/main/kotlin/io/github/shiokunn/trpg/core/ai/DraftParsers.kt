@@ -6,22 +6,82 @@ import io.github.shiokunn.trpg.core.domain.Item
 import io.github.shiokunn.trpg.core.domain.Skill
 import io.github.shiokunn.trpg.core.rules.CharacterRules
 import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import java.util.UUID
 
 object WorldDraftParser {
 
     fun parse(raw: String): AiParseResult<WorldDraft> {
-        val candidate = AiJson.extractObject(raw)
-            ?: return AiParseResult.Failure(listOf("JSONオブジェクトが見つかりません。JSONのみを出力してください。"))
-        val draft = try {
-            AiJson.strict.decodeFromString(WorldDraft.serializer(), candidate)
-        } catch (t: SerializationException) {
-            return AiParseResult.Failure(listOf("JSONスキーマが不正です: ${t.message ?: "解析に失敗しました"}"))
-        } catch (t: IllegalArgumentException) {
-            return AiParseResult.Failure(listOf("JSONの値が不正です: ${t.message ?: "解析に失敗しました"}"))
+        // Step 1: find and parse the JSON object. A malformed document fails here
+        // and nowhere else, so "the JSON is broken" can never be confused with
+        // "the JSON has the wrong shape".
+        val element = when (val extraction = AiJson.extractObject(raw)) {
+            is AiJsonExtraction.Found -> extraction.element
+            is AiJsonExtraction.NotFound -> return AiParseResult.Failure(
+                listOf(AiError(AiErrorKind.JSON_EXTRACTION, extraction.message)),
+            )
+            is AiJsonExtraction.Truncated -> return AiParseResult.Failure(
+                listOf(AiError(AiErrorKind.JSON_TRUNCATED, extraction.message)),
+            )
+            is AiJsonExtraction.Malformed -> return AiParseResult.Failure(
+                listOf(AiError(AiErrorKind.JSON_SYNTAX, extraction.message)),
+            )
         }
+
+        // Step 2: the schema and the types.
+        val draft = try {
+            val normalized = normalizeOpeningLocationSecrets(element)
+            AiJson.strict.decodeFromJsonElement(WorldDraft.serializer(), normalized)
+        } catch (t: SerializationException) {
+            return AiParseResult.Failure(
+                listOf(t.toAiError("JSONスキーマが不正です")),
+            )
+        } catch (t: IllegalArgumentException) {
+            return AiParseResult.Failure(
+                listOf(
+                    AiError(
+                        AiErrorKind.JSON_SCHEMA,
+                        "JSONの値が不正です: ${t.message ?: "解析に失敗しました"}",
+                    ),
+                ),
+            )
+        }
+
+        // Step 3: the content contract.
         val errors = validate(draft)
-        return if (errors.isEmpty()) AiParseResult.Success(draft) else AiParseResult.Failure(errors)
+        return if (errors.isEmpty()) {
+            AiParseResult.Success(draft)
+        } else {
+            AiParseResult.Failure(errors.map { AiError(AiErrorKind.CONTRACT, it) })
+        }
+    }
+
+    /**
+     * Compatibility fix for the one known string/array mismatch.
+     *
+     * Only opening.location.secrets is converted, and only when it is a JSON
+     * string. null, numbers, objects and existing arrays are left untouched so the
+     * strict decoder still rejects every other type error.
+     */
+    private fun normalizeOpeningLocationSecrets(element: JsonElement): JsonElement {
+        val root = element as? JsonObject ?: return element
+        val opening = root["opening"] as? JsonObject ?: return element
+        val location = opening["location"] as? JsonObject ?: return element
+        val secrets = location["secrets"]
+        if (secrets !is JsonPrimitive || !secrets.isString) return element
+
+        val normalizedLocation = JsonObject(
+            location + ("secrets" to JsonArray(listOf(secrets))),
+        )
+        val normalizedOpening = JsonObject(
+            opening + ("location" to normalizedLocation),
+        )
+        return JsonObject(
+            root + ("opening" to normalizedOpening),
+        )
     }
 
     fun validate(draft: WorldDraft): List<String> {
@@ -108,17 +168,40 @@ object WorldDraftParser {
 object CharacterDraftParser {
 
     fun parse(raw: String): AiParseResult<CharacterDraft> {
-        val candidate = AiJson.extractObject(raw)
-            ?: return AiParseResult.Failure(listOf("JSONオブジェクトが見つかりません。JSONのみを出力してください。"))
+        val element = when (val extraction = AiJson.extractObject(raw)) {
+            is AiJsonExtraction.Found -> extraction.element
+            is AiJsonExtraction.NotFound -> return AiParseResult.Failure(
+                listOf(AiError(AiErrorKind.JSON_EXTRACTION, extraction.message)),
+            )
+            is AiJsonExtraction.Truncated -> return AiParseResult.Failure(
+                listOf(AiError(AiErrorKind.JSON_TRUNCATED, extraction.message)),
+            )
+            is AiJsonExtraction.Malformed -> return AiParseResult.Failure(
+                listOf(AiError(AiErrorKind.JSON_SYNTAX, extraction.message)),
+            )
+        }
         val draft = try {
-            AiJson.strict.decodeFromString(CharacterDraft.serializer(), candidate)
+            AiJson.strict.decodeFromJsonElement(CharacterDraft.serializer(), element)
         } catch (t: SerializationException) {
-            return AiParseResult.Failure(listOf("JSONスキーマが不正です: ${t.message ?: "解析に失敗しました"}"))
+            return AiParseResult.Failure(
+                listOf(t.toAiError("JSONスキーマが不正です")),
+            )
         } catch (t: IllegalArgumentException) {
-            return AiParseResult.Failure(listOf("JSONの値が不正です: ${t.message ?: "解析に失敗しました"}"))
+            return AiParseResult.Failure(
+                listOf(
+                    AiError(
+                        AiErrorKind.JSON_SCHEMA,
+                        "JSONの値が不正です: ${t.message ?: "解析に失敗しました"}",
+                    ),
+                ),
+            )
         }
         val errors = validate(draft)
-        return if (errors.isEmpty()) AiParseResult.Success(draft) else AiParseResult.Failure(errors)
+        return if (errors.isEmpty()) {
+            AiParseResult.Success(draft)
+        } else {
+            AiParseResult.Failure(errors.map { AiError(AiErrorKind.CONTRACT, it) })
+        }
     }
 
     fun validate(draft: CharacterDraft): List<String> {

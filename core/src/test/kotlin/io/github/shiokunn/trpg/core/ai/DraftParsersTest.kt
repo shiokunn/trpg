@@ -1,6 +1,7 @@
 package io.github.shiokunn.trpg.core.ai
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -104,14 +105,14 @@ class DraftParsersTest {
 
         val blankScenario = validWorld.replaceFirst("\"title\": \"消えた灯台守\"", "\"title\": \" \"")
         val errors = (WorldDraftParser.parse(blankScenario) as AiParseResult.Failure).errors
-        assertTrue(errors.any { it.contains("scenario.title") })
+        assertTrue(errors.any { it.message.contains("scenario.title") })
     }
 
     @Test
     fun worldRejectsInvalidCombatHp() {
         val raw = validWorld.replaceFirst("\"hp\": 8", "\"hp\": 0")
         val errors = (WorldDraftParser.parse(raw) as AiParseResult.Failure).errors
-        assertTrue(errors.any { it.contains("hp") })
+        assertTrue(errors.any { it.message.contains("hp") })
     }
 
     @Test
@@ -121,13 +122,84 @@ class DraftParsersTest {
             "\"objectives\": []",
         )
         val errors = (WorldDraftParser.parse(raw) as AiParseResult.Failure).errors
-        assertTrue(errors.any { it.contains("objectives") })
+        assertTrue(errors.any { it.message.contains("objectives") })
     }
 
     @Test
     fun worldRejectsUnknownKey() {
         val raw = validWorld.replaceFirst("{", "{\"mood\": \"dark\",")
         assertTrue(WorldDraftParser.parse(raw) is AiParseResult.Failure)
+    }
+
+    @Test
+    fun worldAcceptsNullCombat() {
+        val raw = validWorld.replace(
+            Regex("\"combat\": \\{[\\s\\S]*?\\}"),
+            "\"combat\": null",
+        )
+        val result = WorldDraftParser.parse(raw)
+        assertTrue(result is AiParseResult.Success)
+        assertNull((result as AiParseResult.Success).value.opening.npcs.single().combat)
+    }
+
+    @Test
+    fun normalizesStringOpeningLocationSecrets() {
+        val raw = validWorld.replaceFirst("\"secrets\": []", "\"secrets\": \"秘密\"")
+        val result = WorldDraftParser.parse(raw)
+        assertTrue(result is AiParseResult.Success)
+        assertEquals(
+            listOf("秘密"),
+            (result as AiParseResult.Success).value.opening.location.secrets,
+        )
+    }
+
+    @Test
+    fun doesNotNormalizeOtherStringLists() {
+        val raw = validWorld.replaceFirst(
+            "\"factions\": [\"灯台守の会\", \"密輸業者\"]",
+            "\"factions\": \"灯台守の会\"",
+        )
+        assertTrue(WorldDraftParser.parse(raw) is AiParseResult.Failure)
+    }
+
+    @Test
+    fun doesNotNormalizeNonStringOpeningLocationSecrets() {
+        listOf("\"secrets\": null", "\"secrets\": 1", "\"secrets\": {\"value\": \"秘密\"}")
+            .forEach { replacement ->
+                val raw = validWorld.replaceFirst("\"secrets\": []", replacement)
+                assertTrue(
+                    "expected failure for $replacement",
+                    WorldDraftParser.parse(raw) is AiParseResult.Failure,
+                )
+            }
+    }
+
+    @Test
+    fun worldRejectsMissingClosingQuote() {
+        val raw = validWorld.replaceFirst("\"secrets\": []", "\"secrets\": [\"秘密]")
+        assertTrue(WorldDraftParser.parse(raw) is AiParseResult.Failure)
+    }
+
+    @Test
+    fun worldRejectsTrailingComma() {
+        val raw = validWorld.replaceFirst("\"name\": \"霧の港\",", "\"name\": \"霧の港\",,")
+        assertTrue(WorldDraftParser.parse(raw) is AiParseResult.Failure)
+    }
+
+    @Test
+    fun worldRejectsNonNumericStringCombatValue() {
+        val raw = validWorld.replaceFirst("\"hp\": 8", "\"hp\": \"many\"")
+        assertTrue(WorldDraftParser.parse(raw) is AiParseResult.Failure)
+    }
+
+    @Test
+    fun worldAcceptsQuotedNumericCombatValue() {
+        // kotlinx.serialization converts a quoted numeric literal into the Int field
+        // even when isLenient is false, so the parser cannot reject it here.
+        val raw = validWorld.replaceFirst("\"hp\": 8", "\"hp\": \"8\"")
+        val result = WorldDraftParser.parse(raw)
+        assertTrue(result is AiParseResult.Success)
+        assertEquals(8, (result as AiParseResult.Success).value.opening.npcs.single().combat?.hp)
     }
 
     @Test
@@ -146,26 +218,44 @@ class DraftParsersTest {
     }
 
     @Test
-    fun characterRejectsWrongAttributeSum() {
-        val raw = validCharacter.replaceFirst("\"cha\": 3", "\"cha\": 5")
-        val errors = (CharacterDraftParser.parse(raw) as AiParseResult.Failure).errors
-        assertTrue(errors.any { it.contains("合計") })
+    fun characterAcceptsNonStandardAttributeAndSkillTotals() {
+        val lowAttributes = validCharacter.replaceFirst("\"cha\": 3", "\"cha\": 1")
+        val attributeResult = CharacterDraftParser.parse(lowAttributes)
+        assertTrue(attributeResult is AiParseResult.Success)
+        assertEquals(
+            16,
+            (attributeResult as AiParseResult.Success).value.attributes.total(),
+        )
+
+        val lowSkills = validCharacter.replaceFirst(
+            "\"level\": 2, \"description\": \"痕跡を見つける\"",
+            "\"level\": 1, \"description\": \"痕跡を見つける\"",
+        )
+        val skillResult = CharacterDraftParser.parse(lowSkills)
+        assertTrue(skillResult is AiParseResult.Success)
+        assertEquals(
+            5,
+            (skillResult as AiParseResult.Success).value.skills.sumOf { it.level },
+        )
     }
 
     @Test
-    fun characterRejectsWrongSkillSumAndLevel() {
-        val lowSum = validCharacter.replaceFirst("\"level\": 2, \"description\": \"説得する\"", "\"level\": 1, \"description\": \"説得する\"")
-        assertTrue(CharacterDraftParser.parse(lowSum) is AiParseResult.Failure)
-
+    fun characterRejectsSkillLevelAboveCreationMax() {
         val tooHigh = validCharacter.replaceFirst("\"level\": 2, \"description\": \"痕跡を見つける\"", "\"level\": 3, \"description\": \"痕跡を見つける\"")
         assertTrue(CharacterDraftParser.parse(tooHigh) is AiParseResult.Failure)
+    }
+
+    @Test
+    fun characterRejectsOutOfRangeAttribute() {
+        val raw = validCharacter.replaceFirst("\"cha\": 3", "\"cha\": 6")
+        assertTrue(CharacterDraftParser.parse(raw) is AiParseResult.Failure)
     }
 
     @Test
     fun characterRejectsZeroQuantityItem() {
         val raw = validCharacter.replaceFirst("\"quantity\": 1", "\"quantity\": 0")
         val errors = (CharacterDraftParser.parse(raw) as AiParseResult.Failure).errors
-        assertTrue(errors.any { it.contains("quantity") })
+        assertTrue(errors.any { it.message.contains("quantity") })
     }
 
     @Test

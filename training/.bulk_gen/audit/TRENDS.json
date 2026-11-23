@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-11-17T10:40:58+00:00",
+  "snapshots": [
+    {
+      "snapshot_id": "snap-0001-20261117T103945Z",
+      "records": 4,
+      "scored": 4,
+      "average_score": 98.0,
+      "verdict_counts": {
+        "pass": 4
+      },
+      "red_flag_total": 0,
+      "finding_total": 0,
+      "delta_score": null
+    }
+  ]
+}

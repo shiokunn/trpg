@@ -1,5 +1,7 @@
 package io.github.shiokunn.trpg.ui.models
 
+import android.app.ActivityManager
+import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -10,7 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -18,16 +19,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -42,18 +41,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.github.shiokunn.trpg.ai.engine.BackendInfo
 import io.github.shiokunn.trpg.ai.engine.EngineStatus
 import io.github.shiokunn.trpg.ai.engine.ModelInfo
 import io.github.shiokunn.trpg.ai.model.ModelFileManager
 import io.github.shiokunn.trpg.ai.model.formatFileSize
 import io.github.shiokunn.trpg.core.domain.ModelSettings
+import io.github.shiokunn.trpg.core.inference.ContextAdvice
+import io.github.shiokunn.trpg.core.inference.MemoryAdvisor
 import io.github.shiokunn.trpg.ui.ImportProgress
 import io.github.shiokunn.trpg.ui.ModelsViewModel
-import io.github.shiokunn.trpg.ui.components.ConfirmDialog
 import io.github.shiokunn.trpg.ui.components.EmptyState
 import io.github.shiokunn.trpg.ui.components.TrpgScaffold
 import java.util.Locale
@@ -64,13 +64,33 @@ fun ModelsScreen(viewModel: ModelsViewModel, onBack: () -> Unit) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val models by viewModel.models.collectAsStateWithLifecycle()
     val status by viewModel.engineStatus.collectAsStateWithLifecycle()
-    val backend by viewModel.backend.collectAsStateWithLifecycle()
     val progress by viewModel.importProgress.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
 
-    var pendingDelete by remember { mutableStateOf<ModelFileManager.ModelFile?>(null) }
-    var draft by remember(settings?.updatedAt) {
+    var draft by remember {
         mutableStateOf((settings ?: ModelSettings()).normalized())
+    }
+
+    val context = LocalContext.current
+    val totalRamBytes = remember(context) {
+        val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val info = ActivityManager.MemoryInfo()
+        manager.getMemoryInfo(info)
+        info.totalMem
+    }
+    val selectedModelSize = models.firstOrNull { it.fileName == draft.modelFileName }?.sizeBytes ?: 0L
+    val readyInfo = (status as? EngineStatus.Ready)
+        ?.takeIf { it.modelFileName == draft.modelFileName }
+        ?.info
+    val advice = if (selectedModelSize > 0L) {
+        MemoryAdvisor.advise(
+            modelSizeBytes = selectedModelSize,
+            totalRamBytes = totalRamBytes,
+            requestedNCtx = draft.nCtx,
+            nCtxTrain = readyInfo?.nCtxTrain ?: ModelSettings.MAX_N_CTX,
+        )
+    } else {
+        null
     }
 
     val picker = rememberLauncherForActivityResult(
@@ -97,8 +117,6 @@ fun ModelsScreen(viewModel: ModelsViewModel, onBack: () -> Unit) {
             message?.let { text ->
                 item { MessageCard(text = text, onDismiss = viewModel::dismissMessage) }
             }
-
-            item { EngineStatusCard(status = status, backend = backend) }
 
             item {
                 Row(
@@ -146,11 +164,7 @@ fun ModelsScreen(viewModel: ModelsViewModel, onBack: () -> Unit) {
                 ModelRow(
                     model = model,
                     selected = settings?.modelFileName == model.fileName,
-                    loaded = (status as? EngineStatus.Ready)?.modelFileName == model.fileName,
-                    loading = (status as? EngineStatus.Loading)?.modelFileName == model.fileName,
-                    onSelect = { viewModel.selectModel(model) },
                     onLoad = { viewModel.loadModel(model) },
-                    onDelete = { pendingDelete = model },
                 )
             }
 
@@ -166,22 +180,21 @@ fun ModelsScreen(viewModel: ModelsViewModel, onBack: () -> Unit) {
             item {
                 ParamCard(
                     draft = draft,
-                    onChange = { draft = it },
-                    onSave = { viewModel.saveParams(draft) },
+                    advice = advice,
+                    onChange = { next ->
+                        draft = next
+                        viewModel.saveParams(next, notify = false)
+                    },
+                    onApplyRecommended = { recommended ->
+                        val next = draft.copy(nCtx = recommended)
+                        draft = next
+                        viewModel.saveParams(next, notify = false)
+                    },
                 )
             }
 
             item { MemoryNoteCard() }
         }
-    }
-
-    pendingDelete?.let { model ->
-        ConfirmDialog(
-            title = "モデルを削除",
-            message = "「${model.displayName}」を端末から削除します。この操作は取り消せません。",
-            onConfirm = { viewModel.deleteModel(model) },
-            onDismiss = { pendingDelete = null },
-        )
     }
 }
 
@@ -213,109 +226,7 @@ private fun MessageCard(text: String, onDismiss: () -> Unit) {
     }
 }
 
-@Composable
-private fun EngineStatusCard(status: EngineStatus, backend: BackendInfo) {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-        ),
-    ) {
-        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    Icons.Default.Memory,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.primary,
-                )
-                Spacer(Modifier.width(8.dp))
-                Text("推論エンジン", style = MaterialTheme.typography.titleSmall)
-            }
-
-            when (status) {
-                is EngineStatus.Unloaded -> {
-                    Text(
-                        "未読み込み。使用するモデルの「読み込む」を押してください。",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-
-                is EngineStatus.Loading -> {
-                    Text(
-                        "「${status.modelFileName}」を読み込み中…",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                }
-
-                is EngineStatus.Ready -> {
-                    Text(
-                        status.modelFileName,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                    if (status.info.description.isNotBlank()) {
-                        Text(
-                            status.info.description,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-                    Text(
-                        "コンテキスト ${status.info.nCtx} / 学習時 ${status.info.nCtxTrain}・" +
-                            "チャットテンプレート ${templateStatusLabel(status.info)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-
-                is EngineStatus.Failed -> {
-                    Text(
-                        "読み込みに失敗しました",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                    Text(
-                        status.message,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                }
-            }
-
-            if (backend.system.isNotBlank()) {
-                HorizontalDivider(Modifier.padding(vertical = 4.dp))
-                Text(
-                    text = if (backend.available) {
-                        "バックエンド: ${backend.backends.joinToString(", ").ifBlank { "CPU" }}"
-                    } else {
-                        "バックエンド情報を取得できません"
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    text = backend.system,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                if (backend.gpuOffload) {
-                    Text(
-                        "GPUオフロード対応ビルドです（GPUレイヤー設定が有効）",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-        }
-    }
-}
-
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ImportCard(progress: ImportProgress, onCancel: () -> Unit) {
     Card(
@@ -340,7 +251,10 @@ private fun ImportCard(progress: ImportProgress, onCancel: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                 )
             } else {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                ContainedLoadingIndicator(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    indicatorColor = MaterialTheme.colorScheme.primary,
+                )
             }
             Text(
                 text = if (progress.total > 0L) {
@@ -360,14 +274,10 @@ private fun ImportCard(progress: ImportProgress, onCancel: () -> Unit) {
 private fun ModelRow(
     model: ModelFileManager.ModelFile,
     selected: Boolean,
-    loaded: Boolean,
-    loading: Boolean,
-    onSelect: () -> Unit,
     onLoad: () -> Unit,
-    onDelete: () -> Unit,
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onSelect),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onLoad),
         colors = CardDefaults.cardColors(
             containerColor = if (selected) {
                 MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
@@ -376,66 +286,28 @@ private fun ModelRow(
             },
         ),
     ) {
-        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    Icons.Default.SmartToy,
-                    contentDescription = null,
-                    modifier = Modifier.size(22.dp),
-                    tint = MaterialTheme.colorScheme.primary,
+        Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                Icons.Default.SmartToy,
+                contentDescription = null,
+                modifier = Modifier.size(22.dp),
+                tint = MaterialTheme.colorScheme.primary,
+            )
+            Spacer(Modifier.width(10.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = model.displayName,
+                    style = MaterialTheme.typography.titleSmall,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                 )
-                Spacer(Modifier.width(10.dp))
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        text = model.displayName,
-                        style = MaterialTheme.typography.titleSmall,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Text(
-                        text = "${formatFileSize(model.sizeBytes)}・${model.fileName}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-            }
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (selected) {
-                    Icon(
-                        Icons.Default.CheckCircle,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Text(
-                        "選択中",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                }
-                Spacer(Modifier.weight(1f))
-                if (loading) {
-                    Text(
-                        "読み込み中…",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                } else {
-                    TextButton(onClick = onLoad, enabled = !loaded) {
-                        Text(if (loaded) "読み込み済み" else "読み込む")
-                    }
-                }
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = "「${model.displayName}」を削除",
-                        tint = MaterialTheme.colorScheme.error,
-                    )
-                }
+                Text(
+                    text = "${formatFileSize(model.sizeBytes)}・${model.fileName}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
         }
     }
@@ -444,8 +316,9 @@ private fun ModelRow(
 @Composable
 private fun ParamCard(
     draft: ModelSettings,
+    advice: ContextAdvice?,
     onChange: (ModelSettings) -> Unit,
-    onSave: () -> Unit,
+    onApplyRecommended: (Int) -> Unit,
 ) {
     Card(
         colors = CardDefaults.cardColors(
@@ -474,13 +347,62 @@ private fun ParamCard(
                     onChange(draft.copy(nCtx = stepped))
                 },
             )
+            advice?.let { current ->
+                Text(
+                    "推奨: ${current.recommendedNCtx} トークン" +
+                        "（端末RAM ${formatFileSize(current.totalRamBytes)} / " +
+                        "モデル ${formatFileSize(current.modelSizeBytes)}）",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (current.warning != null) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                )
+                current.warning?.let { warning ->
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                        ),
+                    ) {
+                        Column(
+                            Modifier.fillMaxWidth().padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    Icons.Default.Warning,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                    tint = MaterialTheme.colorScheme.onErrorContainer,
+                                )
+                                Spacer(Modifier.width(6.dp))
+                                Text(
+                                    "メモリ不足の可能性",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
+                                )
+                            }
+                            Text(
+                                warning,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                            )
+                            TextButton(onClick = { onApplyRecommended(current.recommendedNCtx) }) {
+                                Text("推奨値（${current.recommendedNCtx}）を使う")
+                            }
+                        }
+                    }
+                }
+            }
             SliderRow(
                 label = "最大生成トークン",
                 valueText = "${draft.maxTokens}",
                 value = draft.maxTokens.toFloat(),
-                range = 64f..4096f,
+                range = ModelSettings.MIN_MAX_TOKENS.toFloat()..ModelSettings.MAX_MAX_TOKENS.toFloat(),
                 onChange = { raw ->
-                    val stepped = (raw / 64f).roundToInt().coerceAtLeast(1) * 64
+                    val stepped = ((raw / 64f).roundToInt().coerceAtLeast(1) * 64)
+                        .coerceIn(ModelSettings.MIN_MAX_TOKENS, ModelSettings.MAX_MAX_TOKENS)
                     onChange(draft.copy(maxTokens = stepped))
                 },
             )
@@ -510,7 +432,7 @@ private fun ParamCard(
                 onChange = { raw -> onChange(draft.copy(topK = raw.roundToInt())) },
             )
             SliderRow(
-                label = "繰り返しペナルティ",
+                label = "Repeat Penalty",
                 valueText = formatDecimal(draft.repeatPenalty),
                 value = draft.repeatPenalty,
                 range = 1f..2f,
@@ -525,11 +447,6 @@ private fun ParamCard(
                 range = 0f..99f,
                 onChange = { raw -> onChange(draft.copy(gpuLayers = raw.roundToInt())) },
             )
-
-            Spacer(Modifier.height(8.dp))
-            Button(onClick = onSave, modifier = Modifier.fillMaxWidth()) {
-                Text("設定を保存")
-            }
         }
     }
 }

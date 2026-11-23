@@ -19,7 +19,6 @@ data class Skill(
         const val MIN_LEVEL = 0
         const val MAX_LEVEL = 3
         const val MAX_CREATION_LEVEL = 2
-        const val CREATION_POINTS = 6
     }
 }
 

@@ -1,30 +1,41 @@
 package io.github.shiokunn.trpg.ui.game
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -34,13 +45,19 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -50,15 +67,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.shiokunn.trpg.ai.engine.EngineStatus
 import io.github.shiokunn.trpg.core.ai.GmChoice
+import io.github.shiokunn.trpg.core.ai.GmErrorCategory
 import io.github.shiokunn.trpg.core.domain.ChatMessage
 import io.github.shiokunn.trpg.core.domain.ChatRole
 import io.github.shiokunn.trpg.core.domain.CombatState
-import io.github.shiokunn.trpg.core.domain.DiceResult
-import io.github.shiokunn.trpg.core.domain.Difficulty
 import io.github.shiokunn.trpg.game.GmTurnPhase
 import io.github.shiokunn.trpg.ui.GameTurnUiState
 import io.github.shiokunn.trpg.ui.GameViewModel
-import io.github.shiokunn.trpg.ui.components.EmptyState
 import io.github.shiokunn.trpg.ui.components.LoadingPane
 import io.github.shiokunn.trpg.ui.components.NarrativeText
 import io.github.shiokunn.trpg.ui.components.SessionMissingState
@@ -71,6 +86,7 @@ fun GameScreen(
     onCharacter: () -> Unit,
     onWorld: () -> Unit,
     onJournal: () -> Unit,
+    onOpenModels: () -> Unit,
 ) {
     val bundle by viewModel.bundle.collectAsStateWithLifecycle()
     val missing by viewModel.missing.collectAsStateWithLifecycle()
@@ -81,6 +97,18 @@ fun GameScreen(
 
     val session = bundle?.session
     val modelReady = engineStatus is EngineStatus.Ready
+
+    // Roleplay cannot start without a model. On entry, send the player to the existing
+    // model screen instead of starting a generation that would only fail. The guard
+    // prevents a navigation loop if the player comes back before loading a model.
+    val navigatedToModels = rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(engineStatus) {
+        val needsModel = engineStatus is EngineStatus.Unloaded || engineStatus is EngineStatus.Failed
+        if (!navigatedToModels.value && needsModel) {
+            navigatedToModels.value = true
+            onOpenModels()
+        }
+    }
 
     TrpgScaffold(
         title = session?.title ?: "冒険",
@@ -104,12 +132,16 @@ fun GameScreen(
                     sceneTitle = choices?.sceneTitle.orEmpty(),
                     turn = turn,
                     modelReady = modelReady,
-                    onBegin = viewModel::beginAdventure,
-                    onChoose = viewModel::choose,
-                    onAct = { text -> viewModel.act(text) },
+                    onChoose = { choice ->
+                        if (modelReady) viewModel.choose(choice) else onOpenModels()
+                    },
+                    onAct = { text ->
+                        if (modelReady) viewModel.act(text) else onOpenModels()
+                    },
                     onAttack = viewModel::attack,
                     onCancel = viewModel::cancelGeneration,
                     onDismissError = viewModel::clearError,
+                    onRetry = viewModel::regenerate,
                 )
             }
         }
@@ -124,40 +156,125 @@ private fun GameContent(
     sceneTitle: String,
     turn: GameTurnUiState,
     modelReady: Boolean,
-    onBegin: () -> Unit,
     onChoose: (GmChoice) -> Unit,
     onAct: (String) -> Unit,
     onAttack: (Boolean) -> Unit,
     onCancel: () -> Unit,
     onDismissError: () -> Unit,
+    onRetry: () -> Unit,
 ) {
     val current = bundle
     val location = current.locations.firstOrNull { it.id == current.session.currentLocationId }
     val character = current.character
-    val hasNarrative = chat.any { it.role == ChatRole.GM }
-    val recent = chat.takeLast(6)
+    val gmMessages = chat.filter { it.role == ChatRole.GM }
+    val hasNarrative = gmMessages.isNotEmpty()
+    val latestGmId = gmMessages.lastOrNull()?.id
+    val gmOrdinals = gmMessages
+        .mapIndexed { index, message -> message.id to index }
+        .toMap()
     val busy = turn.running
+    val view = LocalView.current
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+    // Android moves a background app to a much smaller cpuset (often cpu0-2),
+    // which makes generation extremely slow. Keep the screen on while the model
+    // is working so the user does not accidentally trigger that state.
+    DisposableEffect(busy) {
+        view.keepScreenOn = busy
+        onDispose { view.keepScreenOn = false }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .imePadding()
+            .padding(20.dp),
     ) {
-        item {
-            StatusCard(
-                locationName = location?.name ?: "未知の場所",
-                chapter = current.session.currentChapter,
-                turnCount = current.session.turnCount,
-                characterName = character.name,
-                species = character.species,
-                occupation = character.occupation,
-                hp = character.hp,
-                maxHp = character.maxHp,
-            )
+        AiMessageArea(
+            modifier = Modifier.weight(1f),
+            sceneTitle = sceneTitle,
+            messages = gmMessages,
+            latestGmId = latestGmId,
+            gmOrdinals = gmOrdinals,
+            combat = current.session.activeCombat,
+            modelReady = modelReady,
+            busy = busy,
+            phase = turn.phase,
+            generatedTokens = turn.generatedTokens,
+            cancelling = turn.cancelling,
+            error = turn.error,
+            errorDetails = turn.errorDetails,
+            errorKind = turn.errorKind,
+            onCancel = onCancel,
+            onDismissError = onDismissError,
+            onRetry = onRetry,
+            onAttack = onAttack,
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(0.35f),
+        ) {
+            Box(Modifier.weight(0.4f).fillMaxHeight()) {
+                StatusCard(
+                    locationName = location?.name ?: "未知の場所",
+                    chapter = current.session.currentChapter,
+                    turnCount = current.session.turnCount,
+                    characterName = character.name,
+                    species = character.species,
+                    occupation = character.occupation,
+                    hp = character.hp,
+                    maxHp = character.maxHp,
+                )
+            }
+            Spacer(Modifier.width(12.dp))
+            Box(Modifier.weight(0.6f).fillMaxHeight()) {
+                ChoicePanel(
+                    choices = choices,
+                    visible = !busy && hasNarrative && turn.error == null &&
+                        current.session.activeCombat == null,
+                    enabled = modelReady && !busy,
+                    onChoose = onChoose,
+                )
+            }
         }
 
-        if (!modelReady) {
-            item {
+        FreeActionRow(
+            onSend = onAct,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+/** Top area: the GM narrative plus scene title. Empty until the first answer arrives. */
+@Composable
+private fun AiMessageArea(
+    modifier: Modifier,
+    sceneTitle: String,
+    messages: List<ChatMessage>,
+    latestGmId: String?,
+    gmOrdinals: Map<String, Int>,
+    combat: CombatState?,
+    modelReady: Boolean,
+    busy: Boolean,
+    phase: GmTurnPhase?,
+    generatedTokens: Int,
+    cancelling: Boolean,
+    error: String?,
+    errorDetails: List<String>,
+    errorKind: GmErrorCategory?,
+    onCancel: () -> Unit,
+    onDismissError: () -> Unit,
+    onRetry: () -> Unit,
+    onAttack: (Boolean) -> Unit,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState()),
+    ) {
+        Column(Modifier.fillMaxWidth()) {
+            if (!modelReady) {
                 Card(
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.errorContainer,
@@ -178,21 +295,10 @@ private fun GameContent(
                         )
                     }
                 }
+                Spacer(Modifier.height(16.dp))
             }
-        }
 
-        current.session.activeCombat?.let { combat ->
-            item {
-                CombatCard(
-                    combat = combat,
-                    enabled = !busy,
-                    onAttack = onAttack,
-                )
-            }
-        }
-
-        if (sceneTitle.isNotBlank()) {
-            item {
+            if (sceneTitle.isNotBlank()) {
                 Text(
                     text = "― $sceneTitle ―",
                     style = MaterialTheme.typography.labelLarge,
@@ -200,94 +306,95 @@ private fun GameContent(
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.fillMaxWidth(),
                 )
+                Spacer(Modifier.height(16.dp))
             }
-        }
 
-        if (!hasNarrative && !busy && turn.error == null) {
-            item {
-                EmptyState(
-                    icon = Icons.Default.PlayArrow,
-                    title = "物語を始めましょう",
-                    message = if (modelReady) {
-                        "最初の情景と選択肢をゲームマスターが生成します。"
+            messages.takeLast(6).forEach { message ->
+                if (message.id == latestGmId) {
+                    if (gmOrdinals[message.id] == 0) {
+                        FadeInContent { NarrativeText(message.content) }
                     } else {
-                        "先にモデルを読み込んでください。"
-                    },
-                    actionLabel = if (modelReady) "冒険を始める" else null,
-                    onAction = if (modelReady) onBegin else null,
-                )
+                        ExpandRevealContent { NarrativeText(message.content) }
+                    }
+                } else {
+                    NarrativeText(message.content)
+                }
+                Spacer(Modifier.height(12.dp))
             }
-        }
 
-        if (hasNarrative) {
-            items(recent, key = { it.id }) { message ->
-                ChatMessageRow(message)
+            combat?.let {
+                CombatCard(combat = it, enabled = !busy, onAttack = onAttack)
+                Spacer(Modifier.height(16.dp))
+            }
+
+            if (busy) {
+                GeneratingIndicator(
+                    phase = phase,
+                    generatedTokens = generatedTokens,
+                    cancelling = cancelling,
+                    onCancel = onCancel,
+                )
+                Spacer(Modifier.height(16.dp))
+            }
+
+            if (error != null) {
+                ErrorCard(
+                    message = error,
+                    details = errorDetails,
+                    errorKind = errorKind,
+                    onDismiss = onDismissError,
+                    onRetry = onRetry,
+                )
+                Spacer(Modifier.height(16.dp))
             }
         }
 
         if (busy) {
-            item {
-                StreamingCard(
-                    phase = turn.phase,
-                    streamedText = turn.streamedText,
-                    cancelling = turn.cancelling,
-                    onCancel = onCancel,
-                )
-            }
+            Text(
+                text = "生成トークン: $generatedTokens",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(4.dp),
+            )
         }
+    }
+}
 
-        turn.lastCheck?.let { dice ->
-            if (!busy) {
-                item { CheckResultCard(dice) }
-            }
-        }
-
-        if (turn.error != null) {
-            item {
-                ErrorCard(
-                    message = turn.error,
-                    details = turn.errorDetails,
-                    onDismiss = onDismissError,
-                )
-            }
-        }
-
-        if (!busy && hasNarrative && turn.error == null && choices.isNotEmpty() &&
-            current.session.activeCombat == null
-        ) {
-            item {
-                Text(
-                    "選択してください",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            items(choices, key = { it.id }) { choice ->
-                ChoiceButton(
-                    choice = choice,
-                    enabled = modelReady && !busy,
-                    onClick = { onChoose(choice) },
-                )
-            }
-        }
-
-        if (!busy && modelReady && current.session.activeCombat == null &&
-            (hasNarrative || choices.isNotEmpty())
-        ) {
-            item {
-                FreeActionRow(onSend = onAct)
-            }
-        }
-
-        item {
-            Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(16.dp))
-                Text(
-                    "ステータス・所持品・クエストは各画面から確認できます。",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+/** Bottom-right area: fixed panel, its contents animate but the panel stays in place. */
+@Composable
+private fun ChoicePanel(
+    choices: List<GmChoice>,
+    visible: Boolean,
+    enabled: Boolean,
+    onChoose: (GmChoice) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val choicesKey = choices.joinToString { it.id + ":" + it.text }
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+    ) {
+        key(choicesKey) {
+            AnimatedVisibility(
+                visible = visible,
+                enter = expandVertically(
+                    animationSpec = tween(durationMillis = 698, easing = FastOutSlowInEasing),
+                ) + fadeIn(animationSpec = tween(durationMillis = 698, easing = FastOutSlowInEasing)),
+                exit = shrinkVertically() + fadeOut(),
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    choices.forEachIndexed { index, choice ->
+                        ChoiceButton(
+                            choice = choice,
+                            number = index + 1,
+                            enabled = enabled,
+                            onClick = { onChoose(choice) },
+                        )
+                    }
+                }
             }
         }
     }
@@ -416,79 +523,83 @@ private fun CombatCard(
     }
 }
 
+/** Loading state for both the first and every later answer: no card or background. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun ChatMessageRow(message: ChatMessage) {
-    when (message.role) {
-        ChatRole.GM -> NarrativeText(message.content)
-        ChatRole.PLAYER -> Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-        ) {
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                ),
-            ) {
-                Text(
-                    text = message.content,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                )
-            }
-        }
-        ChatRole.SYSTEM -> Text(
-            text = message.content,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.outline,
-        )
-    }
-}
-
-@Composable
-private fun StreamingCard(
+private fun GeneratingIndicator(
     phase: GmTurnPhase?,
-    streamedText: String,
+    generatedTokens: Int,
     cancelling: Boolean,
     onCancel: () -> Unit,
 ) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        modifier = Modifier.fillMaxWidth(),
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(240.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
     ) {
-        Column(Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .size(18.dp)
-                        .semantics { contentDescription = "ゲームマスターが生成中" },
-                    strokeWidth = 2.dp,
-                )
-                Text(
-                    text = when (phase) {
-                        is GmTurnPhase.Repairing -> "応答を修正しています（再試行 1/1）"
-                        is GmTurnPhase.Committing -> "ターンを保存しています"
-                        else -> if (cancelling) "生成を中止しています" else "ゲームマスターが応答を生成しています"
-                    },
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            if (streamedText.isNotBlank()) {
-                Spacer(Modifier.height(12.dp))
-                NarrativeText(streamedText)
-            }
-            Spacer(Modifier.height(8.dp))
-            TextButton(
-                onClick = onCancel,
-                enabled = !cancelling,
-            ) { Text(if (cancelling) "中止中" else "生成を中止") }
-        }
+        ContainedLoadingIndicator(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            indicatorColor = MaterialTheme.colorScheme.primary,
+        )
+        Spacer(Modifier.height(16.dp))
+        Text(
+            text = when {
+                cancelling -> "生成を中止しています"
+                phase is GmTurnPhase.Repairing -> "応答を修正しています"
+                phase is GmTurnPhase.Committing -> "ターンを保存しています"
+                generatedTokens <= 0 -> "読み込み中"
+                else -> "作成中"
+            },
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(12.dp))
+        TextButton(
+            onClick = onCancel,
+            enabled = !cancelling,
+        ) { Text(if (cancelling) "中止中" else "生成を中止") }
+    }
+}
+
+/** Fades newly generated content in once per message. Older messages stay in place. */
+@Composable
+private fun FadeInContent(content: @Composable () -> Unit) {
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { visible = true }
+    val alpha by animateFloatAsState(
+        targetValue = if (visible) 1f else 0f,
+        animationSpec = tween(durationMillis = 1143, easing = LinearOutSlowInEasing),
+        label = "fadeIn",
+    )
+    Box(Modifier.fillMaxWidth().alpha(alpha)) { content() }
+}
+
+/** Unfolds later GM answers downward from just below the previous answer. */
+@Composable
+private fun ExpandRevealContent(content: @Composable () -> Unit) {
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { visible = true }
+    AnimatedVisibility(
+        visible = visible,
+        enter = expandVertically(
+            animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+            expandFrom = Alignment.Top,
+        ) + fadeIn(animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)),
+        exit = shrinkVertically() + fadeOut(),
+    ) {
+        Box(Modifier.fillMaxWidth()) { content() }
     }
 }
 
 @Composable
-private fun ChoiceButton(choice: GmChoice, enabled: Boolean, onClick: () -> Unit) {
+private fun ChoiceButton(
+    choice: GmChoice,
+    number: Int,
+    enabled: Boolean,
+    onClick: () -> Unit,
+) {
     OutlinedButton(
         onClick = onClick,
         enabled = enabled,
@@ -496,28 +607,13 @@ private fun ChoiceButton(choice: GmChoice, enabled: Boolean, onClick: () -> Unit
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
     ) {
         Column(Modifier.fillMaxWidth()) {
-            Text(choice.text, style = MaterialTheme.typography.bodyMedium)
-            choice.check?.let { check ->
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = buildString {
-                        append("判定: ").append(check.attribute.label)
-                        append(" ／ 難易度 ").append(check.difficulty)
-                        append("（").append(Difficulty.labelFor(check.difficulty)).append("）")
-                        if (check.rollMode != io.github.shiokunn.trpg.core.domain.RollMode.NORMAL) {
-                            append(" ／ ").append(check.rollMode.label)
-                        }
-                    },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
+            Text("$number. ${choice.text}", style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
 
 @Composable
-private fun FreeActionRow(onSend: (String) -> Unit) {
+private fun FreeActionRow(onSend: (String) -> Unit, modifier: Modifier = Modifier) {
     var input by rememberSaveable { mutableStateOf("") }
     val focus = LocalFocusManager.current
     val submit = {
@@ -529,7 +625,7 @@ private fun FreeActionRow(onSend: (String) -> Unit) {
         }
     }
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -550,34 +646,13 @@ private fun FreeActionRow(onSend: (String) -> Unit) {
 }
 
 @Composable
-private fun CheckResultCard(dice: DiceResult) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Column(Modifier.padding(12.dp)) {
-            Text(
-                text = "判定結果: ${dice.outcome.label}",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSecondaryContainer,
-            )
-            Text(
-                text = buildString {
-                    append(dice.attributeId.label).append(" ").append(dice.attributeValue)
-                    if (dice.skillName.isNotBlank()) append(" + ").append(dice.skillName).append(" ").append(dice.skillLevel)
-                    append(" / 出目 ").append(dice.dice.joinToString(", "))
-                    append(" = ").append(dice.total)
-                    append(" / 難易度 ").append(dice.difficulty)
-                },
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSecondaryContainer,
-            )
-        }
-    }
-}
-
-@Composable
-private fun ErrorCard(message: String, details: List<String>, onDismiss: () -> Unit) {
+private fun ErrorCard(
+    message: String,
+    details: List<String>,
+    errorKind: GmErrorCategory?,
+    onDismiss: () -> Unit,
+    onRetry: () -> Unit,
+) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
         modifier = Modifier.fillMaxWidth(),
@@ -588,6 +663,19 @@ private fun ErrorCard(message: String, details: List<String>, onDismiss: () -> U
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onErrorContainer,
             )
+            if (errorKind != null) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "エラー種別: ${errorKind.name}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                )
+                Text(
+                    text = "直前の行動から再度シナリオを生成できます。",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                )
+            }
             if (details.isNotEmpty()) {
                 Spacer(Modifier.height(8.dp))
                 details.take(5).forEach { detail ->
@@ -598,8 +686,13 @@ private fun ErrorCard(message: String, details: List<String>, onDismiss: () -> U
                     )
                 }
             }
-            TextButton(onClick = onDismiss) {
-                Text("閉じる", color = MaterialTheme.colorScheme.onErrorContainer)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = onRetry) {
+                    Text("同じ行動で再生成", color = MaterialTheme.colorScheme.onErrorContainer)
+                }
+                TextButton(onClick = onDismiss) {
+                    Text("閉じる", color = MaterialTheme.colorScheme.onErrorContainer)
+                }
             }
         }
     }

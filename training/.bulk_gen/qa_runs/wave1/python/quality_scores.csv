@@ -1,0 +1,97 @@
+id,category,task,group,total,machine_score,quality_score_provisional,verdict,needs_human_review,red_flags,findings,content_hash,verifier_version
+ex-0001,extraction,character_draft,extract-char-valley-apprentice,100,55,45,pass,0,,NEGATION_ADDED | CONDITION_LOST,4daf5d3a93ceb86e32dfe006099c69785ab94fa75485c71e7db3041731fcd827,qa-1.0.0
+ex-0002,extraction,character_draft,extract-char-charcoal-negation,100,55,45,pass,0,,CONDITION_LOST,86b75873047f1a6a92da35f4954043792409aa69fe080a4837cc40608a2ce475,qa-1.0.0
+ex-0003,extraction,character_draft,extract-char-lighthouse-counts,100,55,45,pass,0,,,52a7a79818a1108d3100b9e7aae399c9bde01b0548a8c026d1109966a7b23da4,qa-1.0.0
+ex-0004,extraction,character_draft,extract-char-clocktower-guard,100,55,45,pass,0,,NEGATION_ADDED,a52c51877d90880718673b7e95dc97aab329b70ccb68b88aedce41eb7e3bdb8b,qa-1.0.0
+ex-0005,extraction,character_draft,extract-char-contradict-age,100,55,45,pass,0,,,01402cba21b478b7ca567be8f726d6f34d67c3fdd659568ee1087aa177490a63,qa-1.0.0
+ex-0006,extraction,character_draft,extract-char-herbalist-bundles,100,55,45,pass,0,,,f982677f74ee90ec54bff1cdcd406b9595c810828430031922e1ef6e8f9ec7ad,qa-1.0.0
+ex-0007,extraction,state_changes,extract-state-idle-chat,96,55,41,pass,0,,NEGATION_INVERSION,c008f4a7efd3975dd59aa9993f2253d05b4860bd3a95b6af9729dd8cc2b20fd0,qa-1.0.0
+ex-0008,extraction,state_changes,extract-state-numeral-negation,100,55,45,pass,0,,NEGATION_INVERSION,faa8de9a98fc9219b8137d5338479b362a0fc7bd42cc2367b6b8ac69ac50dcf6,qa-1.0.0
+ex-0009,extraction,state_changes,extract-state-hp-xp-mixed,96,55,41,pass,0,,,8e9a0daa4d3c8bf4bac06ad3dda2a436ab8e9c7e6b2d825bb51e90bc3a417c5c,qa-1.0.0
+ex-0010,extraction,state_changes,extract-state-flag-halfday,100,55,45,pass,0,,,547f535ba5dd9911c85b1ce0ceb92147d677c98e2324a24bf022c8619acef224,qa-1.0.0
+ex-0011,extraction,state_changes,extract-state-quest-multiple,100,55,45,pass,0,,,0dd1582d5e4903062fcdfa5006ff62864bf8b0206a3daa2ca317d967bd5b9cdc,qa-1.0.0
+ex-0012,extraction,state_changes,extract-state-relation-item-add,100,55,45,pass,0,,,814d9ae1009cd9c25bea8b3c8df4221cbd6bea9167aaccc3217ae14dfdd46fdb,qa-1.0.0
+ex-0013,extraction,state_changes,extract-state-move-combat,100,55,45,pass,0,,,dc5c534265c19b47c6e00263801c2f9da087ebad503481394e9f28e8300749b3,qa-1.0.0
+ex-0014,extraction,state_changes,extract-state-speculation,96,55,41,pass,0,,NEGATION_INVERSION | CONDITION_LOST,4ebe1edd877699c3199b8e05f433558c9bb65530308e3fb73a496451c67b6cc7,qa-1.0.0
+ex-0015,extraction,state_changes,extract-state-combat-end-loot,100,55,45,pass,0,,,6f55c9db8cdcd67272bbb0da9ce08557cdf591cf078cc3b696c231a8431179f0,qa-1.0.0
+ex-0016,extraction,state_changes,extract-state-conflicting-hp,100,55,45,pass,0,,CONDITION_LOST,f6d8836695738faf24b679cf320346db5c0d985a41f9cfe49545e94c95460298,qa-1.0.0
+ex-0017,extraction,memories,extract-mem-chat-only,100,55,45,pass,0,,NEGATION_INVERSION,e1f56fa03e03a1ce0d4362851b1d363d0e795551641b142d675eb0b70a4f5809,qa-1.0.0
+ex-0018,extraction,memories,extract-mem-festival-bridge,100,55,45,pass,0,,,771b8176590cddcf1f2ae9b4a1847a4198840050fad3e989be5793ea46fb2c64,qa-1.0.0
+ex-0019,extraction,memories,extract-mem-speculative-secret,100,55,45,pass,0,,CONDITION_LOST | UNCERTAIN_CONFIRMED,d2bb499623635f0801e0a780fedd572f4a6b70000b455c21fe57d14f2bc0d4cb,qa-1.0.0
+ex-0020,extraction,memories,extract-mem-conflicting-testimony,100,55,45,pass,0,,NEGATION_INVERSION,7ee6004089bd9296b4f96d632a7799b7332aa2f27b44feba71a8a1db348ba65f,qa-1.0.0
+ex-0021,extraction,memories,extract-mem-tavern-faces,100,55,45,pass,0,,,e234627de1142cc6a75815d2fe44480267533026f6396740a3f5c1800f3df3b5,qa-1.0.0
+ex-0022,extraction,memories,extract-mem-poison-dishes,100,55,45,pass,0,,,410932c6eae8aaf1cd6ab7a689defaf4f1e433b779684f381bfae3b88b87e92a,qa-1.0.0
+ex-0023,extraction,memories,extract-mem-observatory-ten,100,55,45,pass,0,,NEGATION_ADDED,62b71c712b4ad4fa439bf40a0fe9db701b3993a218b583d70ee8ccc829d23f6b,qa-1.0.0
+ex-0024,extraction,memories,extract-mem-council-ritual,100,55,45,pass,0,,,7e7727f1afcffc6872daa73f427c16ac08fefae3e41c9cadd0721ef9fefbf864,qa-1.0.0
+ex-0025,extraction,items,extract-bex02-items-negation,96,55,41,pass,0,,NEGATION_INVERSION,3ebac80b85423e5ef2be09c10c56f2e5b0fcce56b6329ca3180bf6fbd2a75e7f,qa-1.0.0
+ex-0026,extraction,items,extract-bex02-items-numerals,96,55,41,pass,0,,,d23b0ad8c3413235349285ca35617d7e0703175cdf18caa4dc672824b20a1e37,qa-1.0.0
+ex-0027,extraction,items,extract-bex02-items-thin,100,55,45,pass,0,,NEGATION_INVERSION,78405f9fa0f1888258552a92d8c425fa3265805ace1fb281da55d3619994a618,qa-1.0.0
+ex-0028,extraction,items,extract-bex02-items-pronoun,100,55,45,pass,0,,NEGATION_INVERSION | CONDITION_LOST,9bfdb7b141e1882a8814dc018871f42c7e3ee1bf37bc3f53b8f97e702c4de498,qa-1.0.0
+ex-0029,extraction,items,extract-bex02-items-empty,96,55,41,pass,0,,,6eb67efa7c4cab5cea48936f28872b7a709bd09ba0d24b052cbf22603b4b31da,qa-1.0.0
+ex-0030,extraction,items,extract-bex02-items-five,96,55,41,pass,0,,,c51b74845440c1c30c5d6e3ffadc1a2c09be22c07eeaab3181999017aaa8988d,qa-1.0.0
+ex-0031,extraction,locations,extract-bex02-locations-links,100,55,45,pass,0,,,19405abc699931be64786ecd01953bfffb0ef8364b7c7b5aca90b80a29aa9afb,qa-1.0.0
+ex-0032,extraction,locations,extract-bex02-locations-negation,100,55,45,pass,0,,NEGATION_ADDED | CONDITION_LOST,56e848a44e523a3ebeef43f2aac885bcebb0f49ffcb544a001a9c07344fffc1b,qa-1.0.0
+ex-0033,extraction,locations,extract-bex02-locations-thin,100,55,45,pass,0,,NEGATION_INVERSION,2e67e6380bd0564f358df4dcf5b67fe441791a7c1690a3abfb93f04aba2a10af,qa-1.0.0
+ex-0034,extraction,locations,extract-bex02-locations-rumor,100,55,45,pass,0,,NEGATION_INVERSION,2850dc5fe72cba75b186c0c1108718d52e35d864bd65e0724338d0e3a1209b07,qa-1.0.0
+ex-0035,extraction,locations,extract-bex02-locations-pronoun,100,55,45,pass,0,,CONDITION_LOST,c4192d25ec75646b2b1307cd4e5006cb30ef5fe3ca12a54b1dc0d67277047c92,qa-1.0.0
+ex-0036,extraction,locations,extract-bex02-locations-empty,100,55,45,pass,0,,CONDITION_LOST,b01caeb3ac373a859476a2d0dc786a9d3e12de26a2eaa9b13c05655b1c56161f,qa-1.0.0
+ex-0037,extraction,npcs,extract-bex02-npcs-basic,96,55,41,pass,0,,NEGATION_INVERSION,555279da3a146cdee031d064d98282e6d63f90ac50096d117b930786923247e6,qa-1.0.0
+ex-0038,extraction,npcs,extract-bex02-npcs-numerals,96,55,41,pass,0,,,5bb6ba7fb6d0f3461eafdaa86c3cf88b548000e48dc9c90435908328040abccc,qa-1.0.0
+ex-0039,extraction,npcs,extract-bex02-npcs-negation,100,55,45,pass,0,,CONDITION_LOST,749813971c5471ae510fafcf882b41430fc90ccf2d98d249b0d8e2a939b6cf4e,qa-1.0.0
+ex-0040,extraction,npcs,extract-bex02-npcs-pronoun,100,55,45,pass,0,,NEGATION_INVERSION | CONDITION_LOST,bed088c20f37e564391072d2f40ee00fd10f090113b62e57ee5e127340bca818,qa-1.0.0
+ex-0041,extraction,npcs,extract-bex02-npcs-thin,100,55,45,pass,0,,NEGATION_INVERSION,48d9bf2d3c9cca589c5971f6e0832684b79d47dee940908e98aabea627b90604,qa-1.0.0
+ex-0042,extraction,npcs,extract-bex02-npcs-three,96,55,41,pass,0,,NEGATION_INVERSION,3b5a9530b9e508422e4f6d1ba47cbed7af323cb961f93ee834b5694321464783,qa-1.0.0
+ex-0043,extraction,quests,extract-bex02-quests-basic,100,55,45,pass,0,,,2ed63b1dd5e0e5e51f1d0461cec38b3a51b4a7e7fef0e1bbe2faa302db56a63c,qa-1.0.0
+ex-0044,extraction,quests,extract-bex02-quests-thin,100,55,45,pass,0,,NEGATION_INVERSION | CONDITION_LOST,97b82ad78d87bc0c72c6dfa42a1c6c04bb3c7ce663f7c222fe4f6314ebafe958,qa-1.0.0
+ex-0045,extraction,quests,extract-bex02-quests-empty,100,55,45,pass,0,,CONDITION_LOST,055f5e378d8257386e2e6e8151bf6b33cf071b7fd6df37d193bf7dd13319d49b,qa-1.0.0
+ex-0046,extraction,quests,extract-bex02-quests-negation,100,55,45,pass,0,,NEGATION_INVERSION,af3b18ff7ab6c0b6e85553543316037a1652dc7bd8a679b54fcae34b3e8a3548,qa-1.0.0
+ex-0047,extraction,quests,extract-bex02-quests-pronoun,96,55,41,pass,0,,NEGATION_INVERSION | CONDITION_LOST,799f5542c16a8ebc8bbe803b466fe32db4995055c072648a267c64252a2c64df,qa-1.0.0
+ex-0048,extraction,quests,extract-bex02-quests-multi,100,55,45,pass,0,,,fa28938236dbc3c983751d4a62b67814803029e862fc6d8faf48f6924e85e455,qa-1.0.0
+gm-a-0001,trpg_gm,gm_turn,scenario-abyss-still-hammer,98,55,43,pass,0,,,c33e813c3405e39f5d6d8eca1412287f3e1244cb625c9076faa10545a28d0f04,qa-1.0.0
+gm-a-0002,trpg_gm,gm_turn,scenario-abyss-still-hammer,98,55,43,pass,0,,,da93192e1d50e2ca3d4eafab04781d94fb4098128276a72c819de73dcf13befe,qa-1.0.0
+gm-a-0003,trpg_gm,gm_turn,scenario-abyss-still-hammer,98,55,43,pass,0,,,8d6237a00a496339b0b561e4f713c6cb683de41d6c132ff5f33bd1af337a4942,qa-1.0.0
+gm-a-0004,trpg_gm,gm_turn,scenario-verdant-maw-forest,98,55,43,pass,0,,,0f1e0a5e029bae3223c58db2684aad96c9e45d311c3c530130489ce87cf4b079,qa-1.0.0
+gm-a-0005,trpg_gm,gm_turn,scenario-verdant-maw-forest,98,55,43,pass,0,,,07d1d187d280c898483ddb944826dbcb0fe3388245d0e420d4660805c59e1326,qa-1.0.0
+gm-a-0006,trpg_gm,gm_turn,scenario-verdant-maw-forest,98,55,43,pass,0,,,a33ae4b822e4aca246c8d71dfd1a48f6d6303951f5c228da0763809167d3882a,qa-1.0.0
+gm-a-0007,trpg_gm,gm_turn,scenario-skygarden-water-rights,98,55,43,pass,0,,,69a3394c363f8caf76b520bf86e3c947a57bb682d397ed2a676aaa78fe8eaf21,qa-1.0.0
+gm-a-0008,trpg_gm,gm_turn,scenario-skygarden-water-rights,98,55,43,pass,0,,,86eb53b3700763ad690f09bf56e96e9978fd708a259da4cfb7a4be3e348bc5a9,qa-1.0.0
+gm-a-0009,trpg_gm,gm_turn,scenario-skygarden-water-rights,98,55,43,pass,0,,,9534bf0e966ae89582258d5b36a5aeef18766a43abacbc91e11fe028daaf0257,qa-1.0.0
+gm-a-0010,trpg_gm,gm_turn,scenario-rust-valley-last-engine,98,55,43,pass,0,,,9f52408af4f02867fe824f2ed13a90cf7e39114c593c89892ede49b34c64b516,qa-1.0.0
+gm-a-0011,trpg_gm,gm_turn,scenario-rust-valley-last-engine,98,55,43,pass,0,,,98198c208f254693f82b8a11c5683ceaf1ff6010d9cb228c8a638ef79d145886,qa-1.0.0
+gm-a-0012,trpg_gm,gm_turn,scenario-rust-valley-last-engine,98,55,43,pass,0,,,25f420fbb12626a41fe64305d328def3c3744e54c1a8621bc0d10a5979a23447,qa-1.0.0
+gm-a-0013,trpg_gm,gm_turn,scenario-song-law-reprisal,98,55,43,pass,0,,,230ba6638c5592ecc1ac544881ca63e8adcff21c9c95059d95a20b7f5d3d9932,qa-1.0.0
+gm-a-0014,trpg_gm,gm_turn,scenario-song-law-reprisal,98,55,43,pass,0,,,1602a03c14e7d1736d6ad6adfff21d077bc46fbc6acdf710cc68ec70f37a306d,qa-1.0.0
+gm-a-0015,trpg_gm,gm_turn,scenario-song-law-reprisal,98,55,43,pass,0,,,8a535219eae67026fb40ef5be87b8a33c49a5f847cfd875400d7fc6fefb6b958,qa-1.0.0
+gm-a-0016,trpg_gm,gm_turn,scenario-amber-memory-market,98,55,43,pass,0,,,a563ad7a897ad5a5a48d98c1d778d0bdb20ac9b107d45ade613da8413fc0ae15,qa-1.0.0
+gm-a-0017,trpg_gm,gm_turn,scenario-amber-memory-market,98,55,43,pass,0,,,60eab9db01da4341e5361d80513bfe07964fd769eb7f3d7a0ab21a07b2ad7849,qa-1.0.0
+gm-a-0018,trpg_gm,gm_turn,scenario-amber-memory-market,98,55,43,pass,0,,,1a9818a54cebb37a2d94847e2a7631fbe299d65c81f98ace130b391b69aa45bc,qa-1.0.0
+gm-a-0019,trpg_gm,gm_turn,scenario-border-checkpoint-ledger,98,55,43,pass,0,,,1d38f8edb571b8ec7542b3e3f7d3f405dde2b368dac4335be2ace493bab3fe0f,qa-1.0.0
+gm-a-0020,trpg_gm,gm_turn,scenario-border-checkpoint-ledger,98,55,43,pass,0,,,da82b0bd35e260803e4db7803c0654e9042e58c0f6858392e56c71bc3ba5105a,qa-1.0.0
+gm-a-0021,trpg_gm,gm_turn,scenario-border-checkpoint-ledger,98,55,43,pass,0,,,323562a325929cb9b7157384d5faf99795d433348807fd29f3f958e37217f9df,qa-1.0.0
+gm-a-0022,trpg_gm,gm_turn,scenario-salvage-union-strongbox,98,55,43,pass,0,,,1db7d947b84a2d2c5e4ded473d8066d5043b7e4f047d2368d75e5149fa18be34,qa-1.0.0
+gm-a-0023,trpg_gm,gm_turn,scenario-salvage-union-strongbox,98,55,43,pass,0,,,75a58567ef0b80dc4a40daf10520af79720ee58409875ee2f626112abd193333,qa-1.0.0
+gm-a-0024,trpg_gm,gm_turn,scenario-salvage-union-strongbox,98,55,43,pass,0,,,889ead9e61f41ca31f7c9dbf45b11091b6a5cf58acec63e7db0f462f8e382df2,qa-1.0.0
+gm-a-0025,trpg_gm,gm_turn,scenario-lantern-archive,98,55,43,pass,0,,,0f5ab2e01a4334165ea77090a346c26942d972261918008bbbafdcd980bc07ec,qa-1.0.0
+gm-a-0026,trpg_gm,gm_turn,scenario-lantern-archive,98,55,43,pass,0,,,565cc19ab5332ff77d02ddc7de0c5f0c5cfdcff81476a1b512a6260cacf1542d,qa-1.0.0
+gm-a-0027,trpg_gm,gm_turn,scenario-quiet-bell,98,55,43,pass,0,,,e57fd3e6f6e89671339d989791c5b851807804971e01ff4110f8138ca71698b9,qa-1.0.0
+gm-a-0028,trpg_gm,gm_turn,scenario-quiet-bell,98,55,43,pass,0,,,4f33cf013eef8ac986d3c9af15d1e7bd0294f41112a5c9d00b6a33e68073bc04,qa-1.0.0
+world-0001,world_json,world_json,world-sound-monastery,96,55,41,pass,0,,,52eb69ccf724105bcb6fcac9f47ead11e2d3828d71259bedd362214444eda31d,qa-1.0.0
+world-0002,world_json,world_json,world-thread-castle,96,55,41,pass,0,,,5585e6611449e357929357fe70477507a63dcf4c75dfa515906656ce7468a805,qa-1.0.0
+world-0003,world_json,world_json,world-sand-observatory,96,55,41,pass,0,,,42b2e3b02534babe8edd5c5c35fbc27f0abe9aeb3cdec8433bf51cbb4c6b590e,qa-1.0.0
+world-0004,world_json,world_json,world-fog-harbor,96,55,41,pass,0,,,d4d441ff4256f061923cba48d5d70d6e4221cf4091d4af7dcd8ba6e73a4b384e,qa-1.0.0
+world-0005,world_json,world_json,world-clockwork-post,96,55,41,pass,0,,,9a0928e4c206aab373360901f859e85ad1574ff2518bcd62b0259b04be979833,qa-1.0.0
+world-0006,world_json,world_json,world-paper-birds,96,55,41,pass,0,,,8e38d132f1154f533c1fd5ff8e3e4d472b24aa05ef64b9ebf520b0fc9607938f,qa-1.0.0
+world-0007,world_json,world_json,world-ash-temple,96,55,41,pass,0,,,bef42479899ac5029bb0dd3ff1ce74e2edea636451c44a5064eec1f0c06a7461,qa-1.0.0
+world-0008,world_json,world_json,world-mirror-workshop,96,55,41,pass,0,,,2ee1fb5854c0a0d232bcac37cd70903c79f5b2ae444e328de03feb1d469556fe,qa-1.0.0
+world-0009,world_json,world_json,world-seed-bank,96,55,41,pass,0,,,056d37b10642c63ab1c6c7307bc080670a3cb5fc555e77f4eeb5e9a258844e60,qa-1.0.0
+world-0010,world_json,world_json,world-wax-seal-bureau,96,55,41,pass,0,,,dd3c474741386f10ff75e716543ba2ea0348438319874eefa464422341595b90,qa-1.0.0
+world-0011,world_json,world_json,world-dust-museum,96,55,41,pass,0,,,92dbbfe5f0a6afa5c52066ecd76efd9d5e6735e0c8e2f7ab13b0eb75459b90eb,qa-1.0.0
+world-0012,world_json,world_json,world-stone-garden,96,55,41,pass,0,,,668c9317e71011cab90411b92e197ac1098ee5ba8ed79ce6d04b8074da6cf3ba,qa-1.0.0
+world-0013,world_json,world_json,world-root-council,96,55,41,pass,0,,,261578eceb6ab1fc5b2a4de308762761e9f7c075748768437963647b819d4037,qa-1.0.0
+world-0014,world_json,world_json,world-star-tattoo,96,55,41,pass,0,,,2f834f05a96c7f2640b87c287044a971871c0c2eb62f02946e8016c5e03deeee,qa-1.0.0
+world-0015,world_json,world_json,world-sweet-ration,96,55,41,pass,0,,,813c3f607a75c49d0fd90d1b614fbf122189c3163b9849f5ee8fefb43a031a04,qa-1.0.0
+world-0016,world_json,world_json,world-name-registry,96,55,41,pass,0,,,fb68c2dad60e099313abc069ef297eca20054eace3f2c312c865bf241c882010,qa-1.0.0
+world-0017,world_json,world_json,world-breath-monastery,96,55,41,pass,0,,,80a156147fbc1f27ccbc6b83bc48759dadf6b24038b160b46b93233165313591,qa-1.0.0
+world-0018,world_json,world_json,world-firefly-watch,96,55,41,pass,0,,,890244136b4ae361acbef8fe3e4453d01d1015b7694d11eed1a76018039ef187,qa-1.0.0
+world-0019,world_json,world_json,world-dew-village,96,55,41,pass,0,,,e57281fbe934797824ae00042887f665f9ddb5fdff1d94444a73e820f5522725,qa-1.0.0
+world-0020,world_json,world_json,world-mirror-grinders,96,55,41,pass,0,,,4b76d5103d4f84eee58258520fce181a79b44819587a56cb32d63c38504c0991,qa-1.0.0

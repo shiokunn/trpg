@@ -1,0 +1,21 @@
+{
+  "files": {
+    "sft_synthetic_json.jsonl": {
+      "rows": 0,
+      "unique": 0,
+      "role_shapes": {},
+      "bytes": 0
+    },
+    "sft_synthetic_extraction.jsonl": {
+      "rows": 58,
+      "unique": 58,
+      "role_shapes": {
+        "system;user;assistant": 58
+      },
+      "bytes": 126253
+    }
+  },
+  "total_rows": 58,
+  "errors": 0,
+  "error_samples": []
+}

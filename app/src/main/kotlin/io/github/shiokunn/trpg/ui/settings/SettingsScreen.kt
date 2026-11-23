@@ -18,7 +18,8 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
@@ -120,26 +121,6 @@ fun SettingsScreen(
                     }
                 }
 
-                item { SectionTitle("オフラインとプライバシー") }
-                item {
-                    Card(
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text(
-                                "このアプリは外部API・クラウド・ネットワークを使用しません。",
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                            Text(
-                                "モデル、セーブデータ、設定、会話はすべて端末内に保存されます。INTERNET権限は付与されていません。",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
-                }
-
                 item { SectionTitle("データ管理") }
                 item {
                     BackupCard(
@@ -229,6 +210,7 @@ fun SettingsScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun BackupCard(
     state: BackupUiState,
@@ -260,7 +242,10 @@ private fun BackupCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                    ContainedLoadingIndicator(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        indicatorColor = MaterialTheme.colorScheme.primary,
+                    )
                     Text("処理しています…", style = MaterialTheme.typography.labelSmall)
                 }
             }

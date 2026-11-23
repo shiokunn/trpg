@@ -1,0 +1,266 @@
+{
+  "snapshot_id": "snap-0003-20261117T111330Z",
+  "created_at": "2026-11-17T11:13:30+00:00",
+  "audited_at": "2026-11-17T11:13:31+00:00",
+  "source_manifest": {
+    "total_records": 96,
+    "by_category": {
+      "trpg_gm": 28,
+      "world_json": 20,
+      "extraction": 48
+    },
+    "files": 7
+  },
+  "audit": {
+    "scored": 96,
+    "coverage_pct": 100.0,
+    "verdict_counts": {
+      "pass": 96
+    },
+    "review_queue": 0,
+    "average_score": 98.1,
+    "threshold": 70,
+    "verifier_version": "qa-1.0.0"
+  },
+  "red_flag_counts": {},
+  "finding_counts": {
+    "NEGATION_ADDED": 4,
+    "CONDITION_LOST": 14,
+    "NEGATION_INVERSION": 17,
+    "UNCERTAIN_CONFIRMED": 1
+  },
+  "score_distribution": {
+    "86-100": 96
+  },
+  "by_category": {
+    "extraction": {
+      "count": 48,
+      "average_score": 99.1,
+      "verdict_counts": {
+        "pass": 48
+      },
+      "red_flags": 0,
+      "findings": 36
+    },
+    "trpg_gm": {
+      "count": 28,
+      "average_score": 98.0,
+      "verdict_counts": {
+        "pass": 28
+      },
+      "red_flags": 0,
+      "findings": 0
+    },
+    "world_json": {
+      "count": 20,
+      "average_score": 96.0,
+      "verdict_counts": {
+        "pass": 20
+      },
+      "red_flags": 0,
+      "findings": 0
+    }
+  },
+  "by_task": {
+    "character_draft": {
+      "count": 6,
+      "average_score": 100.0,
+      "verdict_counts": {
+        "pass": 6
+      },
+      "red_flags": 0,
+      "findings": 4
+    },
+    "gm_turn": {
+      "count": 28,
+      "average_score": 98.0,
+      "verdict_counts": {
+        "pass": 28
+      },
+      "red_flags": 0,
+      "findings": 0
+    },
+    "items": {
+      "count": 6,
+      "average_score": 97.3,
+      "verdict_counts": {
+        "pass": 6
+      },
+      "red_flags": 0,
+      "findings": 4
+    },
+    "locations": {
+      "count": 6,
+      "average_score": 100.0,
+      "verdict_counts": {
+        "pass": 6
+      },
+      "red_flags": 0,
+      "findings": 6
+    },
+    "memories": {
+      "count": 8,
+      "average_score": 100.0,
+      "verdict_counts": {
+        "pass": 8
+      },
+      "red_flags": 0,
+      "findings": 5
+    },
+    "npcs": {
+      "count": 6,
+      "average_score": 98.0,
+      "verdict_counts": {
+        "pass": 6
+      },
+      "red_flags": 0,
+      "findings": 6
+    },
+    "quests": {
+      "count": 6,
+      "average_score": 99.3,
+      "verdict_counts": {
+        "pass": 6
+      },
+      "red_flags": 0,
+      "findings": 6
+    },
+    "state_changes": {
+      "count": 10,
+      "average_score": 98.8,
+      "verdict_counts": {
+        "pass": 10
+      },
+      "red_flags": 0,
+      "findings": 5
+    },
+    "world_json": {
+      "count": 20,
+      "average_score": 96.0,
+      "verdict_counts": {
+        "pass": 20
+      },
+      "red_flags": 0,
+      "findings": 0
+    }
+  },
+  "top_issues": [
+    {
+      "code": "NEGATION_INVERSION",
+      "label": "否定の反転",
+      "count": 17,
+      "severity": {
+        "warn": 17
+      },
+      "examples": [
+        {
+          "id": "bex01-0007",
+          "category": "extraction",
+          "message": "入力の否定・不確実表現が出力から消失（要確認）",
+          "evidence": "['ず', 'ない', 'なかった']"
+        },
+        {
+          "id": "bex01-0008",
+          "category": "extraction",
+          "message": "入力の否定・不確実表現が出力から消失（要確認）",
+          "evidence": "['なかった']"
+        },
+        {
+          "id": "bex01-0014",
+          "category": "extraction",
+          "message": "入力の否定・不確実表現が出力から消失（要確認）",
+          "evidence": "['ない']"
+        }
+      ]
+    },
+    {
+      "code": "CONDITION_LOST",
+      "label": "CONDITION_LOST",
+      "count": 14,
+      "severity": {
+        "warn": 14
+      },
+      "examples": [
+        {
+          "id": "bex01-0001",
+          "category": "extraction",
+          "message": "入力の条件表現が出力から消失",
+          "evidence": "['だけ']"
+        },
+        {
+          "id": "bex01-0002",
+          "category": "extraction",
+          "message": "入力の条件表現が出力から消失",
+          "evidence": "['だけ']"
+        },
+        {
+          "id": "bex01-0014",
+          "category": "extraction",
+          "message": "入力の条件表現が出力から消失",
+          "evidence": "['だけ']"
+        }
+      ]
+    },
+    {
+      "code": "NEGATION_ADDED",
+      "label": "NEGATION_ADDED",
+      "count": 4,
+      "severity": {
+        "warn": 4
+      },
+      "examples": [
+        {
+          "id": "bex01-0001",
+          "category": "extraction",
+          "message": "入力に無い否定・不確実表現が出力に追加",
+          "evidence": "['ず']"
+        },
+        {
+          "id": "bex01-0004",
+          "category": "extraction",
+          "message": "入力に無い否定・不確実表現が出力に追加",
+          "evidence": "['ない']"
+        },
+        {
+          "id": "bex01-0023",
+          "category": "extraction",
+          "message": "入力に無い否定・不確実表現が出力に追加",
+          "evidence": "['ず']"
+        }
+      ]
+    },
+    {
+      "code": "UNCERTAIN_CONFIRMED",
+      "label": "UNCERTAIN_CONFIRMED",
+      "count": 1,
+      "severity": {
+        "warn": 1
+      },
+      "examples": [
+        {
+          "id": "bex01-0019",
+          "category": "extraction",
+          "message": "不確実な記述が isConfirmed:true",
+          "evidence": "古文書係 n2 は印の意味を否定したが、様子が不自然だった。"
+        }
+      ]
+    }
+  ],
+  "run": {
+    "command": [
+      "/data/data/com.termux/files/usr/bin/python3",
+      "/data/data/com.termux/files/home/trpg/training/tools/quality_system.py",
+      "score",
+      "--root",
+      "/data/data/com.termux/files/home/trpg/training/.bulk_gen/snapshots/snap-0003-20261117T111330Z/raw",
+      "--out-dir",
+      "/data/data/com.termux/files/home/trpg/training/.bulk_gen/audit/snap-0003-20261117T111330Z"
+    ],
+    "returncode": 0,
+    "audited_at": "2026-11-17T11:13:31+00:00"
+  },
+  "notes": [
+    "監査入力はスナップショットの raw のみ。inbox の書き込み中ファイルは読んでいない。",
+    "品質点はヒューリスティック推定であり人手レビューの代替ではない。"
+  ]
+}

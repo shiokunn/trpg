@@ -38,7 +38,7 @@ class GmResponseParserTest {
     private fun failure(raw: String): List<String> {
         val result = GmResponseParser.parse(raw)
         assertTrue("expected failure but was $result", result is AiParseResult.Failure)
-        return (result as AiParseResult.Failure).errors
+        return (result as AiParseResult.Failure).errors.map { it.message }
     }
 
     @Test

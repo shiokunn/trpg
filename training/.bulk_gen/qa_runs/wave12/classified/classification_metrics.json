@@ -1,0 +1,436 @@
+{
+  "verifier_version": "classify-1.0",
+  "classification_counts": {
+    "PASS": 1225,
+    "REVIEW": 33,
+    "FAIL": 25
+  },
+  "audit": {
+    "total": 1283,
+    "counts": {
+      "PASS": 1225,
+      "REVIEW": 33,
+      "FAIL": 25
+    },
+    "duplicate_input_ids": [],
+    "invalid_id_prefix": [],
+    "unique_output_ids": 1283,
+    "id_format_all_valid": true,
+    "root": "/data/data/com.termux/files/home/trpg/training/.bulk_gen/qa_runs/wave12/raw",
+    "root_allowed": true
+  },
+  "reused": 0,
+  "recomputed": 1283,
+  "skipped_score_lines": 0,
+  "skipped_semantic_lines": 0,
+  "manifest_duplicate_ids": [],
+  "manifest_skipped_lines": 0,
+  "review_or_fail_rows": [
+    {
+      "id": "ex-0044",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0050",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0053",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0058",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0089",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0119",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0125",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0129",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0130",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0136",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0153",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0209",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "gm-a-0021",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "gm-a-0055",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0295",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0345",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "gm-a-0349",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0001",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0011",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "world-0018",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0020",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0023",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0027",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0058",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0071",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0145",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "world-0256",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0261",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "world-0263",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "world-0277",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0279",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "world-0310",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "world-0311",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "world-0330",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "world-0340",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0342",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0349",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0353",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0355",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0357",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0359",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0387",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "world-0396",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "world-0400",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "world-0412",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "world-0414",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "world-0447",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "world-0456",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "world-0530",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "world-0532",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "world-0534",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0547",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "world-0549",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "world-0602",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "world-0605",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0609",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "world-0620",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "world-0631",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    }
+  ]
+}

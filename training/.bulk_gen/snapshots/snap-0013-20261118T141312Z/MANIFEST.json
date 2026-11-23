@@ -1,0 +1,152 @@
+{
+  "snapshot_id": "snap-0013-20261118T141312Z",
+  "created_at": "2026-11-18T14:13:12+00:00",
+  "note": "wave10",
+  "source": "training/.bulk_gen/inbox (sealed batches only)",
+  "audit_reads": "snapshots/snap-0013-20261118T141312Z/raw",
+  "files": [
+    {
+      "file": "raw/extraction/bex15.jsonl",
+      "category": "extraction",
+      "records": 80,
+      "sha256": "b04f85b520ca27b378b886e84f992d2c9700b4b3e78bec8a514518776d4d6363",
+      "bytes": 74433,
+      "sealed_at": "2026-11-18T14:09:19+00:00"
+    },
+    {
+      "file": "raw/extraction/bex16.jsonl",
+      "category": "extraction",
+      "records": 80,
+      "sha256": "1d2b00bd99e5ae0b3b9e3c7a835a59e268076a972c209e295cb055ee6cf29dbd",
+      "bytes": 82287,
+      "sealed_at": "2026-11-18T14:09:19+00:00"
+    },
+    {
+      "file": "raw/trpg_gm/bgm26.jsonl",
+      "category": "trpg_gm",
+      "records": 54,
+      "sha256": "fa89dca8e866c42a1392cf87566266e686a28030e7b0c9a16710053fc5fc3eac",
+      "bytes": 281554,
+      "sealed_at": "2026-11-18T14:09:19+00:00"
+    },
+    {
+      "file": "raw/trpg_gm/bgm27.jsonl",
+      "category": "trpg_gm",
+      "records": 54,
+      "sha256": "6f1f8015bb6bb230f344d126a10b003c448d0bd3e982d4011698afd2e70714fa",
+      "bytes": 270544,
+      "sealed_at": "2026-11-18T14:09:19+00:00"
+    },
+    {
+      "file": "raw/trpg_gm/bgm28.jsonl",
+      "category": "trpg_gm",
+      "records": 54,
+      "sha256": "74b73fe9a2154a90ac4d2b7370100f822184df7c48286ea2ebffe8578cdeb354",
+      "bytes": 257611,
+      "sealed_at": "2026-11-18T14:09:19+00:00"
+    },
+    {
+      "file": "raw/trpg_gm/bgm30.jsonl",
+      "category": "trpg_gm",
+      "records": 54,
+      "sha256": "9cd908412026ad085ca131c0d90d2588f5367eec3cc6eb4795ec7427b7647077",
+      "bytes": 264432,
+      "sealed_at": "2026-11-18T14:09:19+00:00"
+    },
+    {
+      "file": "raw/world_json/bwd14.jsonl",
+      "category": "world_json",
+      "records": 35,
+      "sha256": "d5a94a4e14d0a8ed35a8c2e53a67baf876f9d0ec933f014ea3fcfd0973f14df7",
+      "bytes": 166428,
+      "sealed_at": "2026-11-18T14:09:19+00:00"
+    },
+    {
+      "file": "raw/world_json/bwd15.jsonl",
+      "category": "world_json",
+      "records": 35,
+      "sha256": "3c14a4ce0736f08c53c7dba7dfc1e36300367e0f26e88dcfb48880693e82ef02",
+      "bytes": 163448,
+      "sealed_at": "2026-11-18T14:09:19+00:00"
+    },
+    {
+      "file": "raw/world_json/bwd17.jsonl",
+      "category": "world_json",
+      "records": 35,
+      "sha256": "9adf82fd30bb1aa144d39054298d9fd07fe31ebb2cd66f60aff2f81de0f726f9",
+      "bytes": 145406,
+      "sealed_at": "2026-11-18T14:09:19+00:00"
+    },
+    {
+      "file": "raw/world_json/bwd18.jsonl",
+      "category": "world_json",
+      "records": 35,
+      "sha256": "04d7780b8ce6ae4b2af42dbd5e610c9f8bb0872f8d6072479920ddb22bec5e49",
+      "bytes": 147634,
+      "sealed_at": "2026-11-18T14:09:19+00:00"
+    },
+    {
+      "file": "raw/world_json/bwd19.jsonl",
+      "category": "world_json",
+      "records": 35,
+      "sha256": "3332987096ecf500e07a7f0382bb4f9111d899ce0d96159b4140525d830e5009",
+      "bytes": 158762,
+      "sealed_at": "2026-11-18T14:09:19+00:00"
+    },
+    {
+      "file": "raw/world_json/bwd20.jsonl",
+      "category": "world_json",
+      "records": 35,
+      "sha256": "16f683759804646ebb02a75a09ba9051eb3cd64f64c352aac836ed0ef7f81c67",
+      "bytes": 157792,
+      "sealed_at": "2026-11-18T14:09:19+00:00"
+    },
+    {
+      "file": "raw/world_json/bwd22.jsonl",
+      "category": "world_json",
+      "records": 35,
+      "sha256": "ca19271bbb795700e59adec205ebb36d90f0428014c8499069f4da08b4bac074",
+      "bytes": 150592,
+      "sealed_at": "2026-11-18T14:09:19+00:00"
+    },
+    {
+      "file": "raw/world_json/bwd23.jsonl",
+      "category": "world_json",
+      "records": 35,
+      "sha256": "c291f0793d7da4d77092738fe8b4cd8ed3f7b8cdec5a70d45181231a81790d5c",
+      "bytes": 149548,
+      "sealed_at": "2026-11-18T14:09:19+00:00"
+    },
+    {
+      "file": "raw/world_json/bwd24.jsonl",
+      "category": "world_json",
+      "records": 35,
+      "sha256": "26bdba2b9f265a5b766859eb1f66f204321ee5592be632a803dadd46647fa0a6",
+      "bytes": 154720,
+      "sealed_at": "2026-11-18T14:09:19+00:00"
+    },
+    {
+      "file": "raw/world_json/bwd26.jsonl",
+      "category": "world_json",
+      "records": 35,
+      "sha256": "6163ce1781e4eb26a2bf747a1c07e01277100584316274859fd0ddf1e94c9e48",
+      "bytes": 161406,
+      "sealed_at": "2026-11-18T14:09:19+00:00"
+    },
+    {
+      "file": "raw/world_json/bwd27.jsonl",
+      "category": "world_json",
+      "records": 35,
+      "sha256": "0c195c0cf671f6886d4f2251b4e557d8539b9c6f84536fd6d6decbb3816bba2d",
+      "bytes": 147103,
+      "sealed_at": "2026-11-18T14:09:19+00:00"
+    }
+  ],
+  "total_files": 17,
+  "total_records": 761,
+  "by_category": {
+    "trpg_gm": 216,
+    "world_json": 385,
+    "extraction": 160
+  }
+}

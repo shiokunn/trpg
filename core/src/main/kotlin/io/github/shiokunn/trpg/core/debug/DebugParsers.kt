@@ -38,6 +38,12 @@ object DebugParsers {
             budget = obj.nonNegativeInt("budget"),
             threads = obj.nonNegativeInt("threads"),
             nBatch = obj.nonNegativeInt("nBatch"),
+            kvValid = obj.boolean("kvValid"),
+            kvHit = obj.boolean("kvHit"),
+            kvReusedTokens = obj.nonNegativeInt("kvReusedTokens"),
+            kvComputedPromptTokens = obj.nonNegativeInt("kvComputedPromptTokens"),
+            kvCachedTokens = obj.nonNegativeInt("kvCachedTokens"),
+            kvInvalidationReason = obj.string("kvInvalidationReason"),
         )
     }
 

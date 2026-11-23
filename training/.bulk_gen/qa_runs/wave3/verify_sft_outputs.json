@@ -1,0 +1,25 @@
+{
+  "files": {
+    "sft_synthetic_json.jsonl": {
+      "rows": 146,
+      "unique": 146,
+      "role_shapes": {
+        "system;user;assistant": 68,
+        "system;user;assistant;user;assistant": 39,
+        "system;user;assistant;user;assistant;user;assistant": 39
+      },
+      "bytes": 980762
+    },
+    "sft_synthetic_extraction.jsonl": {
+      "rows": 77,
+      "unique": 77,
+      "role_shapes": {
+        "system;user;assistant": 77
+      },
+      "bytes": 153490
+    }
+  },
+  "total_rows": 223,
+  "errors": 0,
+  "error_samples": []
+}

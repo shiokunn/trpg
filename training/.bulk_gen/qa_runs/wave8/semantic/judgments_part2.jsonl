@@ -1,0 +1,59 @@
+{"id":"ex-0060","labels":[]}
+{"id":"ex-0061","labels":[]}
+{"id":"ex-0062","labels":[]}
+{"id":"ex-0063","labels":[]}
+{"id":"ex-0064","labels":[]}
+{"id":"ex-0065","labels":[]}
+{"id":"ex-0066","labels":[]}
+{"id":"ex-0067","labels":[]}
+{"id":"ex-0068","labels":[]}
+{"id":"ex-0069","labels":[]}
+{"id":"ex-0070","labels":[{"category":"review","confidence":0.6,"evidence":"npcMemoriesで『料理人は…一つに毒が入っていたことを後で認めた』とするが、原文は『後で判明した』のみで料理人の自認は記載なし"}]}
+{"id":"ex-0071","labels":[{"category":"review","confidence":0.55,"evidence":"⑨の日記に isSecret=true を付与し、⑩に『聞き違いの可能性もある』かつ isConfirmed=false を追加。原文はいずれも断定調で秘密・不確実性の記述なし"}]}
+{"id":"ex-0072","labels":[{"category":"fabrication","confidence":0.8,"evidence":"NPC_RELATIONで『ミナは巫女 n1 を信じることにした』とするが、原文は『ミナは巫女のことだけを覚えることにし』であり信頼関係の記述なし"}]}
+{"id":"ex-0073","labels":[]}
+{"id":"ex-0074","labels":[]}
+{"id":"ex-0075","labels":[]}
+{"id":"ex-0076","labels":[]}
+{"id":"ex-0077","labels":[]}
+{"id":"ex-0078","labels":[{"category":"fabrication","confidence":0.9,"evidence":"secrets に『冷えた炉の下に古い抄本が隠されている』『灯は誰かが遠くから点けている』を追加。原文は炉が二つあることと小屋に灯がともることのみで、抄本や点灯者の記述なし"}]}
+{"id":"ex-0079","labels":[]}
+{"id":"ex-0080","labels":[]}
+{"id":"ex-0081","labels":[]}
+{"id":"ex-0082","labels":[]}
+{"id":"ex-0083","labels":[]}
+{"id":"ex-0084","labels":[]}
+{"id":"ex-0085","labels":[]}
+{"id":"ex-0086","labels":[]}
+{"id":"ex-0087","labels":[]}
+{"id":"ex-0088","labels":[]}
+{"id":"ex-0089","labels":[]}
+{"id":"ex-0090","labels":[]}
+{"id":"ex-0091","labels":[]}
+{"id":"ex-0092","labels":[]}
+{"id":"ex-0093","labels":[]}
+{"id":"ex-0094","labels":[{"category":"fabrication","confidence":0.85,"evidence":"ギルの combat に attackSkillLevel=2・defenseSkillLevel=1 を追加。原文は攻撃4・防御3・hp十二のみで技能レベルの記載なし"},{"category":"review","confidence":0.5,"evidence":"メイの secrets に『通りすがりの者は名を名乗らなかった』を帰属。原文はギル・メイとは別の通りすがりの者についての記述"}]}
+{"id":"ex-0095","labels":[{"category":"review","confidence":0.55,"evidence":"locationName に『診療小屋』を追加（原文に場所の記載なし）。また『弟子の名は呼ばれなかった』は弟子に関する事実をノラの secrets に帰属"}]}
+{"id":"ex-0096","labels":[]}
+{"id":"ex-0097","labels":[]}
+{"id":"ex-0098","labels":[]}
+{"id":"ex-0099","labels":[]}
+{"id":"ex-0100","labels":[]}
+{"id":"ex-0101","labels":[]}
+{"id":"ex-0102","labels":[]}
+{"id":"ex-0103","labels":[]}
+{"id":"ex-0104","labels":[]}
+{"id":"ex-0105","labels":[]}
+{"id":"ex-0106","labels":[{"category":"review","confidence":0.5,"evidence":"npcMemories(n2)に isSecret=true を付与。原文は『チナはその印を昔から知っていた』のみで秘密の記述なし"}]}
+{"id":"ex-0107","labels":[]}
+{"id":"ex-0108","labels":[]}
+{"id":"ex-0109","labels":[]}
+{"id":"ex-0110","labels":[]}
+{"id":"ex-0111","labels":[]}
+{"id":"ex-0112","labels":[]}
+{"id":"ex-0113","labels":[]}
+{"id":"ex-0114","labels":[]}
+{"id":"ex-0115","labels":[]}
+{"id":"ex-0116","labels":[]}
+{"id":"ex-0117","labels":[]}
+{"id":"ex-0118","labels":[]}

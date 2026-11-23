@@ -14,6 +14,7 @@ import io.github.shiokunn.trpg.core.domain.Quest
 import io.github.shiokunn.trpg.core.domain.QuestStatus
 import io.github.shiokunn.trpg.core.domain.StoryMemory
 import io.github.shiokunn.trpg.core.domain.World
+import io.github.shiokunn.trpg.core.memory.MemorySelector
 import io.github.shiokunn.trpg.core.rules.CharacterRules
 
 /** One chat turn in the final prompt. */
@@ -277,7 +278,9 @@ class PromptBuilder(
                 append(" (").append(npc.relationship).append(")")
                 if (npc.description.isNotBlank()) append("\n  説明: ").append(npc.description)
                 if (npc.personality.isNotBlank()) append("\n  性格: ").append(npc.personality)
-                val memories = npcMemories.filter { it.npcId == npc.id }.sortedByDescending { it.importance }.take(3)
+                // The selector has already ranked, separated and bounded these memories.
+                // Re-sorting here would undo relevance ordering.
+                val memories = npcMemories.filter { it.npcId == npc.id }
                 if (memories.isNotEmpty()) {
                     append("\n  記憶: ").append(memories.joinToString(" / ") { it.content })
                 }
@@ -291,7 +294,8 @@ class PromptBuilder(
 
     private fun renderMemories(memories: List<StoryMemory>): String {
         if (memories.isEmpty()) return ""
-        return memories.sortedByDescending { it.importance }
+        // Preserve the order supplied by MemorySelector (relevance first).
+        return memories
             .take(MAX_MEMORIES)
             .joinToString("\n") { memory ->
                 buildString {
@@ -353,12 +357,12 @@ class PromptBuilder(
         val title: String get() = "【$name】"
     }
 
-    private companion object {
-        const val MAX_MEMORIES = 12
+    companion object {
+        const val MAX_MEMORIES = MemorySelector.DEFAULT_LIMIT
         const val MAX_HISTORY_MESSAGES = 8
-        const val MIN_TRUNCATED_CHARS = 40
+        private const val MIN_TRUNCATED_CHARS = 40
 
-        val SYSTEM_RULES = """
+        private val SYSTEM_RULES = """
             あなたは完全オフラインのAndroid TRPGアプリで動作するゲームマスター（GM）です。
             日本語で、プレイヤーの選択に基づく情景描写と次の選択肢を生成してください。
 
@@ -373,7 +377,7 @@ class PromptBuilder(
             - 出力はJSONオブジェクト1つだけ。前後に説明文やコードフェンスを付けない。
         """.trimIndent()
 
-        val JSON_CONTRACT = """
+        private val JSON_CONTRACT = """
             【出力JSON契約】
             {
               "narrative": "情景描写（必須・日本語）",
@@ -407,5 +411,8 @@ class PromptBuilder(
             }
             stateChanges が不要なら空配列にする。存在しないIDを創作しない。
         """.trimIndent()
+
+        /** Rules + JSON contract only, used when a repair retry must drop all history. */
+        fun repairSystemPrompt(): String = SYSTEM_RULES + "\n\n" + JSON_CONTRACT
     }
 }

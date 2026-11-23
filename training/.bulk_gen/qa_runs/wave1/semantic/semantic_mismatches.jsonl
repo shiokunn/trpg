@@ -1,0 +1,2 @@
+{"id": "gm-a-0006", "cause": "llm_only:contradiction", "python_categories": [], "llm_categories": ["contradiction"], "python_verdict": "pass", "final_verdict": "fail"}
+{"id": "gm-a-0009", "cause": "llm_only:contradiction", "python_categories": [], "llm_categories": ["contradiction"], "python_verdict": "pass", "final_verdict": "fail"}

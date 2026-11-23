@@ -1,0 +1,56 @@
+{"id":"gm-a-0225","labels":[]}
+{"id":"gm-a-0226","labels":[]}
+{"id":"gm-a-0227","labels":[]}
+{"id":"gm-a-0228","labels":[]}
+{"id":"world-0001","labels":[]}
+{"id":"world-0002","labels":[]}
+{"id":"world-0003","labels":[]}
+{"id":"world-0004","labels":[]}
+{"id":"world-0005","labels":[]}
+{"id":"world-0006","labels":[]}
+{"id":"world-0007","labels":[]}
+{"id":"world-0008","labels":[]}
+{"id":"world-0009","labels":[]}
+{"id":"world-0010","labels":[]}
+{"id":"world-0011","labels":[]}
+{"id":"world-0012","labels":[]}
+{"id":"world-0013","labels":[]}
+{"id":"world-0014","labels":[]}
+{"id":"world-0015","labels":[]}
+{"id":"world-0016","labels":[]}
+{"id":"world-0017","labels":[]}
+{"id":"world-0018","labels":[]}
+{"id":"world-0019","labels":[]}
+{"id":"world-0020","labels":[]}
+{"id":"world-0021","labels":[]}
+{"id":"world-0022","labels":[]}
+{"id":"world-0023","labels":[]}
+{"id":"world-0024","labels":[]}
+{"id":"world-0025","labels":[]}
+{"id":"world-0026","labels":[]}
+{"id":"world-0027","labels":[]}
+{"id":"world-0028","labels":[]}
+{"id":"world-0029","labels":[]}
+{"id":"world-0030","labels":[]}
+{"id":"world-0031","labels":[]}
+{"id":"world-0032","labels":[{"category":"review","confidence":0.7,"evidence":"history『二度目の鐘が鳴らず、係が駅に立ちすくんでいる』— 舞台は中央の塔とその広場（geography/opening）のみで『駅』は世界に存在しない語"}]}
+{"id":"world-0033","labels":[]}
+{"id":"world-0034","labels":[]}
+{"id":"world-0035","labels":[]}
+{"id":"world-0036","labels":[]}
+{"id":"world-0037","labels":[]}
+{"id":"world-0038","labels":[]}
+{"id":"world-0039","labels":[]}
+{"id":"world-0040","labels":[]}
+{"id":"world-0041","labels":[]}
+{"id":"world-0042","labels":[{"category":"review","confidence":0.7,"evidence":"npc1 personality『음を数えるように話す』に韓国語『음』が混入（日本語文脈では『音を数える』）"}]}
+{"id":"world-0043","labels":[]}
+{"id":"world-0044","labels":[{"category":"review","confidence":0.65,"evidence":"scenario premise『税吏は事故を強張る』— 『主張する／言い張る』の誤記で、目的語を取れない語が使われている"}]}
+{"id":"world-0045","labels":[]}
+{"id":"world-0046","labels":[]}
+{"id":"world-0047","labels":[]}
+{"id":"world-0048","labels":[{"category":"review","confidence":0.7,"evidence":"techMagic『呪いを特别的な镜に映す』・npc3 description『的包帯を巻いた女性』に簡体字／中国語助詞（别・镜・的）が混入。他箇所は『鏡』"}]}
+{"id":"world-0049","labels":[{"category":"review","confidence":0.7,"evidence":"npc3 personality『损得を先に計算する』・problem『重要な約束の当晚』に簡体字『损』と中国語『当晚』が混入"}]}
+{"id":"world-0050","labels":[]}
+{"id":"world-0051","labels":[{"category":"review","confidence":0.7,"evidence":"objective『失われた年的历史を取り戻す』に中国語助詞『的』が混入（『失われた歴史』が正しい）"}]}
+{"id":"world-0052","labels":[]}

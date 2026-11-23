@@ -1,0 +1,24 @@
+{
+  "snapshot_id": "snap-0008-20261117T120648Z",
+  "created_at": "2026-11-17T12:06:48+00:00",
+  "note": "wave6",
+  "source": "training/.bulk_gen/inbox (sealed batches only)",
+  "audit_reads": "snapshots/snap-0008-20261117T120648Z/raw",
+  "files": [
+    {
+      "file": "raw/extraction/bex08.jsonl",
+      "category": "extraction",
+      "records": 60,
+      "sha256": "a39395d862e53393cb951a50384e5ee280b0148195f6bbc6823a54794939a73b",
+      "bytes": 52466,
+      "sealed_at": "2026-11-17T12:06:48+00:00"
+    }
+  ],
+  "total_files": 1,
+  "total_records": 60,
+  "by_category": {
+    "trpg_gm": 0,
+    "world_json": 0,
+    "extraction": 60
+  }
+}

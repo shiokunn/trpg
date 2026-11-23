@@ -1,0 +1,114 @@
+{
+  "gold_cases": 0,
+  "per_category": {
+    "fabrication": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "negation": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "condition": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "number": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "contradiction": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    }
+  },
+  "precision": 0.0,
+  "recall": 0.0,
+  "f1": 0.0,
+  "disagreements": 1,
+  "disagreement_causes": {
+    "llm_only:fabrication": 1
+  },
+  "disagreement_rows": [
+    {
+      "id": "ex-0055",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    }
+  ],
+  "review_reasons": {
+    "python_suppressed:NEGATION_INVERSION": 18,
+    "python_suppressed:CONDITION_LOST": 9,
+    "llm_review": 1
+  },
+  "review_rate": 0.017,
+  "unjudged": 0,
+  "unjudged_rate": 0.0,
+  "api_errors": 0,
+  "api_error_rate": 0.0,
+  "total": 60,
+  "reused": 0,
+  "recomputed": 60,
+  "manifest_duplicate_ids": [],
+  "manifest_skipped_lines": 0
+}

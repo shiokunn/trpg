@@ -1,0 +1,121 @@
+{
+  "verifier_version": "classify-1.0",
+  "classification_counts": {
+    "PASS": 137,
+    "REVIEW": 5,
+    "FAIL": 8
+  },
+  "audit": {
+    "total": 150,
+    "counts": {
+      "PASS": 137,
+      "REVIEW": 5,
+      "FAIL": 8
+    },
+    "duplicate_input_ids": [],
+    "invalid_id_prefix": [],
+    "unique_output_ids": 150,
+    "id_format_all_valid": true,
+    "root": "/data/data/com.termux/files/home/trpg/training/.bulk_gen/qa_runs/wave7b/raw",
+    "root_allowed": true
+  },
+  "reused": 0,
+  "recomputed": 150,
+  "skipped_score_lines": 0,
+  "skipped_semantic_lines": 0,
+  "manifest_duplicate_ids": [],
+  "manifest_skipped_lines": 0,
+  "review_or_fail_rows": [
+    {
+      "id": "ex-0019",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0026",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0029",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0030",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0033",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0037",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0041",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0044",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0060",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0062",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    },
+    {
+      "id": "ex-0064",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ]
+    },
+    {
+      "id": "ex-0081",
+      "verdict": "REVIEW",
+      "reasons": [
+        "python_semantic_category_mismatch"
+      ]
+    },
+    {
+      "id": "ex-0138",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ]
+    }
+  ]
+}

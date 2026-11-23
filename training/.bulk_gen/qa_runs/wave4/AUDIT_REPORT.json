@@ -1,0 +1,118 @@
+{
+  "run_dir": "/data/data/com.termux/files/home/trpg/training/.bulk_gen/qa_runs/wave4",
+  "source_snapshot": "snap-0006-20261117T120140Z",
+  "generated_at": "2026-11-17T12:06:38+00:00",
+  "counts": {
+    "PASS": 101,
+    "REVIEW": 3,
+    "FAIL": 2
+  },
+  "total": 106,
+  "pass_rate_pct": 95.3,
+  "non_pass_count": 5,
+  "problematic_ids": [
+    {
+      "audit_id": "ex-0034",
+      "original_id": "bex07-0034",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "ex-0039",
+      "original_id": "bex07-0039",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "ex-0042",
+      "original_id": "bex07-0042",
+      "verdict": "REVIEW",
+      "reasons": [
+        "fallback"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "review",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "ex-0047",
+      "original_id": "bex07-0047",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    },
+    {
+      "audit_id": "world-0018",
+      "original_id": "bwd07-0018",
+      "verdict": "FAIL",
+      "reasons": [
+        "semantic_final_verdict=fail"
+      ],
+      "python_verdict": "pass",
+      "semantic_final_verdict": "fail",
+      "python_red_flags": [],
+      "llm_labels": {}
+    }
+  ],
+  "reason_counts": {
+    "fallback": 3,
+    "semantic_final_verdict=fail": 2
+  },
+  "id_format_all_valid": true,
+  "duplicate_input_ids": [],
+  "invalid_id_prefix": [],
+  "manifest_duplicate_ids": [],
+  "verify_sft_errors": 0,
+  "verify_sft_error_samples": [],
+  "verify_sft_files": {
+    "sft_synthetic_json.jsonl": {
+      "rows": 55,
+      "unique": 55,
+      "role_shapes": {
+        "system;user;assistant": 31,
+        "system;user;assistant;user;assistant": 12,
+        "system;user;assistant;user;assistant;user;assistant": 12
+      },
+      "bytes": 384400
+    },
+    "sft_synthetic_extraction.jsonl": {
+      "rows": 46,
+      "unique": 46,
+      "role_shapes": {
+        "system;user;assistant": 46
+      },
+      "bytes": 101293
+    }
+  },
+  "isolated_sft": {
+    "pass_ids": 101,
+    "rows_written": 101,
+    "by_file": {
+      "sft_synthetic_json.jsonl": 55,
+      "sft_synthetic_extraction.jsonl": 46
+    },
+    "written_ids_all_in_pass": true,
+    "pass_ids_not_found_in_raw": [],
+    "non_pass_records_excluded": 5,
+    "official_files_touched": false
+  },
+  "conclusion": "PASS品のみ隔離SFTに含まれ、形式検証エラー0。正式データへの統合は全Wave監査完了後。"
+}

@@ -1,0 +1,99 @@
+{
+  "gold_cases": 0,
+  "per_category": {
+    "fabrication": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "negation": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "condition": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "number": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "contradiction": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    }
+  },
+  "precision": 0.0,
+  "recall": 0.0,
+  "f1": 0.0,
+  "disagreements": 0,
+  "disagreement_causes": {},
+  "disagreement_rows": [],
+  "review_reasons": {
+    "llm_review": 1
+  },
+  "review_rate": 0.028,
+  "unjudged": 0,
+  "unjudged_rate": 0.0,
+  "api_errors": 0,
+  "api_error_rate": 0.0,
+  "total": 36,
+  "reused": 0,
+  "recomputed": 36,
+  "manifest_duplicate_ids": [],
+  "manifest_skipped_lines": 0
+}

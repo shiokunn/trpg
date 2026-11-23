@@ -1,0 +1,32 @@
+{
+  "snapshot_id": "snap-0010-20261117T122807Z",
+  "created_at": "2026-11-17T12:28:07+00:00",
+  "note": "wave7b",
+  "source": "training/.bulk_gen/inbox (sealed batches only)",
+  "audit_reads": "snapshots/snap-0010-20261117T122807Z/raw",
+  "files": [
+    {
+      "file": "raw/extraction/bex10.jsonl",
+      "category": "extraction",
+      "records": 70,
+      "sha256": "5f8590f4c0b053aac17b49d9d42591ae5ec30c50c8f1e959d6bc1c875ada256e",
+      "bytes": 49048,
+      "sealed_at": "2026-11-17T12:28:07+00:00"
+    },
+    {
+      "file": "raw/extraction/bex13.jsonl",
+      "category": "extraction",
+      "records": 80,
+      "sha256": "93552d10fa030798015637a150057c8342ac865e625113b07459e6dfae0d4a93",
+      "bytes": 59327,
+      "sealed_at": "2026-11-17T12:28:07+00:00"
+    }
+  ],
+  "total_files": 2,
+  "total_records": 150,
+  "by_category": {
+    "trpg_gm": 0,
+    "world_json": 0,
+    "extraction": 150
+  }
+}

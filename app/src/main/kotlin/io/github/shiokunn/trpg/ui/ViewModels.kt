@@ -10,10 +10,12 @@ import io.github.shiokunn.trpg.AppContainer
 import io.github.shiokunn.trpg.ai.engine.BackendInfo
 import io.github.shiokunn.trpg.ai.engine.EngineStatus
 import io.github.shiokunn.trpg.ai.engine.GenerationProgress
+import io.github.shiokunn.trpg.ai.engine.GenerationFailureKind
 import io.github.shiokunn.trpg.BuildConfig
 import io.github.shiokunn.trpg.ai.model.ModelFileManager
 import io.github.shiokunn.trpg.core.ai.CharacterDraft
 import io.github.shiokunn.trpg.core.ai.GmChoice
+import io.github.shiokunn.trpg.core.ai.GmErrorCategory
 import io.github.shiokunn.trpg.core.ai.TurnChoices
 import io.github.shiokunn.trpg.core.ai.WorldDraft
 import io.github.shiokunn.trpg.creation.AdventureAssembler
@@ -63,6 +65,10 @@ private fun unexpectedFailureMessage(error: Throwable): String {
 class HomeViewModel(private val container: AppContainer) : ViewModel() {
     val recent: StateFlow<List<RecentSessionRow>> = container.sessions.observeRecentDetails(8)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    fun delete(sessionId: String) {
+        viewModelScope.launch { container.sessions.delete(sessionId) }
+    }
 }
 
 class SavesViewModel(private val container: AppContainer) : ViewModel() {
@@ -79,8 +85,11 @@ data class GameTurnUiState(
     val running: Boolean = false,
     val phase: GmTurnPhase? = null,
     val streamedText: String = "",
+    /** Exact generated-token count reported by the engine for the current attempt. */
+    val generatedTokens: Int = 0,
     val error: String? = null,
     val errorDetails: List<String> = emptyList(),
+    val errorKind: GmErrorCategory? = null,
     val lastCheck: DiceResult? = null,
     val cancelling: Boolean = false,
 )
@@ -116,6 +125,7 @@ class GameViewModel(
     val turn: StateFlow<GameTurnUiState> = _turn.asStateFlow()
 
     private var turnJob: Job? = null
+    private var lastAction: PlayerTurnAction? = null
 
     fun beginAdventure() {
         startTurn(PlayerTurnAction("冒険を開始する"))
@@ -150,24 +160,40 @@ class GameViewModel(
     }
 
     fun clearError() {
-        _turn.update { it.copy(error = null, errorDetails = emptyList()) }
+        _turn.update { it.copy(error = null, errorDetails = emptyList(), errorKind = null) }
+    }
+
+    /** Re-runs exactly the action that failed, from the same turn-start state. */
+    fun regenerate() {
+        val action = lastAction ?: return
+        startTurn(action)
     }
 
     private fun startTurn(action: PlayerTurnAction) {
         if (turnJob?.isActive == true) return
         if (action.text.isBlank()) return
+        lastAction = action
         _turn.value = GameTurnUiState(running = true, phase = GmTurnPhase.Preparing)
         turnJob = viewModelScope.launch {
             val listener = object : GmTurnListener {
                 override suspend fun onPhase(phase: GmTurnPhase) {
                     _turn.update {
                         val restart = phase is GmTurnPhase.Generating || phase is GmTurnPhase.Repairing
-                        it.copy(phase = phase, streamedText = if (restart) "" else it.streamedText, cancelling = false)
+                        it.copy(
+                            phase = phase,
+                            streamedText = if (restart) "" else it.streamedText,
+                            generatedTokens = if (restart) 0 else it.generatedTokens,
+                            cancelling = false,
+                        )
                     }
                 }
 
                 override suspend fun onToken(piece: String) {
                     _turn.update { it.copy(streamedText = it.streamedText + piece) }
+                }
+
+                override fun onProgress(progress: GenerationProgress) {
+                    _turn.update { it.copy(generatedTokens = progress.generatedTokens) }
                 }
             }
             val result = try {
@@ -184,17 +210,25 @@ class GameViewModel(
                         running = false,
                         phase = null,
                         streamedText = "",
+                        generatedTokens = 0,
                         cancelling = false,
                         error = "生成をキャンセルしました。このターンは保存されていません。",
                     )
-                    is GmTurnResult.Failed -> previous.copy(
-                        running = false,
-                        phase = null,
-                        streamedText = "",
-                        cancelling = false,
-                        error = result.message,
-                        errorDetails = result.errors,
-                    )
+                    is GmTurnResult.Failed -> {
+                        // Keep the exact action and the already resolved dice so a manual
+                        // retry cannot re-roll or change a confirmed check.
+                        lastAction = action.copy(resolvedCheck = result.dice)
+                        previous.copy(
+                            running = false,
+                            phase = null,
+                            streamedText = "",
+                            generatedTokens = 0,
+                            cancelling = false,
+                            error = result.message,
+                            errorDetails = result.errors,
+                            errorKind = result.errorKind,
+                        )
+                    }
                 }
             }
         }
@@ -353,7 +387,7 @@ class NewAdventureViewModel(private val container: AppContainer) : ViewModel() {
                         return@launch
                     }
                     is CreationResult.Failed -> {
-                        failGeneration(worldResult.message, worldResult.errors)
+                        failGeneration(worldResult.message, worldResult.errors, worldResult.failureKind)
                         return@launch
                     }
                 }
@@ -368,7 +402,11 @@ class NewAdventureViewModel(private val container: AppContainer) : ViewModel() {
                         )
                     }
                     is CreationResult.Cancelled -> failGeneration("生成をキャンセルしました。", emptyList())
-                    is CreationResult.Failed -> failGeneration(characterResult.message, characterResult.errors)
+                    is CreationResult.Failed -> failGeneration(
+                        characterResult.message,
+                        characterResult.errors,
+                        characterResult.failureKind,
+                    )
                 }
             } catch (cancelled: CancellationException) {
                 failGeneration("生成をキャンセルしました。", emptyList())
@@ -404,13 +442,27 @@ class NewAdventureViewModel(private val container: AppContainer) : ViewModel() {
         }
     }
 
-    private fun failGeneration(message: String, details: List<String>) {
+    private fun failGeneration(
+        message: String,
+        details: List<String>,
+        failureKind: GenerationFailureKind? = null,
+    ) {
+        val classified = when (failureKind) {
+            GenerationFailureKind.GRAMMAR ->
+                listOf("分類: JSON文法エラー（文法を適用できませんでした）") + details
+            GenerationFailureKind.MEMORY ->
+                listOf("分類: メモリ不足（コンテキストサイズまたはモデルサイズを下げてください）") + details
+            GenerationFailureKind.TIMEOUT ->
+                listOf("分類: 推論タイムアウト（5分間トークンが生成されませんでした）") + details
+            GenerationFailureKind.INFERENCE -> listOf("分類: 推論エラー") + details
+            null -> details
+        }
         _state.update {
             it.copy(
                 stage = CreationStage.FORM,
                 statusText = "",
                 error = message,
-                details = details,
+                details = classified,
                 cancelling = false,
             )
         }
@@ -571,6 +623,7 @@ class ModelsViewModel(private val container: AppContainer) : ViewModel() {
     val message: StateFlow<String?> = _message.asStateFlow()
 
     private var importJob: Job? = null
+    private var saveParamsJob: Job? = null
 
     init {
         viewModelScope.launch { _backend.value = container.engine.backendInfo() }
@@ -598,7 +651,7 @@ class ModelsViewModel(private val container: AppContainer) : ViewModel() {
                             ),
                         )
                         container.settings.setLastModel(file.fileName)
-                        _message.value = "「${file.displayName}」を取り込みました。「読み込む」で使用できます。"
+                        _message.value = "「${file.displayName}」を取り込みました。モデルをタップして読み込んでください。"
                     },
                     onFailure = { error ->
                         _message.value = error.message ?: "モデルの取り込みに失敗しました"
@@ -656,10 +709,13 @@ class ModelsViewModel(private val container: AppContainer) : ViewModel() {
         }
     }
 
-    fun saveParams(modelSettings: ModelSettings) {
-        viewModelScope.launch {
+    fun saveParams(modelSettings: ModelSettings, notify: Boolean = true) {
+        saveParamsJob?.cancel()
+        saveParamsJob = viewModelScope.launch {
             container.models.save(modelSettings.normalized())
-            _message.value = "推論設定を保存しました。コンテキストサイズとGPUレイヤーは再読み込みで反映されます。"
+            if (notify) {
+                _message.value = "推論設定を保存しました。コンテキストサイズとGPUレイヤーは再読み込みで反映されます。"
+            }
         }
     }
 

@@ -1,0 +1,403 @@
+{
+  "gold_cases": 0,
+  "per_category": {
+    "fabrication": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "negation": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "condition": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "number": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "contradiction": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      },
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    }
+  },
+  "precision": 0.0,
+  "recall": 0.0,
+  "f1": 0.0,
+  "disagreements": 29,
+  "disagreement_causes": {
+    "python_only:negation": 1,
+    "llm_only:fabrication": 10,
+    "python_only:number": 1,
+    "mixed": 1,
+    "llm_only:contradiction": 2,
+    "llm_only:condition": 12,
+    "llm_only:negation": 2
+  },
+  "disagreement_rows": [
+    {
+      "id": "ex-0120",
+      "cause": "python_only:negation",
+      "python_categories": [
+        "negation"
+      ],
+      "llm_categories": [],
+      "python_verdict": "pass",
+      "final_verdict": "pass"
+    },
+    {
+      "id": "ex-0125",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0129",
+      "cause": "python_only:number",
+      "python_categories": [
+        "number"
+      ],
+      "llm_categories": [],
+      "python_verdict": "pass",
+      "final_verdict": "pass"
+    },
+    {
+      "id": "ex-0132",
+      "cause": "mixed",
+      "python_categories": [
+        "number"
+      ],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0133",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0135",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "ex-0137",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "gm-a-0195",
+      "cause": "llm_only:contradiction",
+      "python_categories": [],
+      "llm_categories": [
+        "contradiction"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0042",
+      "cause": "llm_only:condition",
+      "python_categories": [],
+      "llm_categories": [
+        "condition"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0071",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0072",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0074",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0227",
+      "cause": "llm_only:negation",
+      "python_categories": [],
+      "llm_categories": [
+        "negation"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0248",
+      "cause": "llm_only:condition",
+      "python_categories": [],
+      "llm_categories": [
+        "condition"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0251",
+      "cause": "llm_only:condition",
+      "python_categories": [],
+      "llm_categories": [
+        "condition"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0254",
+      "cause": "llm_only:condition",
+      "python_categories": [],
+      "llm_categories": [
+        "condition"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0257",
+      "cause": "llm_only:condition",
+      "python_categories": [],
+      "llm_categories": [
+        "condition"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0260",
+      "cause": "llm_only:condition",
+      "python_categories": [],
+      "llm_categories": [
+        "condition"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0263",
+      "cause": "llm_only:condition",
+      "python_categories": [],
+      "llm_categories": [
+        "condition"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0266",
+      "cause": "llm_only:condition",
+      "python_categories": [],
+      "llm_categories": [
+        "condition"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0269",
+      "cause": "llm_only:condition",
+      "python_categories": [],
+      "llm_categories": [
+        "condition"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0272",
+      "cause": "llm_only:condition",
+      "python_categories": [],
+      "llm_categories": [
+        "condition"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0275",
+      "cause": "llm_only:condition",
+      "python_categories": [],
+      "llm_categories": [
+        "condition"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0278",
+      "cause": "llm_only:condition",
+      "python_categories": [],
+      "llm_categories": [
+        "condition"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0319",
+      "cause": "llm_only:negation",
+      "python_categories": [],
+      "llm_categories": [
+        "negation"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0322",
+      "cause": "llm_only:contradiction",
+      "python_categories": [],
+      "llm_categories": [
+        "contradiction"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0340",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0352",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    },
+    {
+      "id": "world-0370",
+      "cause": "llm_only:fabrication",
+      "python_categories": [],
+      "llm_categories": [
+        "fabrication"
+      ],
+      "python_verdict": "pass",
+      "final_verdict": "fail"
+    }
+  ],
+  "review_reasons": {
+    "python_suppressed:NEGATION_INVERSION": 35,
+    "python_suppressed:FABRICATED_NUMBER": 8,
+    "python_suppressed:CONDITION_LOST": 14,
+    "llm_review": 3
+  },
+  "review_rate": 0.004,
+  "unjudged": 0,
+  "unjudged_rate": 0.0,
+  "api_errors": 0,
+  "api_error_rate": 0.0,
+  "total": 761,
+  "reused": 0,
+  "recomputed": 761,
+  "manifest_duplicate_ids": [],
+  "manifest_skipped_lines": 0
+}

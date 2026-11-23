@@ -1,0 +1,72 @@
+{
+  "snapshot_id": "snap-0012-20261118T130810Z",
+  "created_at": "2026-11-18T13:08:10+00:00",
+  "note": "wave9",
+  "source": "training/.bulk_gen/inbox (sealed batches only)",
+  "audit_reads": "snapshots/snap-0012-20261118T130810Z/raw",
+  "files": [
+    {
+      "file": "raw/trpg_gm/bgm17.jsonl",
+      "category": "trpg_gm",
+      "records": 54,
+      "sha256": "ab8fbe36ea991ffb875acc71fadffaea9e703141b7e20f2d91e01d98f98a9f65",
+      "bytes": 264255,
+      "sealed_at": "2026-11-18T13:07:08+00:00"
+    },
+    {
+      "file": "raw/trpg_gm/bgm22.jsonl",
+      "category": "trpg_gm",
+      "records": 54,
+      "sha256": "4af3b6c3b2e638db331b95cf5ca61e7a6bc18fec791d0ed98ac550c07f6ec626",
+      "bytes": 268527,
+      "sealed_at": "2026-11-18T13:07:08+00:00"
+    },
+    {
+      "file": "raw/trpg_gm/bgm23.jsonl",
+      "category": "trpg_gm",
+      "records": 60,
+      "sha256": "db576aa1922679a6f68c007d50328e35d0f5be219cffb2b8ca5f6bafa32ff995",
+      "bytes": 307963,
+      "sealed_at": "2026-11-18T13:07:08+00:00"
+    },
+    {
+      "file": "raw/trpg_gm/bgm25.jsonl",
+      "category": "trpg_gm",
+      "records": 60,
+      "sha256": "9419fab84700b2adbbf7838d18de35bd50db40b68359a1f3e0ef628bead0dc80",
+      "bytes": 316541,
+      "sealed_at": "2026-11-18T13:07:08+00:00"
+    },
+    {
+      "file": "raw/world_json/bwd11.jsonl",
+      "category": "world_json",
+      "records": 35,
+      "sha256": "193ed432d818333dcdac3ec3acd1c7d55c01bb372413c9a9cae81d5ced406500",
+      "bytes": 161200,
+      "sealed_at": "2026-11-18T13:07:08+00:00"
+    },
+    {
+      "file": "raw/world_json/bwd12.jsonl",
+      "category": "world_json",
+      "records": 35,
+      "sha256": "d6fbde07f70f6722f966528ec389a925a870a5b141fd8844299e6927789b4a36",
+      "bytes": 125371,
+      "sealed_at": "2026-11-18T13:07:08+00:00"
+    },
+    {
+      "file": "raw/world_json/bwd13.jsonl",
+      "category": "world_json",
+      "records": 35,
+      "sha256": "28944e37a5dfe1d6dc8c1393068193ab76bef885c41faec047cc30053693f1e7",
+      "bytes": 170494,
+      "sealed_at": "2026-11-18T13:07:08+00:00"
+    }
+  ],
+  "total_files": 7,
+  "total_records": 333,
+  "by_category": {
+    "trpg_gm": 228,
+    "world_json": 105,
+    "extraction": 0
+  }
+}

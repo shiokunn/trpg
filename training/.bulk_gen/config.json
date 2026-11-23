@@ -1,0 +1,21 @@
+{
+  "target_records": 10000,
+  "category_targets": {
+    "trpg_gm": 5000,
+    "world_json": 2000,
+    "extraction": 2000
+  },
+  "policy": {
+    "data_root": "training/.bulk_gen (dedicated temporary directory)",
+    "existing_data": "training/raw, processed, splits, metadata, sft_synthetic_*.jsonl are never read-modify-written by this pipeline",
+    "audit_input": "snapshots/<id>/raw only",
+    "in_progress": "inbox files without a sealed .done.json marker are never snapshotted or audited",
+    "integration": "final official integration only after generation and all audits complete",
+    "git": "no commit, no push, no delete/overwrite of existing data"
+  },
+  "tools": {
+    "existing_auditor": "training/tools/quality_system.py score",
+    "existing_schema": "training/tools/schema_lib.py",
+    "existing_sft_builder": "training/tools/build_sft_outputs.py --out-dir <isolated> --accepted-ids <PASS ids>"
+  }
+}

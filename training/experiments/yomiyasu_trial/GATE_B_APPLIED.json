@@ -1,0 +1,23 @@
+{
+  "applied_ids": [
+    "ex-0021",
+    "ex-0022",
+    "ex-0024",
+    "ex-0025",
+    "gm-0001",
+    "gm-0003",
+    "gm-f-0001",
+    "gm-f-0002",
+    "gm-f-0006",
+    "world-0007",
+    "world-0008",
+    "world-0011"
+  ],
+  "files": [
+    "training/raw/extraction/extraction_03.jsonl",
+    "training/raw/trpg_gm/gm_forest.jsonl",
+    "training/raw/trpg_gm/gm_f_01.jsonl",
+    "training/raw/world_json/world_03.jsonl",
+    "training/raw/world_json/world_04.jsonl"
+  ]
+}
