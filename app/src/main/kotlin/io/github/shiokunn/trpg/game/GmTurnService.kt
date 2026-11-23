@@ -177,9 +177,13 @@ class GmTurnService(
         )
 
         val contextTokens = status.info.nCtx.takeIf { it > 0 } ?: settings.nCtx
+        // Keep maxTokens inside the loaded context; otherwise llama.cpp reports
+        // finishReason=context and the reply is cut off mid-JSON.
+        val effectiveMaxTokens = GmTurnRepair.effectiveMaxTokens(settings.maxTokens, contextTokens)
+        val effectiveSettings = settings.copy(maxTokens = effectiveMaxTokens)
         val budget = PromptBudget(
             contextTokens = contextTokens,
-            maxOutputTokens = settings.maxTokens,
+            maxOutputTokens = effectiveMaxTokens,
         )
         val prompt = runCatching {
             PromptBuilder(MemoTokenCounter(EngineTokenCounter(engine))).build(context, budget)
@@ -190,7 +194,8 @@ class GmTurnService(
         val messages = prompt.toMessages()
 
         listener.onPhase(GmTurnPhase.Generating(attempt = 1))
-        val first = generate(messages, settings, listener)
+        val first = generate(messages, effectiveSettings, listener)
+        val firstTruncated = first is GenerationOutcome.Success && GmTurnRepair.isTruncated(first)
         val firstText = when (first) {
             is GenerationOutcome.Cancelled -> return GmTurnResult.Cancelled
             is GenerationOutcome.Failure -> return failure(first.message)
@@ -198,7 +203,14 @@ class GmTurnService(
         }
 
         val snapshot = bundle.toSnapshot()
-        val firstEvaluation = evaluateTurn(firstText, snapshot, bundle, allowLocalRepair = true)
+        val firstEvaluation = evaluateTurn(
+            raw = firstText,
+            snapshot = snapshot,
+            bundle = bundle,
+            allowLocalRepair = true,
+            truncated = firstTruncated,
+            truncationDetail = GmTurnRepair.truncationMessage(first).takeIf { firstTruncated },
+        )
         var attempt = firstEvaluation.attempt
         var localRepairApplied = firstEvaluation.localRepairApplied
 
@@ -212,11 +224,24 @@ class GmTurnService(
                 RepairMode.STRUCTURE
             }
             val repairMessages = buildRepairMessages(mode, attempt, bundle, recentChat, snapshot)
-            when (val second = generate(repairMessages, settings, listener)) {
+            // A repair rewrites the whole JSON, so a slightly larger budget prevents the
+            // same truncation from happening twice.
+            val repairSettings = effectiveSettings.copy(
+                maxTokens = GmTurnRepair.repairMaxTokens(effectiveMaxTokens, contextTokens),
+            )
+            when (val second = generate(repairMessages, repairSettings, listener)) {
                 is GenerationOutcome.Cancelled -> return GmTurnResult.Cancelled
                 is GenerationOutcome.Failure -> return failure(second.message)
                 is GenerationOutcome.Success -> {
-                    val secondEvaluation = evaluateTurn(second.text, snapshot, bundle, allowLocalRepair = true)
+                    val secondTruncated = GmTurnRepair.isTruncated(second)
+                    val secondEvaluation = evaluateTurn(
+                        raw = second.text,
+                        snapshot = snapshot,
+                        bundle = bundle,
+                        allowLocalRepair = true,
+                        truncated = secondTruncated,
+                        truncationDetail = GmTurnRepair.truncationMessage(second).takeIf { secondTruncated },
+                    )
                     attempt = secondEvaluation.attempt
                     localRepairApplied = localRepairApplied || secondEvaluation.localRepairApplied
                     if (attempt is Attempt.Rejected) {
@@ -229,10 +254,20 @@ class GmTurnService(
                             modelFileName = status.modelFileName,
                         )
                         return failure(
-                            "ゲームマスターの応答が規定のJSON契約を満たしませんでした。" +
-                                "ターンは保存されていません。",
+                            if (secondTruncated) {
+                                "ゲームマスターの応答がトークン上限で途中に切れました。" +
+                                    "最大生成トークンを増やすか、コンテキストサイズを下げてください。" +
+                                    "ターンは保存されていません。"
+                            } else {
+                                "ゲームマスターの応答が規定のJSON契約を満たしませんでした。" +
+                                    "ターンは保存されていません。"
+                            },
                             errors = attempt.errors,
-                            kind = primaryKind(repairIssues),
+                            kind = if (secondTruncated) {
+                                GmErrorCategory.TRUNCATED
+                            } else {
+                                primaryKind(repairIssues)
+                            },
                         )
                     }
                 }
@@ -287,100 +322,6 @@ class GmTurnService(
         throw cancelled
     } catch (error: Throwable) {
         GenerationOutcome.Failure(error.message ?: "推論中にエラーが発生しました")
-    }
-
-    // ---------------------------------------------------------------- validation
-
-    private enum class RepairMode { STRUCTURE, CONTENT }
-
-    private sealed interface Attempt {
-        data class Accepted(
-            val response: GmResponse,
-            val snapshot: GameSnapshot,
-        ) : Attempt
-
-        data class Rejected(
-            val errors: List<String>,
-            val issues: List<GmRepairIssue> = emptyList(),
-            val raw: String = "",
-        ) : Attempt
-    }
-
-    private data class Evaluation(
-        val attempt: Attempt,
-        val localRepairApplied: Boolean = false,
-    )
-
-    /**
-     * Strict validation with an optional deterministic pre-pass. Local repair is never
-     * counted as an LLM retry and is used only when the repaired JSON passes the exact
-     * same validation as a normal response.
-     */
-    private fun evaluateTurn(
-        raw: String,
-        snapshot: GameSnapshot,
-        bundle: SessionBundle,
-        allowLocalRepair: Boolean,
-    ): Evaluation {
-        val parsed = GmResponseParser.parse(raw)
-        if (parsed is AiParseResult.Success) {
-            return Evaluation(validateSemantics(parsed.value, snapshot))
-        }
-
-        val failure = parsed as AiParseResult.Failure
-        val issues = GmRepair.analyze(failure.errors)
-        if (allowLocalRepair) {
-            val repaired = GmRepair.repairTopLevelUnknownKeys(raw)
-            if (repaired != null) {
-                val reparsed = GmResponseParser.parse(repaired)
-                if (reparsed is AiParseResult.Success) {
-                    val result = validateSemantics(reparsed.value, snapshot)
-                    if (result is Attempt.Accepted) {
-                        return Evaluation(result, localRepairApplied = true)
-                    }
-                }
-            }
-        }
-        return Evaluation(
-            Attempt.Rejected(
-                errors = failure.errors.map { it.message },
-                issues = issues,
-                raw = raw.take(MAX_REPAIR_JSON_CHARS),
-            ),
-        )
-    }
-
-    /** Game-specific validation that cannot be expressed in the JSON schema alone. */
-    private fun validateSemantics(
-        response: GmResponse,
-        snapshot: GameSnapshot,
-    ): Attempt {
-        val referenceErrors = validateReferences(response, snapshot)
-        if (referenceErrors.isNotEmpty()) return Attempt.Rejected(referenceErrors)
-
-        return when (val mutation = StateChangeEngine.apply(snapshot, response.stateChanges)) {
-            is MutationResult.Rejected -> Attempt.Rejected(mutation.errors)
-            is MutationResult.Applied -> Attempt.Accepted(response, mutation.snapshot)
-        }
-    }
-
-    /** Checks the IDs the pure state validator cannot see (skills, NPC memories). */
-    private fun validateReferences(response: GmResponse, snapshot: GameSnapshot): List<String> {
-        val errors = mutableListOf<String>()
-        val skillIds = snapshot.character.skills.map { it.id }.toSet()
-        response.choices.forEachIndexed { index, choice ->
-            val skillId = choice.check?.skillId ?: return@forEachIndexed
-            if (skillId !in skillIds) {
-                errors += "choices[$index].check.skillId「$skillId」は所持スキルに存在しません"
-            }
-        }
-        val npcIds = snapshot.npcs.map { it.id }.toSet()
-        response.npcMemories.forEachIndexed { index, memory ->
-            if (memory.npcId !in npcIds) {
-                errors += "npcMemories[$index].npcId「${memory.npcId}」は存在しません"
-            }
-        }
-        return errors
     }
 
     // ---------------------------------------------------------------- dice
@@ -537,86 +478,6 @@ class GmTurnService(
         add(PromptMessage("user", user))
     }
 
-    /** World information the AI produced when the adventure was created. */
-    private fun initialScenarioFrom(world: World, summary: String): String = buildString {
-        append("世界名: ").append(world.name)
-        if (world.genre.isNotBlank()) append(" / ジャンル: ").append(world.genre)
-        if (world.era.isNotBlank()) append(" / 時代: ").append(world.era)
-        if (world.setting.isNotBlank()) append("\n設定: ").append(world.setting)
-        if (world.atmosphere.isNotBlank()) append("\n雰囲気: ").append(world.atmosphere)
-        if (world.history.isNotBlank()) append("\n歴史: ").append(world.history)
-        if (world.objective.isNotBlank()) append("\n目的: ").append(world.objective)
-        if (world.problem.isNotBlank()) append("\n問題: ").append(world.problem)
-        if (world.scenarioPremise.isNotBlank()) append("\nシナリオ前提: ").append(world.scenarioPremise)
-        if (summary.isNotBlank()) append("\n冒険のあらすじ: ").append(summary)
-    }
-
-    /** The exchange immediately before the current turn. */
-    private fun previousChatFrom(chat: List<ChatMessage>): String = chat.takeLast(2)
-        .joinToString("\n") { message ->
-            val label = when (message.role) {
-                ChatRole.PLAYER -> "プレイヤー"
-                ChatRole.GM -> "GM"
-                ChatRole.SYSTEM -> "システム"
-            }
-            "$label: ${message.content}"
-        }
-
-    /**
-     * Structure repairs only need the broken JSON and the error list. Content repairs
-     * additionally need the scenario, the previous exchange and the current game state.
-     */
-    private fun buildRepairMessages(
-        mode: RepairMode,
-        rejected: Attempt.Rejected,
-        bundle: SessionBundle,
-        recentChat: List<ChatMessage>,
-        snapshot: GameSnapshot,
-    ): List<PromptMessage> {
-        val userMessage = buildString {
-            if (mode == RepairMode.STRUCTURE) {
-                append("失敗したJSON:\n").append(rejected.raw)
-                append("\n\n")
-            } else {
-                append("最初のシナリオ（冒険開始時に生成された世界情報）:\n")
-                append(initialScenarioFrom(bundle.world, bundle.session.summary))
-                append("\n\n")
-                val previousChat = previousChatFrom(recentChat)
-                if (previousChat.isNotBlank()) {
-                    append("一つ前の会話履歴:\n").append(previousChat).append("\n\n")
-                }
-                append("現在のゲーム状態:\n").append(currentStateFrom(snapshot)).append("\n\n")
-            }
-
-            val narrative = validNarrativeFrom(rejected.raw)
-                .take(GmResponseRules.MAX_NARRATIVE_CHARS)
-            if (narrative.isNotBlank()) {
-                append("契約違反がなかった情景描写（変更しないでください）:\n").append(narrative).append("\n\n")
-            }
-
-            append(
-                if (mode == RepairMode.STRUCTURE) {
-                    GmRepair.structuralInstruction(rejected.issues)
-                } else {
-                    GmRepair.contentInstruction(rejected.issues)
-                },
-            )
-        }
-        return listOf(
-            PromptMessage("system", PromptBuilder.repairSystemPrompt()),
-            PromptMessage("user", userMessage),
-        )
-    }
-
-    /** Compact snapshot summary for content repairs; no private conversation is logged. */
-    private fun currentStateFrom(snapshot: GameSnapshot): String = buildString {
-        append("ターン: ").append(snapshot.turn + 1)
-        val location = snapshot.locations.firstOrNull { it.id == snapshot.currentLocationId }
-        if (location != null) append("\n現在地: ").append(location.name)
-        append("\nHP: ").append(snapshot.character.hp).append('/').append(snapshot.character.maxHp)
-        append("\nレベル: ").append(io.github.shiokunn.trpg.core.rules.CharacterRules.levelForXp(snapshot.character.experience))
-        if (snapshot.activeCombat != null) append("\n戦闘中: はい")
-    }
 
     private fun primaryKind(issues: List<GmRepairIssue>): GmErrorCategory =
         issues.firstOrNull()?.category ?: GmErrorCategory.OTHER
@@ -640,16 +501,6 @@ class GmTurnService(
         )
     }
 
-    /** Keeps only the narrative text; drops every other (possibly invalid) JSON field. */
-    private fun validNarrativeFrom(raw: String): String {
-        val parsed = GmResponseParser.parse(raw)
-        if (parsed is AiParseResult.Success) return parsed.value.narrative
-        val match = NARRATIVE_REGEX.find(raw) ?: return ""
-        val escaped = match.groupValues[1]
-        return runCatching { Json.decodeFromString<String>("\"$escaped\"") }
-            .getOrDefault(escaped)
-    }
-
     /** Per-turn memoisation: tokenizer calls are expensive and repeat during truncation. */
     private class MemoTokenCounter(private val delegate: PromptTokenCounter) : PromptTokenCounter {
         private val cache = HashMap<String, Int>(128)
@@ -669,7 +520,6 @@ class GmTurnService(
         const val MAX_REPAIR_JSON_CHARS = 4_000
         private const val TAG = "TrpgRepair"
 
-        private val NARRATIVE_REGEX = Regex("\"narrative\"\\s*:\\s*\"((?:\\\\.|[^\"\\\\])*)\"")
     }
 }
 

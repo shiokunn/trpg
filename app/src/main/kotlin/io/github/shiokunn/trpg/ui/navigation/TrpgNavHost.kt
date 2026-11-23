@@ -18,6 +18,8 @@ import io.github.shiokunn.trpg.ui.SavesViewModel
 import io.github.shiokunn.trpg.ui.SettingsViewModel
 import io.github.shiokunn.trpg.ui.WorldViewModel
 import io.github.shiokunn.trpg.ui.character.CharacterScreen
+import io.github.shiokunn.trpg.ui.chat.CharacterChatScreen
+import io.github.shiokunn.trpg.ui.chat.CharacterChatViewModel
 import io.github.shiokunn.trpg.ui.components.LoadingPane
 import io.github.shiokunn.trpg.ui.creation.NewAdventureScreen
 // DEBUG MODE (temporary)
@@ -37,6 +39,7 @@ object Routes {
     const val SAVES = "saves"
     const val MODELS = "models"
     const val SETTINGS = "settings"
+    const val CHAT = "chat"
     // DEBUG MODE (temporary)
     const val DEBUG = "debug"
 
@@ -65,6 +68,7 @@ fun TrpgNavHost(container: AppContainer) {
                 onSaves = { navController.navigate(Routes.SAVES) },
                 onModels = { navController.navigate(Routes.MODELS) },
                 onSettings = { navController.navigate(Routes.SETTINGS) },
+                onChat = { navController.navigate(Routes.CHAT) },
             )
         }
 
@@ -104,6 +108,20 @@ fun TrpgNavHost(container: AppContainer) {
                 onBack = { navController.popBackStack() },
                 onOpenDebug = { navController.navigate(Routes.DEBUG) },
             )
+        }
+
+        composable(Routes.CHAT) {
+            val vm: CharacterChatViewModel = viewModel(
+                factory = io.github.shiokunn.trpg.ui.createFactory {
+                    CharacterChatViewModel(
+                        container.characterChats,
+                        container.models,
+                        container.engine,
+                        container.characterCreator,
+                    )
+                },
+            )
+            CharacterChatScreen(viewModel = vm, onBack = { navController.popBackStack() })
         }
 
         // DEBUG MODE (temporary)
