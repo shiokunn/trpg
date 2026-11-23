@@ -2,22 +2,20 @@ package io.github.shiokunn.trpg.game
 
 import io.github.shiokunn.trpg.ai.engine.GenerationFinishReason
 import io.github.shiokunn.trpg.ai.engine.GenerationOutcome
-import io.github.shiokunn.trpg.ai.engine.InferenceEngine
+import io.github.shiokunn.trpg.core.ai.AiError
+import io.github.shiokunn.trpg.core.ai.AiErrorKind
 import io.github.shiokunn.trpg.core.ai.GmErrorCategory
 import io.github.shiokunn.trpg.core.ai.GmRepair
 import io.github.shiokunn.trpg.core.domain.Character
 import io.github.shiokunn.trpg.core.domain.GameSession
 import io.github.shiokunn.trpg.core.domain.World
 import io.github.shiokunn.trpg.core.state.GameSnapshot
-import io.github.shiokunn.trpg.data.repository.MemoryRepository
-import io.github.shiokunn.trpg.data.repository.ModelRepository
 import io.github.shiokunn.trpg.data.repository.SessionBundle
-import io.github.shiokunn.trpg.data.repository.SessionRepository
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** The validation/prompt helpers under test do not touch any repository or the engine. */
+/** Pure validation and repair-prompt helpers need no engine or repositories. */
 class GmTurnServiceTest {
 
     private val character = Character(id = "char-1", name = "テスト")
@@ -38,14 +36,6 @@ class GmTurnServiceTest {
     )
     private val snapshot = GameSnapshot(character = character)
 
-    @Suppress("UNCHECKED_CAST")
-    private val service = GmTurnService(
-        sessions = null as SessionRepository,
-        memories = null as MemoryRepository,
-        models = null as ModelRepository,
-        engine = null as InferenceEngine,
-    )
-
     /** Parses cleanly, but the skillId does not exist in the live snapshot. */
     private val semanticFailure = """
         {
@@ -60,12 +50,12 @@ class GmTurnServiceTest {
 
     @Test
     fun semanticRejectionIsClassifiedAsGameRuleAndKeepsRawJson() {
-        val rejected = service.evaluateTurn(
+        val rejected = evaluateTurn(
             raw = semanticFailure,
             snapshot = snapshot,
             bundle = bundle,
             allowLocalRepair = true,
-        ).attempt as GmTurnService.Attempt.Rejected
+        ).attempt as Attempt.Rejected
 
         assertTrue(rejected.issues.any { it.category == GmErrorCategory.GAME_RULE })
         assertEquals(semanticFailure, rejected.raw)
@@ -81,14 +71,14 @@ class GmTurnServiceTest {
             generatedTokens = 50,
             budget = 50,
         )
-        val rejected = service.evaluateTurn(
+        val rejected = evaluateTurn(
             raw = outcome.text,
             snapshot = snapshot,
             bundle = bundle,
             allowLocalRepair = true,
             truncated = true,
             truncationDetail = GmTurnRepair.truncationMessage(outcome),
-        ).attempt as GmTurnService.Attempt.Rejected
+        ).attempt as Attempt.Rejected
 
         assertEquals(GmErrorCategory.TRUNCATED, rejected.issues.single().category)
         assertEquals(outcome.text, rejected.raw)
@@ -98,14 +88,14 @@ class GmTurnServiceTest {
     @Test
     fun contentRepairReceivesTheRawJson() {
         val raw = semanticFailure.replace("\"difficulty\": 8", "\"difficulty\": 9")
-        val rejected = GmTurnService.Attempt.Rejected(
+        val rejected = Attempt.Rejected(
             errors = listOf("choices[0].check.difficultyが不正です"),
             issues = GmRepair.analyzeGameRule(listOf("choices[0].check.difficultyが不正です")),
             raw = raw,
         )
 
-        val userMessage = service.buildRepairMessages(
-            mode = GmTurnService.RepairMode.CONTENT,
+        val userMessage = buildRepairMessages(
+            mode = RepairMode.CONTENT,
             rejected = rejected,
             bundle = bundle,
             recentChat = emptyList(),
@@ -121,19 +111,16 @@ class GmTurnServiceTest {
     @Test
     fun structureRepairReceivesTheRawJsonToo() {
         val raw = "{\"narrative\":\"途中\", \"id\":\"bad\""
-        val rejected = GmTurnService.Attempt.Rejected(
+        val rejected = Attempt.Rejected(
             errors = listOf("JSONが途中で終わっています"),
             issues = GmRepair.analyze(
-                listOf(io.github.shiokunn.trpg.core.ai.AiError(
-                    io.github.shiokunn.trpg.core.ai.AiErrorKind.JSON_TRUNCATED,
-                    "JSONが途中で終わっています",
-                )),
+                listOf(AiError(AiErrorKind.JSON_TRUNCATED, "JSONが途中で終わっています")),
             ),
             raw = raw,
         )
 
-        val userMessage = service.buildRepairMessages(
-            mode = GmTurnService.RepairMode.STRUCTURE,
+        val userMessage = buildRepairMessages(
+            mode = RepairMode.STRUCTURE,
             rejected = rejected,
             bundle = bundle,
             recentChat = emptyList(),
