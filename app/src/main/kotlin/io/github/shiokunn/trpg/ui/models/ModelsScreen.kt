@@ -82,6 +82,7 @@ fun ModelsScreen(viewModel: ModelsViewModel, onBack: () -> Unit) {
     val readyInfo = (status as? EngineStatus.Ready)
         ?.takeIf { it.modelFileName == draft.modelFileName }
         ?.info
+    val loadingFileName = (status as? EngineStatus.Loading)?.modelFileName
     val advice = if (selectedModelSize > 0L) {
         MemoryAdvisor.advise(
             modelSizeBytes = selectedModelSize,
@@ -116,6 +117,10 @@ fun ModelsScreen(viewModel: ModelsViewModel, onBack: () -> Unit) {
         ) {
             message?.let { text ->
                 item { MessageCard(text = text, onDismiss = viewModel::dismissMessage) }
+            }
+
+            loadingFileName?.let { fileName ->
+                item { ModelLoadingCard(modelFileName = fileName) }
             }
 
             item {
@@ -220,6 +225,43 @@ private fun MessageCard(text: String, onDismiss: () -> Unit) {
                     Icons.Default.Close,
                     contentDescription = "閉じる",
                     tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+            }
+        }
+    }
+}
+
+/** Model load is indeterminate, so use the same indicator as every other loading state. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun ModelLoadingCard(modelFileName: String) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+        ),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            ContainedLoadingIndicator(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                indicatorColor = MaterialTheme.colorScheme.primary,
+            )
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = "モデルを読み込み中…",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer,
+                )
+                Text(
+                    text = modelFileName,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
