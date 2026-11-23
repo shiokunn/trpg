@@ -11,12 +11,10 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -203,48 +201,42 @@ private fun GameContent(
 
         Spacer(Modifier.height(12.dp))
 
-        BoxWithConstraints(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f),
+                .weight(1f)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // 65:35 is the baseline. Wider screens may give the narrative a little more room.
-            val narrativeWeight = if (maxWidth >= 600.dp) 0.70f else 0.65f
-            val choiceWeight = 1f - narrativeWeight
+            AiMessageArea(
+                modifier = Modifier.fillMaxWidth(),
+                sceneTitle = sceneTitle,
+                messages = gmMessages,
+                latestGmId = latestGmId,
+                gmOrdinals = gmOrdinals,
+                combat = current.session.activeCombat,
+                modelReady = modelReady,
+                busy = busy,
+                phase = turn.phase,
+                generatedTokens = turn.generatedTokens,
+                cancelling = turn.cancelling,
+                error = turn.error,
+                errorDetails = turn.errorDetails,
+                errorKind = turn.errorKind,
+                onCancel = onCancel,
+                onDismissError = onDismissError,
+                onRetry = onRetry,
+                onAttack = onAttack,
+            )
 
-            Row(Modifier.fillMaxSize()) {
-                AiMessageArea(
-                    modifier = Modifier.weight(narrativeWeight).fillMaxHeight(),
-                    sceneTitle = sceneTitle,
-                    messages = gmMessages,
-                    latestGmId = latestGmId,
-                    gmOrdinals = gmOrdinals,
-                    combat = current.session.activeCombat,
-                    modelReady = modelReady,
-                    busy = busy,
-                    phase = turn.phase,
-                    generatedTokens = turn.generatedTokens,
-                    cancelling = turn.cancelling,
-                    error = turn.error,
-                    errorDetails = turn.errorDetails,
-                    errorKind = turn.errorKind,
-                    onCancel = onCancel,
-                    onDismissError = onDismissError,
-                    onRetry = onRetry,
-                    onAttack = onAttack,
-                )
-
-                Spacer(Modifier.width(12.dp))
-
-                ChoicePanel(
-                    choices = choices,
-                    visible = !busy && hasNarrative && turn.error == null &&
-                        current.session.activeCombat == null,
-                    enabled = modelReady && !busy,
-                    onChoose = onChoose,
-                    modifier = Modifier.weight(choiceWeight).fillMaxHeight(),
-                )
-            }
+            ChoicePanel(
+                choices = choices,
+                visible = !busy && hasNarrative && turn.error == null &&
+                    current.session.activeCombat == null,
+                enabled = modelReady && !busy,
+                onChoose = onChoose,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
 
         FreeActionRow(
@@ -276,11 +268,7 @@ private fun AiMessageArea(
     onRetry: () -> Unit,
     onAttack: (Boolean) -> Unit,
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState()),
-    ) {
+    Box(modifier = modifier.fillMaxWidth()) {
         Column(Modifier.fillMaxWidth()) {
             if (!modelReady) {
                 Card(
@@ -370,7 +358,7 @@ private fun AiMessageArea(
     }
 }
 
-/** Bottom-right area: fixed panel, its contents animate but the panel stays in place. */
+/** Choices below the narrative: full width, vertical, and part of the shared scroll area. */
 @Composable
 private fun ChoicePanel(
     choices: List<GmChoice>,
@@ -380,11 +368,7 @@ private fun ChoicePanel(
     modifier: Modifier = Modifier,
 ) {
     val choicesKey = choices.joinToString { it.id + ":" + it.text }
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
-    ) {
+    Column(modifier = modifier.fillMaxWidth()) {
         key(choicesKey) {
             AnimatedVisibility(
                 visible = visible,
